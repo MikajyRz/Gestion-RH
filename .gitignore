@@ -1,0 +1,68 @@
+# ===================================================================
+# Fichier .gitignore pour un projet Full-Stack (Spring Boot + React / Vite)
+# ===================================================================
+
+# -------------------------------------------------------------------
+# Fichiers Système & Éditeurs / IDEs
+# -------------------------------------------------------------------
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Visual Studio Code
+.vscode/*
+
+# -------------------------------------------------------------------
+# Fichiers de Logs & Temporaires
+# -------------------------------------------------------------------
+*.log
+*.tmp
+*.temp
+*.swp
+*.bak
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# -------------------------------------------------------------------
+# Backend : Java / Maven / Spring Boot
+# -------------------------------------------------------------------
+# Compilats Java
+*.class
+
+# Dossiers de Build Maven / Gradle (racine et sous-dossiers)
+target/
+**/target/
+build/
+**/build/
+
+# Fichiers temporaires Maven
+pom.xml.*
+
+
+# -------------------------------------------------------------------
+# Frontend : Node.js / React (Vite)
+# -------------------------------------------------------------------
+# Dépendances Node (racine et sous-dossiers)
+node_modules/
+**/node_modules/
+
+# Dossiers de Build Frontend (Vite / React)
+dist/
+
+# Cache d'outils frontend
+.eslintcache
+.vite/
+
+# -------------------------------------------------------------------
+# Fichiers d'Environnement & Secrets
+# -------------------------------------------------------------------
+.env
+.txt
+
+documentation/
+
+

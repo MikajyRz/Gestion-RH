@@ -1,13 +1,18 @@
-import { Route, Routes } from 'react-router-dom'
-import HomePage from '../pages/HomePage'
+import { Routes, Route } from 'react-router-dom';
+import FrontofficeLayout from '../components/layouts/FrontofficeLayout';
+import HomePage from '../pages/HomePage';
+import AnnoncesPage from '../pages/AnnoncesPage';
 
-function AppRouter() {
+export const AppRouter = () => {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="*" element={<HomePage />} />
+      {/* Frontoffice : Portail Candidat Public */}
+      <Route element={<FrontofficeLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/annonces" element={<AnnoncesPage />} />
+      </Route>
     </Routes>
-  )
-}
+  );
+};
 
-export default AppRouter
+export default AppRouter;

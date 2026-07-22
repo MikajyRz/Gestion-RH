@@ -1,5 +1,5 @@
 import { Link, Outlet } from 'react-router-dom'
-import '../../styles/frontoffice-layout.css'
+// import '../../styles/frontoffice-layout.css'
 
 const FrontofficeLayout = () => {
   return (

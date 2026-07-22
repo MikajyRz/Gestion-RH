@@ -1,0 +1,198 @@
+/* c:\Users\Mikajy\Documents\GitHub\Gestion-RH\frontend\src\styles\AnnoncesPage.css */
+
+.annonces-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f8f9fa;
+}
+
+.annonces-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.annonces-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #212529;
+  margin-bottom: 0.5rem;
+}
+
+.annonces-header p {
+  font-size: 1.1rem;
+  color: #6c757d;
+}
+
+.annonces-container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+}
+
+/* --- Filtres --- */
+.filters-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #dee2e6;
+  position: sticky;
+  top: 20px; /* Pour que les filtres restent visibles au scroll */
+}
+
+.filters-card h5 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 1rem;
+}
+
+.filter-group {
+  margin-bottom: 1.25rem;
+}
+
+.filter-group label {
+  display: block;
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.filter-input,
+.filter-select {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.filter-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn {
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+.btn-secondary {
+  background-color: #e9ecef;
+  color: #212529;
+  border-color: #ced4da;
+}
+
+.btn-secondary:hover {
+  background-color: #d3d9df;
+}
+
+/* --- Liste des annonces --- */
+.annonces-list {
+  min-height: 400px;
+}
+
+.results-count {
+  font-size: 0.95rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.annonce-card {
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.annonce-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+}
+
+.annonce-card__title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #0d6efd;
+  margin: 0 0 0.5rem 0;
+}
+
+.annonce-card__subtitle {
+  display: flex;
+  gap: 1rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.annonce-card__description {
+  color: #495057;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.annonce-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.annonce-card__date {
+  color: #6c757d;
+}
+
+.annonce-card__action {
+  background-color: transparent;
+  color: #0d6efd;
+  border: 1px solid #0d6efd;
+  padding: 0.5rem 1rem;
+}
+
+.annonce-card__action:hover {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.loading-indicator,
+.no-results {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  color: #6c757d;
+  font-size: 1.1rem;
+}

@@ -3,8 +3,16 @@ import backendClient from './backendClient'
 export const rechercherAnnonces = async (filtres = {}) => {
   const params = new URLSearchParams();
   Object.keys(filtres).forEach((key) => {
-    if (filtres[key] !== null && filtres[key] !== undefined && filtres[key] !== '') {
-      params.append(key, filtres[key]);
+    const val = filtres[key];
+    if (val !== null && val !== undefined && val !== '') {
+      // Ignorer les dates incomplètes (ex: 0002-07-21 ou 0202-07-17 pendant la saisie au clavier)
+      if ((key === 'dateDebut' || key === 'dateFin') && typeof val === 'string') {
+        const year = parseInt(val.split('-')[0], 10);
+        if (isNaN(year) || year < 1900 || year > 2100) {
+          return;
+        }
+      }
+      params.append(key, val);
     }
   });
 

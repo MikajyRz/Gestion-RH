@@ -1,48 +1,82 @@
-* {
-  box-sizing: border-box;
-}
+/* ============================================================================
+   INDEX.CSS - SYSTEME DE DESIGN GLOBAL & SOCLE CSS COMMUN
+   ============================================================================ */
 
+/* --- 1. TOKENS & VARIABLES CSS GLOBALES --- */
 :root {
-  --color-page: #edf0f3;
-  --color-surface: #ffffff;
-  --color-surface-soft: #f8f9fa;
-  --color-border: #d3d9df;
-  --color-border-strong: #c4ccd4;
-  --color-text: #263238;
-  --color-heading: #24394a;
-  --color-muted: #60717f;
-  --color-primary: #2f80ad;
-  --color-primary-dark: #256b92;
-  --color-danger: #b42318;
-  --shadow-soft: 0 1px 4px rgba(36, 52, 66, 0.08);
+  /* Palette de couleurs Principales (Slate & LinkedIn Blue) */
+  --color-primary: #0a66c2;
+  --color-primary-dark: #004182;
+  --color-primary-light: #eff6ff;
+  --color-primary-border: #bfdbfe;
 
-  color: var(--color-text);
-  background: var(--color-page);
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --color-secondary: #64748b;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #ef4444;
+  --color-danger-bg: #fef2f2;
+  --color-danger-text: #b42318;
+
+  /* Arrière-plans & Surfaces */
+  --color-page: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f1f5f9;
+
+  /* Typographie & Couleurs de Texte */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --color-text-main: #0f172a;
+  --color-text-muted: #475569;
+  --color-text-subtle: #64748b;
+
+  /* Bordures */
+  --color-border: #cbd5e1;
+  --color-border-light: #e2e8f0;
+  --color-border-subtle: #f1f5f9;
+
+  /* Ombrages (Shadows) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.05);
+  --shadow-hover: 0 12px 24px -4px rgba(15, 23, 42, 0.12);
+
+  /* Arrondis (Border Radius) */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Transitions & Animations */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
+/* --- 2. REINITIALISATION BASE (RESET CSS) --- */
+*, *::before, *::after {
+  box-sizing: border-box;
   margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  min-height: 100%;
+  width: 100%;
 }
 
 body {
   min-height: 100vh;
-  background: var(--color-page);
+  background-color: var(--color-page);
+  color: var(--color-text-main);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
 }
 
 a {
@@ -50,100 +84,129 @@ a {
   text-decoration: none;
 }
 
-button {
-  min-height: 38px;
-  border: 1px solid #2f6f93;
-  border-radius: 4px;
-  background: var(--color-primary);
-  color: #ffffff;
-  cursor: pointer;
-  font-weight: 600;
-  padding: 0 16px;
-  transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-button:hover:not(:disabled) {
-  background: var(--color-primary-dark);
-  border-color: #255f82;
-  box-shadow: 0 2px 8px rgba(31, 67, 89, 0.18);
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.65;
-}
-
-input,
-select,
-textarea {
-  width: 100%;
-  min-height: 40px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 4px;
-  background: #ffffff;
-  color: var(--color-text);
-  padding: 8px 10px;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(47, 128, 173, 0.14);
-  outline: 0;
-}
-
-label {
-  color: #344c5f;
+/* --- 3. TYPOGRAPHIE GLOBALE --- */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text-main);
   font-weight: 700;
+  line-height: 1.25;
 }
 
+/* --- 4. FORMULAIRES DE BASE & INPUTS REUTILISABLES --- */
+.base-input,
+.base-select,
+.filter-input,
+.filter-select {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  color: var(--color-text-main);
+  background-color: var(--color-page);
+  transition: all var(--transition-normal);
+  box-sizing: border-box;
+}
+
+select.base-select,
+select.filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.25rem;
+}
+
+.base-input:hover,
+.base-select:hover,
+.filter-input:hover,
+.filter-select:hover {
+  border-color: #94a3b8;
+  background-color: var(--color-surface);
+}
+
+.base-input:focus,
+.base-select:focus,
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  background-color: var(--color-surface);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.15);
+}
+
+/* --- 5. BOUTONS & BADGES DE BASE --- */
+.base-badge,
+.active-count-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-primary-border);
+}
+
+.svg-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* --- 6. ANIMATIONS & CHARGEMENT --- */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinner-dot {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid var(--color-primary-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+.spinner-dot-small {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--color-primary-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+/* Tableaux & Helpers */
 table {
   width: 100%;
   border-collapse: collapse;
 }
 
-th,
-td {
-  border-bottom: 1px solid #e1e5e9;
+th, td {
+  border-bottom: 1px solid var(--color-border-light);
   padding: 11px 14px;
   text-align: left;
 }
 
 th {
-  background: #f1f4f6;
-  color: #344c5f;
+  background: var(--color-surface-subtle);
+  color: var(--color-text-muted);
   font-size: 0.78rem;
   text-transform: uppercase;
 }
 
-td {
-  color: #314553;
-}
-
-tbody tr:hover {
-  background: #f7fbfd;
-}
-
-.error,
-.form-error {
+.error, .form-error {
   border: 1px solid #f3b4af;
-  border-radius: 4px;
-  background: #fff2f0;
-  color: var(--color-danger);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
   font-weight: 600;
   padding: 10px 12px;
-}
-
-.table-container,
-.table-wrap {
-  overflow-x: auto;
-}
-
-.table-container table,
-.table-wrap table {
-  min-width: 620px;
 }

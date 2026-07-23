@@ -12,13 +12,16 @@ import java.util.List;
 @Repository
 public interface AnnonceRepository extends JpaRepository<Annonce, Long> {
 
-    @Query("SELECT a FROM Annonce a " +
-           "WHERE (:motCle IS NULL OR :motCle = '' OR LOWER(a.nomposte) LIKE LOWER(CONCAT('%', :motCle, '%')) OR LOWER(a.description) LIKE LOWER(CONCAT('%', :motCle, '%'))) " +
-           "AND (:idDepartement IS NULL OR a.departement.id = :idDepartement) " +
-           "AND (:idProfil IS NULL OR a.profil.id = :idProfil) " +
-           "AND (:idTypeAnnonce IS NULL OR a.typeannonce.id = :idTypeAnnonce) " +
-           "AND (:dateDebut IS NULL OR a.datepublication >= :dateDebut) " +
-           "AND (:dateFin IS NULL OR a.datepublication <= :dateFin) " +
+    @Query("SELECT DISTINCT a FROM Annonce a " +
+           "LEFT JOIN FETCH a.departement " +
+           "LEFT JOIN FETCH a.profil " +
+           "LEFT JOIN FETCH a.typeannonce " +
+           "WHERE (cast(:motCle as string) IS NULL OR :motCle = '' OR LOWER(a.nomposte) LIKE LOWER(CONCAT('%', :motCle, '%')) OR LOWER(a.description) LIKE LOWER(CONCAT('%', :motCle, '%'))) " +
+           "AND (cast(:idDepartement as integer) IS NULL OR a.departement.id = :idDepartement) " +
+           "AND (cast(:idProfil as integer) IS NULL OR a.profil.id = :idProfil) " +
+           "AND (cast(:idTypeAnnonce as integer) IS NULL OR a.typeannonce.id = :idTypeAnnonce) " +
+           "AND (cast(:dateDebut as date) IS NULL OR a.datepublication >= :dateDebut) " +
+           "AND (cast(:dateFin as date) IS NULL OR a.datepublication <= :dateFin) " +
            "ORDER BY a.datepublication DESC")
     List<Annonce> rechercheMulticritere(
         @Param("motCle") String motCle,

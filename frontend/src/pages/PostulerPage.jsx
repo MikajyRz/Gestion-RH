@@ -13,6 +13,8 @@ import {
   TagIcon,
   CalendarIcon,
   XIcon,
+  UploadIcon,
+  FileIcon,
 } from '../components/common/Icons';
 import '../styles/PostulerPage.css';
 
@@ -27,6 +29,10 @@ const PostulerPage = () => {
   const [loadingAnnonce, setLoadingAnnonce] = useState(true);
   const [errorAnnonce, setErrorAnnonce] = useState(null);
 
+  const fileInputRef = React.useRef(null);
+  const [cvFile, setCvFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const [formData, setFormData] = useState({
     nom: '',
     prenom: '',
@@ -35,6 +41,12 @@ const PostulerPage = () => {
     cv: '',
     idDiplome: '',
   });
+
+  const handleFileSelect = (file) => {
+    if (!file) return;
+    setCvFile(file);
+    setFormData((prev) => ({ ...prev, cv: file.name }));
+  };
 
   // Map des réponses aux critères : { [idCritere]: { valeurdouble, valeurvarchar, valeurbool, idDiplome } }
   const [criteresAnswers, setCriteresAnswers] = useState({});
@@ -128,7 +140,8 @@ const PostulerPage = () => {
         criteres: criteresArray,
       };
 
-      await postulerAnnonce(payload);
+      // Envoi multipart avec le fichier CV réel
+      await postulerAnnonce(payload, cvFile);
       setSubmitted(true);
     } catch (err) {
       console.error('Erreur lors de la postulation :', err);
@@ -162,28 +175,36 @@ const PostulerPage = () => {
   }
 
   return (
-    <div className="postuler-page-container">
-      {/* HEADER / BREADCRUMB */}
-      <nav className="postuler-breadcrumb">
-        <Link to="/annonces" className="breadcrumb-link">
-          ← Retour à la liste des offres
-        </Link>
-      </nav>
+    <div className="postuler-page">
+      {/* BANNIÈRE LINKEDIN PLEIN ÉCRAN */}
+      <header className="postuler-header linkedin-banner">
+        <div className="linkedin-banner-content">
+          <Link to="/annonces" className="banner-breadcrumb-link">
+            ← Retour à la liste des offres
+          </Link>
+          <h1>{annonce.nomposte}</h1>
+          <p>
+            {annonce.departement?.nom || 'Département RH'} • Candidature & Prérequis
+          </p>
+        </div>
+      </header>
 
-      <div className="postuler-layout">
-        {/* COLONNE GAUCHE : DÉTAILS DE L'ANNONCE */}
-        <article className="postuler-details-card linkedin-card">
-          <header className="postuler-details__header">
-            <div className="company-logo-avatar lg">
-              <BuildingIcon size={24} />
-            </div>
-            <div>
-              <h1 className="postuler-title">{annonce.nomposte}</h1>
-              <span className="company-name text-lg">
-                {annonce.departement?.nom || 'Département RH'}
-              </span>
-            </div>
-          </header>
+      {/* CONTENU PRINCIPAL PLEIN ÉCRAN */}
+      <main className="postuler-content-container">
+        <div className="postuler-layout">
+          {/* COLONNE GAUCHE : DÉTAILS DE L'ANNONCE */}
+          <article className="postuler-details-card linkedin-card">
+            <header className="postuler-details__header">
+              <div className="company-logo-avatar lg">
+                <BuildingIcon size={24} />
+              </div>
+              <div>
+                <h2 className="postuler-title">{annonce.nomposte}</h2>
+                <span className="company-name text-lg">
+                  {annonce.departement?.nom || 'Département RH'}
+                </span>
+              </div>
+            </header>
 
           <div className="postuler-badges">
             {annonce.typeannonce?.libelle && (
@@ -276,6 +297,78 @@ const PostulerPage = () => {
             <form onSubmit={handleSubmit} className="postuler-form">
               {submitError && <div className="form-error-alert">{submitError}</div>}
 
+              {/* ZONE DE TÉLÉVERSEMENT DE CV AU DESSUS DU FORMULAIRE */}
+              <div className="cv-upload-container">
+                <label className="cv-upload-label">
+                  Curriculum Vitae (CV) <span className="req-star">*</span>
+                </label>
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".pdf,.doc,.docx"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      handleFileSelect(e.target.files[0]);
+                    }
+                  }}
+                />
+
+                {!cvFile && !formData.cv ? (
+                  <div
+                    className={`cv-dropzone ${isDragging ? 'dragging' : ''}`}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragging(false);
+                      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                        handleFileSelect(e.dataTransfer.files[0]);
+                      }
+                    }}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <div className="dropzone-icon">
+                      <UploadIcon size={32} />
+                    </div>
+                    <p className="dropzone-text">
+                      <strong>Cliquez pour téléverser votre CV</strong> ou glissez-déposez le fichier ici
+                    </p>
+                    <span className="dropzone-hint">Formats acceptés : PDF, DOC, DOCX (Max 10 Mo)</span>
+                  </div>
+                ) : (
+                  <div className="cv-file-selected-card">
+                    <div className="file-info-left">
+                      <div className="file-icon-badge">
+                        <FileIcon size={22} />
+                      </div>
+                      <div className="file-details">
+                        <span className="file-name">{cvFile ? cvFile.name : formData.cv}</span>
+                        <span className="file-status">
+                          {cvFile ? `${(cvFile.size / 1024).toFixed(1)} KB — Prêt` : 'Fichier attaché'}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-remove-cv"
+                      onClick={() => {
+                        setCvFile(null);
+                        setFormData((prev) => ({ ...prev, cv: '' }));
+                        if (fileInputRef.current) fileInputRef.current.value = '';
+                      }}
+                      title="Supprimer / Changer de fichier"
+                    >
+                      <XIcon size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {/* COORDONNÉES */}
               <div className="form-section-title">
                 <span>1</span> Informations du Candidat
@@ -326,18 +419,6 @@ const PostulerPage = () => {
                   name="adresse"
                   placeholder="Ex: Antananarivo"
                   value={formData.adresse}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="cv">Lien ou Nom de votre CV</label>
-                <input
-                  type="text"
-                  id="cv"
-                  name="cv"
-                  placeholder="Ex: cv_jean_luc.pdf"
-                  value={formData.cv}
                   onChange={handleChange}
                 />
               </div>
@@ -489,8 +570,9 @@ const PostulerPage = () => {
           )}
         </section>
       </div>
-    </div>
-  );
+    </main>
+  </div>
+);
 };
 
 export default PostulerPage;

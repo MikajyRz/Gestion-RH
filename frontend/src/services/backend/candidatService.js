@@ -9,8 +9,30 @@ const backendClient = axios.create({
   },
 });
 
-export const postulerAnnonce = async (candidatureData) => {
-  const response = await backendClient.post('/candidats/postuler', candidatureData);
+/**
+ * Envoie la candidature avec upload réel du fichier CV.
+ * @param {Object} candidatureData - Les données JSON de la candidature (nom, prenom, idAnnonce, criteres, etc.)
+ * @param {File|null} cvFile - Le fichier CV sélectionné par le candidat (optionnel)
+ */
+export const postulerAnnonce = async (candidatureData, cvFile = null) => {
+  const formData = new FormData();
+
+  // Le JSON de la candidature est envoyé comme un Blob avec le bon Content-Type
+  const candidatureBlob = new Blob([JSON.stringify(candidatureData)], {
+    type: 'application/json',
+  });
+  formData.append('candidature', candidatureBlob);
+
+  // Ajout du fichier CV si présent
+  if (cvFile) {
+    formData.append('cvFile', cvFile);
+  }
+
+  const response = await axios.post(`${API_BASE_URL}/candidats/postuler`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
   return response.data;
 };
 

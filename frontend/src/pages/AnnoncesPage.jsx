@@ -293,11 +293,18 @@ const AnnoncesPage = () => {
                   </p>
 
                   <footer className="annonce-card__footer">
-                    <span className="annonce-card__date">
-                      {annonce.datepublication
-                        ? `Publié le ${new Date(annonce.datepublication).toLocaleDateString('fr-FR')}`
-                        : 'Date non précisée'}
-                    </span>
+                    <div className="annonce-card__dates">
+                      <span className="annonce-card__date">
+                        {annonce.datepublication
+                          ? `Publié le ${new Date(annonce.datepublication).toLocaleDateString('fr-FR')}`
+                          : 'Date non précisée'}
+                      </span>
+                      {(annonce.datefin || annonce.dateFin) && (
+                        <span className="annonce-card__date-limite">
+                          Date limite : {new Date(annonce.datefin || annonce.dateFin).toLocaleDateString('fr-FR')}
+                        </span>
+                      )}
+                    </div>
                     <button className="btn-linkedin-action">Postuler</button>
                   </footer>
                 </article>

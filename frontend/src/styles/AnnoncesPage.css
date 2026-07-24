@@ -293,9 +293,21 @@
   margin-top: auto;
 }
 
+.annonce-card__dates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
 .annonce-card__date {
   color: #94a3b8;
   font-weight: 500;
+}
+
+.annonce-card__date-limite {
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 0.78rem;
 }
 
 /* BOUTON D'ACTION PRINCIPAL */

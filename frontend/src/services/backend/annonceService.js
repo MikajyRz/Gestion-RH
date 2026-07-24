@@ -34,3 +34,23 @@ export const getTypesAnnonce = async () => {
   const response = await backendClient.get('/api/annonces/types-annonce');
   return response.data;
 };
+
+export const getAnnonceById = async (id) => {
+  const response = await backendClient.get(`/api/annonces/${id}`);
+  return response.data;
+};
+
+export const getCriteresByAnnonceId = async (id) => {
+  const response = await backendClient.get(`/api/annonces/${id}/criteres`);
+  return response.data;
+};
+
+export const getDiplomes = async () => {
+  const response = await backendClient.get('/api/annonces/diplomes');
+  return response.data;
+};
+
+export const getDiplomesExigesByAnnonceId = async (id) => {
+  const response = await backendClient.get(`/api/annonces/${id}/diplomes-exiges`);
+  return response.data;
+};

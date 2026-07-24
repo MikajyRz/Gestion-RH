@@ -1,11 +1,8 @@
 -- ============================================================================
 -- JEU DE DONNÉES DE TEST (DEMO DATA)
--- Module 1 : Recrutement & Intégration
 -- ============================================================================
 
--- ----------------------------------------------------------------------------
 -- 1. ANNONCES D'EMPLOI
--- ----------------------------------------------------------------------------
 INSERT INTO annonce (nomposte, description, datedebut, datefin, datepublication, iddepartement, idprofil, idtypeannonce) VALUES
 (
   'Développeur Fullstack Java / React Senior',
@@ -32,15 +29,11 @@ INSERT INTO annonce (nomposte, description, datedebut, datefin, datepublication,
   (SELECT id FROM typeannonce WHERE libelle = 'Recrutement Externe')
 );
 
--- ----------------------------------------------------------------------------
 -- 2. COMPTES & CANDIDATS
--- ----------------------------------------------------------------------------
--- Compte 1 : Candidat Développeur
 INSERT INTO comptecandidat (email, motdepasse) VALUES
 ('jean.dupont@gmail.com', '$2a$10$e8T3bB...hash_mot_de_passe_demo'),
 ('rasoa.gardien@gmail.com', '$2a$10$e8T3bB...hash_mot_de_passe_demo');
 
--- Profil Candidat 1 (Postule comme Développeur Java/React)
 INSERT INTO candidat (nom, prenom, datenaissance, adresse, cv, idannonce, idstatut, idcomptecandidat) VALUES
 (
   'Dupont', 'Jean', '1998-05-14', 'Lot II B 123 Antananarivo',
@@ -48,10 +41,7 @@ INSERT INTO candidat (nom, prenom, datenaissance, adresse, cv, idannonce, idstat
   (SELECT id FROM annonce WHERE nomposte LIKE 'Développeur Fullstack%'),
   (SELECT id FROM statutcandidat WHERE nom = 'QCM Envoyé'),
   (SELECT id FROM comptecandidat WHERE email = 'jean.dupont@gmail.com')
-);
-
--- Profil Candidat 2 (Postule comme Gardien)
-INSERT INTO candidat (nom, prenom, datenaissance, adresse, cv, idannonce, idstatut, idcomptecandidat) VALUES
+),
 (
   'Rasoanaivo', 'Paul', '1992-11-03', 'Lot IV G 45 Ivato',
   '/uploads/cv/paul_rasoanaivo_cv.pdf',
@@ -60,10 +50,7 @@ INSERT INTO candidat (nom, prenom, datenaissance, adresse, cv, idannonce, idstat
   (SELECT id FROM comptecandidat WHERE email = 'rasoa.gardien@gmail.com')
 );
 
--- ----------------------------------------------------------------------------
 -- 3. RÉPONSES AUX CRITÈRES
--- ----------------------------------------------------------------------------
--- Jean Dupont (Développeur) : 4 ans d'expérience
 INSERT INTO candidaturecritere (idcandidat, idannonce, idcritere, valeurdouble) VALUES
 (
   (SELECT id FROM candidat WHERE nom = 'Dupont'),
@@ -72,7 +59,6 @@ INSERT INTO candidaturecritere (idcandidat, idannonce, idcritere, valeurdouble) 
   4.0
 );
 
--- Paul Rasoanaivo (Gardien) : 1m82 (182 cm), casier judiciaire vierge
 INSERT INTO candidaturecritere (idcandidat, idannonce, idcritere, valeurdouble, valeurbool) VALUES
 (
   (SELECT id FROM candidat WHERE nom = 'Rasoanaivo'),
@@ -87,16 +73,13 @@ INSERT INTO candidaturecritere (idcandidat, idannonce, idcritere, valeurdouble, 
   NULL, TRUE
 );
 
--- ----------------------------------------------------------------------------
 -- 4. TEST QCM & QUESTIONS
--- ----------------------------------------------------------------------------
 INSERT INTO qcmtest (nom, idprofil) VALUES
 (
   'QCM - Évaluation Java & Spring Boot',
   (SELECT id FROM profil WHERE nom = 'Développeur Fullstack Java / React')
 );
 
--- Question 1
 INSERT INTO qcmquestion (idtest, numero, question, points) VALUES
 (
   (SELECT id FROM qcmtest WHERE nom LIKE 'QCM - Évaluation Java%'),
@@ -110,7 +93,6 @@ INSERT INTO qcmchoix (idquestion, texte, estcorrect) VALUES
 ((SELECT id FROM qcmquestion WHERE numero = 1), '@RestController', TRUE),
 ((SELECT id FROM qcmquestion WHERE numero = 1), '@Service', FALSE);
 
--- Question 2
 INSERT INTO qcmquestion (idtest, numero, question, points) VALUES
 (
   (SELECT id FROM qcmtest WHERE nom LIKE 'QCM - Évaluation Java%'),
@@ -124,16 +106,13 @@ INSERT INTO qcmchoix (idquestion, texte, estcorrect) VALUES
 ((SELECT id FROM qcmquestion WHERE numero = 2), 'useContext', FALSE),
 ((SELECT id FROM qcmquestion WHERE numero = 2), 'useEffect', TRUE);
 
--- Lier le QCM à l'annonce Développeur
 INSERT INTO testannonce (idtest, idannonce) VALUES
 (
   (SELECT id FROM qcmtest WHERE nom LIKE 'QCM - Évaluation Java%'),
   (SELECT id FROM annonce WHERE nomposte LIKE 'Développeur Fullstack%')
 );
 
--- ----------------------------------------------------------------------------
--- 5. HISTORIQUE & ENTRETIEN (EXEMPLE)
--- ----------------------------------------------------------------------------
+-- 5. HISTORIQUE & ENTRETIEN
 INSERT INTO historiquecandidature (idcandidat, idstatut) VALUES
 (
   (SELECT id FROM candidat WHERE nom = 'Dupont'),
@@ -144,7 +123,6 @@ INSERT INTO historiquecandidature (idcandidat, idstatut) VALUES
   (SELECT id FROM statutcandidat WHERE nom = 'QCM Envoyé')
 );
 
--- Résultat d'entretien (Pour un candidat admis)
 INSERT INTO resultat (note, appreciation) VALUES
 (17, 'Excellent candidat technique, très bonne maîtrise de Spring Boot et React.');
 

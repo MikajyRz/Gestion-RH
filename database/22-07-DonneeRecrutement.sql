@@ -8,7 +8,8 @@ INSERT INTO departement (nom) VALUES
 ('Ressources Humaines'),
 ('Finance & Comptabilité'),
 ('Marketing & Communication'),
-('Commercial & Ventes');
+('Commercial & Ventes'),
+('Sécurité & Logistique');
 
 -- 2. Profils / Métiers recherchés
 INSERT INTO profil (nom) VALUES 
@@ -16,7 +17,8 @@ INSERT INTO profil (nom) VALUES
 ('Développeur Frontend Vue.js'),
 ('Administrateur Systèmes & DevOps'),
 ('Chef de Projet RH'),
-('Comptable Senior');
+('Comptable Senior'),
+('Gardien / Agent de Sécurité');
 
 -- 3. Types d'Annonces
 INSERT INTO typeannonce (libelle) VALUES 
@@ -34,6 +36,7 @@ INSERT INTO typechamp (libelle) VALUES
 
 -- 5. Diplômes
 INSERT INTO diplome (nom) VALUES 
+('Aucun / Certificat de Sécurité'),
 ('Baccalauréat'),
 ('Licence / Bac+3'),
 ('Master / Bac+5'),
@@ -64,24 +67,95 @@ INSERT INTO types_contrat (code, libelle) VALUES
 ('ALTERNANCE', 'Contrat d''Alternance'),
 ('FREELANCE', 'Prestation Indépendante');
 
--- 9. Critères de Base
+-- 9. Critères de Base (Généraux + Spécifiques)
 INSERT INTO critere (nom, idtypechamp) VALUES 
 ('Années d''expérience globale', (SELECT id FROM typechamp WHERE libelle = 'Nombre')),
 ('Diplôme le plus élevé', (SELECT id FROM typechamp WHERE libelle = 'Diplome')),
-('Prétention salariale (Ar)', (SELECT id FROM typechamp WHERE libelle = 'Nombre')),
-('Disponible immédiatement', (SELECT id FROM typechamp WHERE libelle = 'Booleen'));
+('Taille minimale (cm)', (SELECT id FROM typechamp WHERE libelle = 'Nombre')),
+('Casier judiciaire vierge', (SELECT id FROM typechamp WHERE libelle = 'Booleen')),
+('Travail de nuit accepté', (SELECT id FROM typechamp WHERE libelle = 'Booleen'));
 
--- 10. Exigences/Critères pour le profil "Développeur Fullstack Java / React"
 
--- Exige au moins 3 ans d'expérience (dans critereprofil)
+-- ============================================================================
+-- EXIGENCES / CRITÈRES PAR PROFIL MÉTIER
+-- ============================================================================
+
+-- Profil 1 : Développeur Fullstack Java / React
 INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, estobligatoire) 
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Développeur Fullstack Java / React'),
  (SELECT id FROM critere WHERE nom = 'Années d''expérience globale'),
  3.00, TRUE);
 
--- Exige au minimum une Licence / Bac+3 (dans profildiplome)
 INSERT INTO profildiplome (idprofil, iddiplome)
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Développeur Fullstack Java / React'),
  (SELECT id FROM diplome WHERE nom = 'Licence / Bac+3'));
+
+-- Profil 2 : Développeur Frontend Vue.js
+INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, estobligatoire) 
+VALUES 
+((SELECT id FROM profil WHERE nom = 'Développeur Frontend Vue.js'),
+ (SELECT id FROM critere WHERE nom = 'Années d''expérience globale'),
+ 2.00, TRUE);
+
+INSERT INTO profildiplome (idprofil, iddiplome)
+VALUES 
+((SELECT id FROM profil WHERE nom = 'Développeur Frontend Vue.js'),
+ (SELECT id FROM diplome WHERE nom = 'Licence / Bac+3'));
+
+-- Profil 3 : Administrateur Systèmes & DevOps
+INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, estobligatoire) 
+VALUES 
+((SELECT id FROM profil WHERE nom = 'Administrateur Systèmes & DevOps'),
+ (SELECT id FROM critere WHERE nom = 'Années d''expérience globale'),
+ 4.00, TRUE);
+
+INSERT INTO profildiplome (idprofil, iddiplome)
+VALUES 
+((SELECT id FROM profil WHERE nom = 'Administrateur Systèmes & DevOps'),
+ (SELECT id FROM diplome WHERE nom = 'Master / Bac+5'));
+
+-- Profil 4 : Chef de Projet RH
+INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, estobligatoire) 
+VALUES 
+((SELECT id FROM profil WHERE nom = 'Chef de Projet RH'),
+ (SELECT id FROM critere WHERE nom = 'Années d''expérience globale'),
+ 3.00, TRUE);
+
+INSERT INTO profildiplome (idprofil, iddiplome)
+VALUES 
+((SELECT id FROM profil WHERE nom = 'Chef de Projet RH'),
+ (SELECT id FROM diplome WHERE nom = 'Master / Bac+5'));
+
+-- Profil 5 : Comptable Senior
+INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, estobligatoire) 
+VALUES 
+((SELECT id FROM profil WHERE nom = 'Comptable Senior'),
+ (SELECT id FROM critere WHERE nom = 'Années d''expérience globale'),
+ 5.00, TRUE);
+
+INSERT INTO profildiplome (idprofil, iddiplome)
+VALUES 
+((SELECT id FROM profil WHERE nom = 'Comptable Senior'),
+ (SELECT id FROM diplome WHERE nom = 'Licence / Bac+3')),
+((SELECT id FROM profil WHERE nom = 'Comptable Senior'),
+ (SELECT id FROM diplome WHERE nom = 'Master / Bac+5'));
+
+-- Profil 6 : Gardien / Agent de Sécurité
+INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, valeurbool, estobligatoire) 
+VALUES 
+((SELECT id FROM profil WHERE nom = 'Gardien / Agent de Sécurité'), 
+ (SELECT id FROM critere WHERE nom = 'Taille minimale (cm)'), 
+ 175.00, NULL, TRUE),
+((SELECT id FROM profil WHERE nom = 'Gardien / Agent de Sécurité'), 
+ (SELECT id FROM critere WHERE nom = 'Casier judiciaire vierge'), 
+ NULL, TRUE, TRUE),
+((SELECT id FROM profil WHERE nom = 'Gardien / Agent de Sécurité'), 
+ (SELECT id FROM critere WHERE nom = 'Travail de nuit accepté'), 
+ NULL, TRUE, TRUE);
+
+INSERT INTO profildiplome (idprofil, iddiplome)
+VALUES 
+((SELECT id FROM profil WHERE nom = 'Gardien / Agent de Sécurité'),
+ (SELECT id FROM diplome WHERE nom = 'Aucun / Certificat de Sécurité'));

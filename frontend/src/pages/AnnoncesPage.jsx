@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   rechercherAnnonces,
   getDepartements,
@@ -17,6 +18,8 @@ import {
 import '../styles/AnnoncesPage.css';
 
 const AnnoncesPage = () => {
+  const navigate = useNavigate();
+
   const initialFiltres = {
     motCle: '',
     idDepartement: '',
@@ -305,7 +308,12 @@ const AnnoncesPage = () => {
                         </span>
                       )}
                     </div>
-                    <button className="btn-linkedin-action">Postuler</button>
+                    <button
+                      className="btn-linkedin-action"
+                      onClick={() => navigate(`/annonces/${annonce.id}/postuler`)}
+                    >
+                      Postuler
+                    </button>
                   </footer>
                 </article>
               ))}

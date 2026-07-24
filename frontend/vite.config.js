@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/backend-api': {
-        target: 'http://localhost:8080', // Redirige les appels vers Spring Boot
+        target: 'http://localhost:8081', // Redirige les appels vers Spring Boot
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/backend-api/, ''),
       },

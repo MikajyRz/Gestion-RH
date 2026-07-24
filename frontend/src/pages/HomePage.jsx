@@ -31,7 +31,7 @@ export default function HomePage() {
             <div style={styles.errorBox}>
               <p style={styles.error}>Erreur : {error}</p>
               <small style={{ color: '#6b7280' }}>
-                Vérifiez que Spring Boot est lancé sur http://localhost:8080
+                Vérifiez que Spring Boot est lancé sur http://localhost:8081
               </small>
             </div>
           )}

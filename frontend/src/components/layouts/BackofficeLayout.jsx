@@ -1,37 +1,72 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom'
-import { backofficeAuthService } from '../../services/backofficeAuthService'
-// import '../../styles/backoffice-layout.css'
+import React from 'react';
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { backofficeAuthService } from '../../services/backofficeAuthService';
+import '../../styles/Backoffice.css';
 
 function BackofficeLayout() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const user = backofficeAuthService.getUser();
 
   const handleLogout = () => {
-    backofficeAuthService.logout()
-    navigate('/backoffice')
-  }
+    backofficeAuthService.logout();
+    navigate('/backoffice');
+  };
 
   return (
     <div className="backoffice-shell">
-      <aside className="sidebar">
-        <h2>NewApp Dolibarr</h2>
+      {/* SIDEBAR NAVIGATION STYLE LINKEDIN CORPORATE */}
+      <aside className="backoffice-sidebar">
+        <div>
+          <div className="backoffice-sidebar__brand">
+            <div className="brand-badge">RH</div>
+            <div className="brand-title">Backoffice RH</div>
+          </div>
 
-        <nav>
-          <Link to="/backoffice/dashboard">Dashboard</Link>
-          <Link to="/backoffice/products">Produits</Link>
-          <Link to="/backoffice/import">Import</Link>
-          <Link to="/backoffice/reset">Réinitialisation</Link>
-        </nav>
+          {user && (
+            <div style={{
+              margin: '1rem 0 0.5rem 0',
+              padding: '0.75rem',
+              backgroundColor: '#eff6ff',
+              borderRadius: '8px',
+              border: '1px solid #bfdbfe'
+            }}>
+              <span style={{ fontSize: '0.8rem', color: '#1e40af', display: 'block', fontWeight: '600' }}>
+                Connecté en tant que :
+              </span>
+              <strong style={{ fontSize: '0.9rem', color: '#1e3a8a' }}>
+                {user.prenom ? `${user.prenom} ${user.nom}` : user.email}
+              </strong>
+            </div>
+          )}
 
-        <button className="logout-button" onClick={handleLogout}>
-          Déconnexion
+          <nav className="backoffice-nav">
+            <Link
+              to="/backoffice/dashboard"
+              className={`nav-item-linkedin ${location.pathname.includes('/dashboard') ? 'active' : ''}`}
+            >
+              📊 Tableau de bord
+            </Link>
+            <Link
+              to="/annonces"
+              className="nav-item-linkedin"
+            >
+              🌐 Voir le Frontoffice
+            </Link>
+          </nav>
+        </div>
+
+        <button className="btn-linkedin-logout" onClick={handleLogout}>
+          🚪 Déconnexion
         </button>
       </aside>
 
-      <main className="content">
+      {/* CONTENU PRINCIPAL */}
+      <main className="backoffice-main-content">
         <Outlet />
       </main>
     </div>
-  )
+  );
 }
 
-export default BackofficeLayout
+export default BackofficeLayout;

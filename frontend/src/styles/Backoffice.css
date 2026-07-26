@@ -1,0 +1,296 @@
+/* ============================================================================
+   BACKOFFICE.CSS - DESIGN SYSTEM LINKEDIN CORPORATE POUR BACKOFFICE RH
+   ============================================================================ */
+
+.backoffice-page {
+  min-height: 100vh;
+  background-color: var(--color-page, #f8fafc);
+  color: var(--color-text-main, #0f172a);
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+}
+
+/* --- BANNIÈRE LINKEDIN CORPORATE --- */
+.backoffice-banner {
+  background: linear-gradient(135deg, var(--color-primary, #0a66c2) 0%, var(--color-primary-dark, #004182) 100%);
+  color: #ffffff;
+  padding: 2.25rem 2rem 1.75rem 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.backoffice-banner-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.backoffice-banner h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+}
+
+.backoffice-banner p {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+/* --- CARTE LOGIN LINKEDIN --- */
+.backoffice-login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f3f2ef;
+  padding: 2rem 1rem;
+}
+
+.backoffice-login-card {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.05);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.backoffice-login-card__header {
+  background: linear-gradient(135deg, #0a66c2 0%, #004182 100%);
+  color: #ffffff;
+  padding: 2rem 2rem 1.75rem 2rem;
+  text-align: center;
+}
+
+.backoffice-login-card__logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin: 0 auto 1rem auto;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+}
+
+.backoffice-login-card__header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem 0;
+  color: #ffffff;
+}
+
+.backoffice-login-card__header p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.backoffice-login-card__body {
+  padding: 2rem;
+}
+
+.backoffice-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group-linkedin {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group-linkedin label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.form-group-linkedin input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.95rem;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.form-group-linkedin input:focus {
+  border-color: #0a66c2;
+  box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.15);
+}
+
+.btn-linkedin-primary {
+  background-color: #0a66c2;
+  color: #ffffff;
+  border: none;
+  border-radius: 24px;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.btn-linkedin-primary:hover {
+  background-color: #004182;
+}
+
+.btn-linkedin-primary:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* --- LAYOUT SHELL & NAVIGATION --- */
+.backoffice-shell {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.backoffice-sidebar {
+  width: 260px;
+  background-color: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem 1rem;
+}
+
+.backoffice-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.5rem 1.5rem 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.brand-badge {
+  width: 40px;
+  height: 40px;
+  background-color: #0a66c2;
+  color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.brand-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.backoffice-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 1.5rem;
+}
+
+.nav-item-linkedin {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  color: #475569;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.nav-item-linkedin:hover, .nav-item-linkedin.active {
+  background-color: #eff6ff;
+  color: #0a66c2;
+  font-weight: 600;
+}
+
+.btn-linkedin-logout {
+  background-color: transparent;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
+  border-radius: 20px;
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.btn-linkedin-logout:hover {
+  background-color: #fef2f2;
+}
+
+.backoffice-main-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* --- DASHBOARD STATS CARDS --- */
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card-linkedin {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.stat-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background-color: #eff6ff;
+  color: #0a66c2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.stat-info h4 {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 0.25rem 0;
+  font-weight: 500;
+}
+
+.stat-info .stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { backendClient } from '../services/backend/backendClient'
+import { backendClient } from '../../services/backend/backendClient'
 
 export default function HomePage() {
   const [data, setData] = useState(null)

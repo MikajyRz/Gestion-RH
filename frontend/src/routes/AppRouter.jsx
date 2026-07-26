@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import HomePage from '../pages/HomePage';
-import AnnoncesPage from '../pages/AnnoncesPage';
-import PostulerPage from '../pages/PostulerPage';
+import HomePage from '../pages/frontoffice/HomePage';
+import AnnoncesPage from '../pages/frontoffice/AnnoncesPage';
+import PostulerPage from '../pages/frontoffice/PostulerPage';
 
 export const AppRouter = () => {
   return (

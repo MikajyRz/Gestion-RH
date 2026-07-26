@@ -5,7 +5,7 @@ import {
   getDepartements,
   getProfils,
   getTypesAnnonce,
-} from '../services/backend/annonceService';
+} from '../../services/backend/annonceService';
 import {
   SearchIcon,
   BuildingIcon,
@@ -14,8 +14,8 @@ import {
   CalendarIcon,
   FilterIcon,
   XIcon,
-} from '../components/common/Icons';
-import '../styles/AnnoncesPage.css';
+} from '../../components/common/Icons';
+import '../../styles/AnnoncesPage.css';
 
 const AnnoncesPage = () => {
   const navigate = useNavigate();

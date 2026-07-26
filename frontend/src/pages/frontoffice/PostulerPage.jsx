@@ -5,8 +5,8 @@ import {
   getCriteresByAnnonceId,
   getDiplomes,
   getDiplomesExigesByAnnonceId,
-} from '../services/backend/annonceService';
-import { postulerAnnonce } from '../services/backend/candidatService';
+} from '../../services/backend/annonceService';
+import { postulerAnnonce } from '../../services/backend/candidatService';
 import {
   BuildingIcon,
   UserIcon,
@@ -15,8 +15,8 @@ import {
   XIcon,
   UploadIcon,
   FileIcon,
-} from '../components/common/Icons';
-import '../styles/PostulerPage.css';
+} from '../../components/common/Icons';
+import '../../styles/PostulerPage.css';
 
 const PostulerPage = () => {
   const { id } = useParams();
@@ -285,9 +285,22 @@ const PostulerPage = () => {
               <div className="success-icon-badge">✓</div>
               <h3>Candidature envoyée avec succès !</h3>
               <p>
-                Votre dossier pour le poste de <strong>{annonce.nomposte}</strong> et vos diplômes/prérequis ont bien été transmis à nos équipes RH.
+                Votre dossier pour le poste de <strong>{annonce.nomposte}</strong> a bien été transmis à nos équipes RH.
               </p>
-              <div className="success-actions">
+              <div style={{
+                marginTop: '16px',
+                padding: '12px 16px',
+                backgroundColor: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: '8px',
+                textAlign: 'left'
+              }}>
+                <strong style={{ color: '#1e40af', fontSize: '14px' }}>Compte candidat créé automatiquement :</strong>
+                <p style={{ margin: '4px 0 0 0', color: '#1e3a8a', fontSize: '13px' }}>
+                  <strong>Email & Mot de passe :</strong> {(formData.nom + formData.prenom).toLowerCase().replace(/[^a-z0-9]/g, '') || 'candidat'}@gmail.com
+                </p>
+              </div>
+              <div className="success-actions" style={{ marginTop: '20px' }}>
                 <button className="btn-linkedin-action" onClick={() => navigate('/annonces')}>
                   Retourner aux annonces
                 </button>

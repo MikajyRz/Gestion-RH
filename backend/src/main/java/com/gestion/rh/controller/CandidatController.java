@@ -36,19 +36,25 @@ public class CandidatController {
     private final CritereRepository critereRepository;
     private final DiplomeRepository diplomeRepository;
     private final CandidatureCritereRepository candidatureCritereRepository;
+    private final CompteCandidatRepository compteCandidatRepository;
+    private final HistoriqueCandidatureRepository historiqueCandidatureRepository;
 
     public CandidatController(CandidatRepository candidatRepository,
                               AnnonceRepository annonceRepository,
                               StatutCandidatRepository statutCandidatRepository,
                               CritereRepository critereRepository,
                               DiplomeRepository diplomeRepository,
-                              CandidatureCritereRepository candidatureCritereRepository) {
+                              CandidatureCritereRepository candidatureCritereRepository,
+                              CompteCandidatRepository compteCandidatRepository,
+                              HistoriqueCandidatureRepository historiqueCandidatureRepository) {
         this.candidatRepository = candidatRepository;
         this.annonceRepository = annonceRepository;
         this.statutCandidatRepository = statutCandidatRepository;
         this.critereRepository = critereRepository;
         this.diplomeRepository = diplomeRepository;
         this.candidatureCritereRepository = candidatureCritereRepository;
+        this.compteCandidatRepository = compteCandidatRepository;
+        this.historiqueCandidatureRepository = historiqueCandidatureRepository;
     }
 
     @GetMapping
@@ -102,6 +108,19 @@ public class CandidatController {
                     .orElseGet(() -> statutCandidatRepository.findById(1)
                     .orElseGet(() -> statutCandidatRepository.findAll().stream().findFirst().orElse(null)));
 
+            // --- Création / Récupération automatique du CompteCandidat ---
+            String nomClean = nom != null ? nom.trim() : "";
+            String prenomClean = prenom != null ? prenom.trim() : "";
+            String cleanNomPrenom = (nomClean + prenomClean).toLowerCase().replaceAll("[^a-z0-9]", "");
+            if (cleanNomPrenom.isEmpty()) {
+                cleanNomPrenom = "candidat" + System.currentTimeMillis();
+            }
+            String generatedEmail = cleanNomPrenom + "@gmail.com";
+            String generatedMdp = generatedEmail;
+
+            CompteCandidat compte = compteCandidatRepository.findByEmail(generatedEmail)
+                    .orElseGet(() -> compteCandidatRepository.save(new CompteCandidat(generatedEmail, generatedMdp)));
+
             Candidat candidat = new Candidat();
             candidat.setNom(nom);
             candidat.setPrenom(prenom);
@@ -110,8 +129,15 @@ public class CandidatController {
             candidat.setCv(cvPath);
             candidat.setAnnonce(annonceOpt.get());
             candidat.setStatut(statut);
+            candidat.setCompteCandidat(compte);
 
             Candidat candidatSauvegarde = candidatRepository.save(candidat);
+
+            // Enregistrement dans l'historique de candidature
+            if (statut != null) {
+                HistoriqueCandidature historique = new HistoriqueCandidature(candidatSauvegarde, statut);
+                historiqueCandidatureRepository.save(historique);
+            }
 
             // Traitement des critères saisis par le candidat
             if (payload.containsKey("criteres") && payload.get("criteres") instanceof List) {

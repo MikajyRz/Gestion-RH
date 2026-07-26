@@ -34,6 +34,10 @@ public class Candidat {
     @JoinColumn(name = "idstatut")
     private StatutCandidat statut;
 
+    @ManyToOne
+    @JoinColumn(name = "idcomptecandidat")
+    private CompteCandidat compteCandidat;
+
     public Candidat() {}
 
     public Long getId() {
@@ -98,5 +102,13 @@ public class Candidat {
 
     public void setStatut(StatutCandidat statut) {
         this.statut = statut;
+    }
+
+    public CompteCandidat getCompteCandidat() {
+        return compteCandidat;
+    }
+
+    public void setCompteCandidat(CompteCandidat compteCandidat) {
+        this.compteCandidat = compteCandidat;
     }
 }

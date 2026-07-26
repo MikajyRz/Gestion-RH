@@ -1,13 +1,18 @@
-import { Route, Routes } from 'react-router-dom'
-import HomePage from '../pages/HomePage'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import HomePage from '../pages/frontoffice/HomePage';
+import AnnoncesPage from '../pages/frontoffice/AnnoncesPage';
+import PostulerPage from '../pages/frontoffice/PostulerPage';
 
-function AppRouter() {
+export const AppRouter = () => {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="*" element={<HomePage />} />
+      <Route path="/" element={<AnnoncesPage />} />
+      <Route path="/annonces" element={<AnnoncesPage />} />
+      <Route path="/annonces/:id/postuler" element={<PostulerPage />} />
+      <Route path="/home" element={<HomePage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  )
-}
+  );
+};
 
-export default AppRouter
+export default AppRouter;

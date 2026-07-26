@@ -1,6 +1,6 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { backofficeAuthService } from '../../services/backofficeAuthService'
-import '../../styles/backoffice-layout.css'
+// import '../../styles/backoffice-layout.css'
 
 function BackofficeLayout() {
   const navigate = useNavigate()

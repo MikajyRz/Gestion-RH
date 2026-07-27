@@ -17,10 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/candidats")
@@ -38,6 +35,8 @@ public class CandidatController {
     private final CandidatureCritereRepository candidatureCritereRepository;
     private final CompteCandidatRepository compteCandidatRepository;
     private final HistoriqueCandidatureRepository historiqueCandidatureRepository;
+    private final CritereProfilRepository critereProfilRepository;
+    private final ProfilDiplomeRepository profilDiplomeRepository;
 
     public CandidatController(CandidatRepository candidatRepository,
                               AnnonceRepository annonceRepository,
@@ -46,7 +45,9 @@ public class CandidatController {
                               DiplomeRepository diplomeRepository,
                               CandidatureCritereRepository candidatureCritereRepository,
                               CompteCandidatRepository compteCandidatRepository,
-                              HistoriqueCandidatureRepository historiqueCandidatureRepository) {
+                              HistoriqueCandidatureRepository historiqueCandidatureRepository,
+                              CritereProfilRepository critereProfilRepository,
+                              ProfilDiplomeRepository profilDiplomeRepository) {
         this.candidatRepository = candidatRepository;
         this.annonceRepository = annonceRepository;
         this.statutCandidatRepository = statutCandidatRepository;
@@ -55,11 +56,96 @@ public class CandidatController {
         this.candidatureCritereRepository = candidatureCritereRepository;
         this.compteCandidatRepository = compteCandidatRepository;
         this.historiqueCandidatureRepository = historiqueCandidatureRepository;
+        this.critereProfilRepository = critereProfilRepository;
+        this.profilDiplomeRepository = profilDiplomeRepository;
     }
 
     @GetMapping
     public ResponseEntity<List<Candidat>> getTousLesCandidats() {
         return ResponseEntity.ok(candidatRepository.findAll());
+    }
+
+    @GetMapping("/statuts")
+    public ResponseEntity<List<StatutCandidat>> getStatutsCandidat() {
+        return ResponseEntity.ok(statutCandidatRepository.findAll());
+    }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<?> getCandidatDetails(@PathVariable Long id) {
+        Optional<Candidat> candOpt = candidatRepository.findById(id);
+        if (candOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Candidat candidat = candOpt.get();
+        Map<String, Object> response = new HashMap<>();
+        response.put("candidat", candidat);
+        response.put("criteresSaisis", candidatureCritereRepository.findByCandidatId(id));
+        response.put("historique", historiqueCandidatureRepository.findByCandidatIdOrderByDatechangementDesc(id));
+
+        if (candidat.getAnnonce() != null && candidat.getAnnonce().getProfil() != null) {
+            Integer idProfil = candidat.getAnnonce().getProfil().getId();
+            response.put("criteresExiges", critereProfilRepository.findByProfilId(idProfil));
+            response.put("diplomesExiges", profilDiplomeRepository.findByProfilId(idProfil));
+        } else {
+            response.put("criteresExiges", Collections.emptyList());
+            response.put("diplomesExiges", Collections.emptyList());
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/statut")
+    public ResponseEntity<?> updateStatut(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        Optional<Candidat> candOpt = candidatRepository.findById(id);
+        if (candOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Candidat candidat = candOpt.get();
+        Integer idStatut = null;
+        if (body.get("idStatut") != null) {
+            idStatut = Integer.valueOf(body.get("idStatut").toString());
+        }
+
+        if (idStatut == null) {
+            return ResponseEntity.badRequest().body("L'identifiant du statut est obligatoire.");
+        }
+
+        Optional<StatutCandidat> stOpt = statutCandidatRepository.findById(idStatut);
+        if (stOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Statut introuvable.");
+        }
+
+        StatutCandidat nouveauStatut = stOpt.get();
+        candidat.setStatut(nouveauStatut);
+        Candidat updated = candidatRepository.save(candidat);
+
+        // Traçabilité automatique dans l'historique
+        HistoriqueCandidature hist = new HistoriqueCandidature(updated, nouveauStatut);
+        historiqueCandidatureRepository.save(hist);
+
+        return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/cv/{fileName:.+}")
+    public ResponseEntity<org.springframework.core.io.Resource> getCvFile(@PathVariable String fileName) {
+        try {
+            Path filePath = Paths.get(uploadDir).resolve(fileName).normalize();
+            if (!Files.exists(filePath)) {
+                filePath = Paths.get(fileName).normalize();
+            }
+            if (Files.exists(filePath)) {
+                org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(filePath.toUri());
+                return ResponseEntity.ok()
+                        .header(org.springframework.http.HttpHeaders.CONTENT_TYPE, "application/pdf")
+                        .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                        .body(resource);
+            }
+        } catch (Exception e) {
+            // Fichier non trouvé
+        }
+        return ResponseEntity.notFound().build();
     }
 
     /**

@@ -7,6 +7,7 @@ import DashboardPage from '../pages/backoffice/DashboardPage';
 import AnnoncesManagementPage from '../pages/backoffice/AnnoncesManagementPage';
 import ReferentielsPage from '../pages/backoffice/ReferentielsPage';
 import CritereManagerPage from '../pages/backoffice/CritereManagerPage';
+import CandidatsManagementPage from '../pages/backoffice/CandidatsManagementPage';
 
 import HomePage from '../pages/frontoffice/HomePage';
 import AnnoncesPage from '../pages/frontoffice/AnnoncesPage';
@@ -38,6 +39,7 @@ export const AppRouter = () => {
       <Route path="/backoffice" element={<ProtectedBackofficeRoute />}>
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="annonces" element={<AnnoncesManagementPage />} />
+        <Route path="candidats" element={<CandidatsManagementPage />} />
         <Route path="referentiels" element={<ReferentielsPage />} />
         <Route path="criteres" element={<CritereManagerPage />} />
       </Route>

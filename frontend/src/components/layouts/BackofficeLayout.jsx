@@ -54,6 +54,12 @@ function BackofficeLayout() {
               📢 Gestion des Annonces
             </Link>
             <Link
+              to="/backoffice/candidats"
+              className={`nav-item-linkedin ${location.pathname.includes('/candidats') ? 'active' : ''}`}
+            >
+              👥 Suivi Candidatures (ATS)
+            </Link>
+            <Link
               to="/backoffice/referentiels"
               className={`nav-item-linkedin ${location.pathname.includes('/referentiels') ? 'active' : ''}`}
             >

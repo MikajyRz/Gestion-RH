@@ -9,6 +9,7 @@ import ReferentielsPage from '../pages/backoffice/ReferentielsPage';
 import CritereManagerPage from '../pages/backoffice/CritereManagerPage';
 import CandidatsManagementPage from '../pages/backoffice/CandidatsManagementPage';
 import QcmManagementPage from '../pages/backoffice/QcmManagementPage';
+import EntretiensManagementPage from '../pages/backoffice/EntretiensManagementPage';
 
 import HomePage from '../pages/frontoffice/HomePage';
 import AnnoncesPage from '../pages/frontoffice/AnnoncesPage';
@@ -42,6 +43,7 @@ export const AppRouter = () => {
         <Route path="annonces" element={<AnnoncesManagementPage />} />
         <Route path="candidats" element={<CandidatsManagementPage />} />
         <Route path="qcm" element={<QcmManagementPage />} />
+        <Route path="entretiens" element={<EntretiensManagementPage />} />
         <Route path="referentiels" element={<ReferentielsPage />} />
         <Route path="criteres" element={<CritereManagerPage />} />
       </Route>

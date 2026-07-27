@@ -66,6 +66,12 @@ function BackofficeLayout() {
               📝 Tests QCM & Évaluations
             </Link>
             <Link
+              to="/backoffice/entretiens"
+              className={`nav-item-linkedin ${location.pathname.includes('/entretiens') ? 'active' : ''}`}
+            >
+              📅 Planning Entretiens
+            </Link>
+            <Link
               to="/backoffice/referentiels"
               className={`nav-item-linkedin ${location.pathname.includes('/referentiels') ? 'active' : ''}`}
             >

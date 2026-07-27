@@ -60,6 +60,12 @@ function BackofficeLayout() {
               👥 Suivi Candidatures (ATS)
             </Link>
             <Link
+              to="/backoffice/qcm"
+              className={`nav-item-linkedin ${location.pathname.includes('/qcm') ? 'active' : ''}`}
+            >
+              📝 Tests QCM & Évaluations
+            </Link>
+            <Link
               to="/backoffice/referentiels"
               className={`nav-item-linkedin ${location.pathname.includes('/referentiels') ? 'active' : ''}`}
             >

@@ -48,6 +48,24 @@ function BackofficeLayout() {
               📊 Tableau de bord
             </Link>
             <Link
+              to="/backoffice/annonces"
+              className={`nav-item-linkedin ${location.pathname.includes('/annonces') ? 'active' : ''}`}
+            >
+              📢 Gestion des Annonces
+            </Link>
+            <Link
+              to="/backoffice/referentiels"
+              className={`nav-item-linkedin ${location.pathname.includes('/referentiels') ? 'active' : ''}`}
+            >
+              🏢 Référentiels Métiers
+            </Link>
+            <Link
+              to="/backoffice/criteres"
+              className={`nav-item-linkedin ${location.pathname.includes('/criteres') ? 'active' : ''}`}
+            >
+              ⚙️ Formulaires Dynamiques
+            </Link>
+            <Link
               to="/annonces"
               className="nav-item-linkedin"
             >

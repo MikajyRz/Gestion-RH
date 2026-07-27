@@ -4,6 +4,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import BackofficeLayout from '../components/layouts/BackofficeLayout';
 import BackofficeLogin from '../pages/backoffice/BackofficeLogin';
 import DashboardPage from '../pages/backoffice/DashboardPage';
+import AnnoncesManagementPage from '../pages/backoffice/AnnoncesManagementPage';
+import ReferentielsPage from '../pages/backoffice/ReferentielsPage';
+import CritereManagerPage from '../pages/backoffice/CritereManagerPage';
 
 import HomePage from '../pages/frontoffice/HomePage';
 import AnnoncesPage from '../pages/frontoffice/AnnoncesPage';
@@ -34,6 +37,9 @@ export const AppRouter = () => {
       {/* Protected Backoffice Routes */}
       <Route path="/backoffice" element={<ProtectedBackofficeRoute />}>
         <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="annonces" element={<AnnoncesManagementPage />} />
+        <Route path="referentiels" element={<ReferentielsPage />} />
+        <Route path="criteres" element={<CritereManagerPage />} />
       </Route>
 
       {/* Fallback */}

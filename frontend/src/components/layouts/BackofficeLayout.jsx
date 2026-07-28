@@ -13,87 +13,101 @@ function BackofficeLayout() {
     navigate('/backoffice');
   };
 
+  const userInitial = user?.prenom ? user.prenom.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'RH');
+
   return (
     <div className="backoffice-shell">
       {/* SIDEBAR NAVIGATION STYLE LINKEDIN CORPORATE */}
       <aside className="backoffice-sidebar">
         <div>
+          {/* LOGO & BRANDING LINKEDIN */}
           <div className="backoffice-sidebar__brand">
-            <div className="brand-badge">RH</div>
-            <div className="brand-title">Backoffice RH</div>
+            <div className="brand-badge-linkedin">in</div>
+            <div>
+              <div className="brand-title-linkedin">Gestion RH</div>
+              <div className="brand-subtitle-linkedin">Talent Solutions</div>
+            </div>
           </div>
 
+          {/* FICHE UTILISATEUR CONNECTÉ */}
           {user && (
-            <div style={{
-              margin: '1rem 0 0.5rem 0',
-              padding: '0.75rem',
-              backgroundColor: '#eff6ff',
-              borderRadius: '8px',
-              border: '1px solid #bfdbfe'
-            }}>
-              <span style={{ fontSize: '0.8rem', color: '#1e40af', display: 'block', fontWeight: '600' }}>
-                Connecté en tant que :
-              </span>
-              <strong style={{ fontSize: '0.9rem', color: '#1e3a8a' }}>
-                {user.prenom ? `${user.prenom} ${user.nom}` : user.email}
-              </strong>
+            <div className="user-profile-widget-linkedin">
+              <div className="user-avatar-linkedin">
+                {userInitial}
+              </div>
+              <div className="user-info-linkedin">
+                <span className="user-label-linkedin">Session active</span>
+                <strong className="user-name-linkedin">
+                  {user.prenom ? `${user.prenom} ${user.nom}` : user.email}
+                </strong>
+                <span className="user-role-badge">Administrateur RH</span>
+              </div>
             </div>
           )}
+
+          {/* SÉPARATEUR ET NAVIGATION */}
+          <div className="nav-section-title">MENUS D'ADMINISTRATION</div>
 
           <nav className="backoffice-nav">
             <Link
               to="/backoffice/dashboard"
               className={`nav-item-linkedin ${location.pathname.includes('/dashboard') ? 'active' : ''}`}
             >
-              📊 Tableau de bord
+              <span>Tableau de bord</span>
             </Link>
             <Link
               to="/backoffice/annonces"
               className={`nav-item-linkedin ${location.pathname.includes('/annonces') ? 'active' : ''}`}
             >
-              📢 Gestion des Annonces
+              <span>Gestion des Annonces</span>
             </Link>
             <Link
               to="/backoffice/candidats"
               className={`nav-item-linkedin ${location.pathname.includes('/candidats') ? 'active' : ''}`}
             >
-              👥 Suivi Candidatures (ATS)
+              <span>Suivi Candidatures (ATS)</span>
             </Link>
             <Link
               to="/backoffice/qcm"
               className={`nav-item-linkedin ${location.pathname.includes('/qcm') ? 'active' : ''}`}
             >
-              📝 Tests QCM & Évaluations
+              <span>Tests QCM & Évaluations</span>
             </Link>
             <Link
               to="/backoffice/entretiens"
               className={`nav-item-linkedin ${location.pathname.includes('/entretiens') ? 'active' : ''}`}
             >
-              📅 Planning Entretiens
+              <span>Planning Entretiens</span>
             </Link>
+
+            <div className="nav-section-title" style={{ marginTop: '1.25rem' }}>RÉFÉRENTIELS & CONFIGURATION</div>
+
             <Link
               to="/backoffice/referentiels"
               className={`nav-item-linkedin ${location.pathname.includes('/referentiels') ? 'active' : ''}`}
             >
-              🏢 Référentiels Métiers
+              <span>Référentiels Métiers</span>
             </Link>
             <Link
               to="/backoffice/criteres"
               className={`nav-item-linkedin ${location.pathname.includes('/criteres') ? 'active' : ''}`}
             >
-              ⚙️ Formulaires Dynamiques
+              <span>Formulaires Dynamiques</span>
             </Link>
+
+            <div className="nav-section-title" style={{ marginTop: '1.25rem' }}>LIENS EXTERNES</div>
+
             <Link
               to="/annonces"
-              className="nav-item-linkedin"
+              className="nav-item-linkedin nav-item-external"
             >
-              🌐 Voir le Frontoffice
+              <span>Voir le Frontoffice</span>
             </Link>
           </nav>
         </div>
 
-        <button className="btn-linkedin-logout" onClick={handleLogout}>
-          🚪 Déconnexion
+        <button className="btn-linkedin-logout-sidebar" onClick={handleLogout}>
+          Déconnexion
         </button>
       </aside>
 

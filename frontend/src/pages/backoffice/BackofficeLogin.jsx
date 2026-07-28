@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { backofficeAuthService } from '../../services/backofficeAuthService';
 import '../../styles/Backoffice.css';
+import '../../styles/BackofficeLogin.css';
 
 const BackofficeLogin = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const BackofficeLogin = () => {
       <div className="backoffice-login-card">
         <div className="backoffice-login-card__header">
           <div className="backoffice-login-card__logo">
-            🛡️
+            in
           </div>
           <h2>Administration RH</h2>
           <p>Espace sécurisé - Connexion au Backoffice</p>

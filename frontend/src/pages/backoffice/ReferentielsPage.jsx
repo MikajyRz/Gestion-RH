@@ -16,6 +16,7 @@ import {
   setDiplomesForProfil
 } from '../../services/backend/referentielService';
 import '../../styles/Backoffice.css';
+import '../../styles/ReferentielsPage.css';
 
 function ReferentielsPage() {
   const [activeTab, setActiveTab] = useState('departements'); // 'departements' | 'profils' | 'diplomes'
@@ -51,8 +52,12 @@ function ReferentielsPage() {
       setDepartements(deptData || []);
       setProfils(profilsData || []);
       setDiplomes(diplomesData || []);
+
+      if (profilsData && profilsData.length > 0 && !selectedProfilForDiplomes) {
+        handleSelectProfilForDiplomes(profilsData[0]);
+      }
     } catch (err) {
-      console.error('Erreur chargement référentiels :', err);
+      console.error('Erreur chargement des référentiels :', err);
     } finally {
       setLoading(false);
     }
@@ -67,21 +72,20 @@ function ReferentielsPage() {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  // --- GESTION DÉPARTEMENTS ---
+  // --- DÉPARTEMENTS ---
   const handleSaveDepartement = async (e) => {
     e.preventDefault();
     if (!formName.trim()) return;
+
     try {
       if (editingItem) {
-        await updateDepartement(editingItem.id, { nom: formName.trim() });
+        await updateDepartement(editingItem.id, formName.trim());
         notify(`Département "${formName}" mis à jour.`);
       } else {
-        await createDepartement({ nom: formName.trim() });
-        notify(`Département "${formName}" créé avec succès.`);
+        await createDepartement(formName.trim());
+        notify(`Département "${formName}" créé.`);
       }
       setModalType(null);
-      setFormName('');
-      setEditingItem(null);
       loadAllData();
     } catch (err) {
       notify('Erreur lors de l\'enregistrement du département.', true);
@@ -95,25 +99,24 @@ function ReferentielsPage() {
       notify(`Département "${nom}" supprimé.`);
       loadAllData();
     } catch (err) {
-      notify('Impossible de supprimer ce département (des annonces y sont liées).', true);
+      notify('Erreur lors de la suppression.', true);
     }
   };
 
-  // --- GESTION PROFILS ---
+  // --- PROFILS ---
   const handleSaveProfil = async (e) => {
     e.preventDefault();
     if (!formName.trim()) return;
+
     try {
       if (editingItem) {
-        await updateProfil(editingItem.id, { nom: formName.trim() });
+        await updateProfil(editingItem.id, formName.trim());
         notify(`Profil "${formName}" mis à jour.`);
       } else {
-        await createProfil({ nom: formName.trim() });
-        notify(`Profil "${formName}" créé avec succès.`);
+        await createProfil(formName.trim());
+        notify(`Profil "${formName}" créé.`);
       }
       setModalType(null);
-      setFormName('');
-      setEditingItem(null);
       loadAllData();
     } catch (err) {
       notify('Erreur lors de l\'enregistrement du profil.', true);
@@ -130,25 +133,24 @@ function ReferentielsPage() {
       }
       loadAllData();
     } catch (err) {
-      notify('Impossible de supprimer ce profil.', true);
+      notify('Erreur lors de la suppression.', true);
     }
   };
 
-  // --- GESTION DIPLÔMES ---
+  // --- DIPLÔMES ---
   const handleSaveDiplome = async (e) => {
     e.preventDefault();
     if (!formName.trim()) return;
+
     try {
       if (editingItem) {
-        await updateDiplome(editingItem.id, { nom: formName.trim() });
+        await updateDiplome(editingItem.id, formName.trim());
         notify(`Diplôme "${formName}" mis à jour.`);
       } else {
-        await createDiplome({ nom: formName.trim() });
-        notify(`Diplôme "${formName}" créé avec succès.`);
+        await createDiplome(formName.trim());
+        notify(`Diplôme "${formName}" créé.`);
       }
       setModalType(null);
-      setFormName('');
-      setEditingItem(null);
       loadAllData();
     } catch (err) {
       notify('Erreur lors de l\'enregistrement du diplôme.', true);
@@ -162,28 +164,31 @@ function ReferentielsPage() {
       notify(`Diplôme "${nom}" supprimé.`);
       loadAllData();
     } catch (err) {
-      notify('Impossible de supprimer ce diplôme.', true);
+      notify('Erreur lors de la suppression.', true);
     }
   };
 
-  // --- SELECTION PROFIL POUR DIPLÔMES EXIGÉS ---
+  // --- GESTION DES DIPLÔMES EXIGÉS PAR PROFIL ---
   const handleSelectProfilForDiplomes = async (profil) => {
     setSelectedProfilForDiplomes(profil);
     try {
-      const pDiplomes = await getDiplomesByProfil(profil.id);
-      setSelectedDiplomeIds((pDiplomes || []).map(pd => pd.diplome?.id).filter(Boolean));
+      const existingDiplomes = await getDiplomesByProfil(profil.id);
+      const ids = (existingDiplomes || []).map(d => d.id);
+      setSelectedDiplomeIds(ids);
     } catch (err) {
-      console.error('Erreur diplomes du profil :', err);
+      console.error('Erreur chargement diplômes du profil :', err);
       setSelectedDiplomeIds([]);
     }
   };
 
   const handleToggleDiplomeCheckbox = (diplomeId) => {
-    if (selectedDiplomeIds.includes(diplomeId)) {
-      setSelectedDiplomeIds(selectedDiplomeIds.filter(id => id !== diplomeId));
-    } else {
-      setSelectedDiplomeIds([...selectedDiplomeIds, diplomeId]);
-    }
+    setSelectedDiplomeIds(prev => {
+      if (prev.includes(diplomeId)) {
+        return prev.filter(id => id !== diplomeId);
+      } else {
+        return [...prev, diplomeId];
+      }
+    });
   };
 
   const handleSaveProfilDiplomes = async () => {
@@ -191,9 +196,9 @@ function ReferentielsPage() {
     try {
       setSavingDiplomes(true);
       await setDiplomesForProfil(selectedProfilForDiplomes.id, selectedDiplomeIds);
-      notify(`Diplômes exigés mis à jour pour le profil "${selectedProfilForDiplomes.nom}".`);
+      notify(`Diplômes exigés enregistrés pour le profil "${selectedProfilForDiplomes.nom}".`);
     } catch (err) {
-      notify('Erreur lors de la mise à jour des diplômes exigés.', true);
+      notify('Erreur lors de l\'enregistrement des diplômes exigés.', true);
     } finally {
       setSavingDiplomes(false);
     }
@@ -204,7 +209,7 @@ function ReferentielsPage() {
       {/* BANNIÈRE */}
       <div className="backoffice-banner">
         <div className="backoffice-banner-content">
-          <h1>🏢 Référentiels Métiers & Structure</h1>
+          <h1>Référentiels Métiers & Structure</h1>
           <p>Gérez les départements, les profils métiers et les diplômes exigés pour l'entreprise</p>
         </div>
       </div>
@@ -212,7 +217,7 @@ function ReferentielsPage() {
       <div className="dashboard-container">
         {notification && (
           <div className={notification.isError ? "alert-linkedin-error" : "alert-linkedin-success"}>
-            {notification.isError ? '⚠️ ' : '✅ '} {notification.text}
+            {notification.text}
           </div>
         )}
 
@@ -222,19 +227,19 @@ function ReferentielsPage() {
             className={`bo-tab-btn ${activeTab === 'departements' ? 'active' : ''}`}
             onClick={() => setActiveTab('departements')}
           >
-            🏢 Départements ({departements.length})
+            Départements ({departements.length})
           </button>
           <button
             className={`bo-tab-btn ${activeTab === 'profils' ? 'active' : ''}`}
             onClick={() => setActiveTab('profils')}
           >
-            👤 Profils & Diplômes ({profils.length})
+            Profils & Diplômes ({profils.length})
           </button>
           <button
             className={`bo-tab-btn ${activeTab === 'diplomes' ? 'active' : ''}`}
             onClick={() => setActiveTab('diplomes')}
           >
-            🎓 Catalogue des Diplômes ({diplomes.length})
+            Catalogue des Diplômes ({diplomes.length})
           </button>
         </div>
 
@@ -259,7 +264,7 @@ function ReferentielsPage() {
                       setModalType('DEPT');
                     }}
                   >
-                    ➕ Nouveau Département
+                    Nouveau Département
                   </button>
                 </div>
 
@@ -288,14 +293,14 @@ function ReferentielsPage() {
                                   setModalType('DEPT');
                                 }}
                               >
-                                ✏️
+                                Éditer
                               </button>
                               <button
                                 className="btn-icon btn-icon-delete"
                                 title="Supprimer"
                                 onClick={() => handleDeleteDepartement(d.id, d.nom)}
                               >
-                                🗑️
+                                Suppr.
                               </button>
                             </div>
                           </td>
@@ -323,7 +328,7 @@ function ReferentielsPage() {
                         setModalType('PROFIL');
                       }}
                     >
-                      ➕ Nouveau Profil
+                      Nouveau Profil
                     </button>
                   </div>
 
@@ -359,14 +364,14 @@ function ReferentielsPage() {
                                       setModalType('PROFIL');
                                     }}
                                   >
-                                    ✏️
+                                    Éditer
                                   </button>
                                   <button
                                     className="btn-icon btn-icon-delete"
                                     title="Supprimer"
                                     onClick={() => handleDeleteProfil(p.id, p.nom)}
                                   >
-                                    🗑️
+                                    Suppr.
                                   </button>
                                 </div>
                               </td>
@@ -382,7 +387,7 @@ function ReferentielsPage() {
                 <div className="bo-card">
                   <div className="bo-card-header">
                     <h3>
-                      🎓 Diplômes exigés pour :{' '}
+                      Diplômes exigés pour :{' '}
                       <span style={{ color: '#0a66c2' }}>
                         {selectedProfilForDiplomes ? selectedProfilForDiplomes.nom : 'Aucun profil sélectionné'}
                       </span>
@@ -391,7 +396,6 @@ function ReferentielsPage() {
 
                   {!selectedProfilForDiplomes ? (
                     <div className="empty-state">
-                      <p className="empty-icon">👈</p>
                       <p>Cliquez sur un profil métier dans la liste de gauche pour configurer ses diplômes exigés.</p>
                     </div>
                   ) : (
@@ -410,7 +414,7 @@ function ReferentielsPage() {
                                 checked={checked}
                                 onChange={() => handleToggleDiplomeCheckbox(d.id)}
                               />
-                              <span>🎓 {d.nom}</span>
+                              <span>{d.nom}</span>
                             </label>
                           );
                         })}
@@ -423,7 +427,7 @@ function ReferentielsPage() {
                           onClick={handleSaveProfilDiplomes}
                           disabled={savingDiplomes}
                         >
-                          {savingDiplomes ? 'Enregistrement...' : '💾 Enregistrer les diplômes exigés'}
+                          {savingDiplomes ? 'Enregistrement...' : 'Enregistrer les diplômes exigés'}
                         </button>
                       </div>
                     </div>
@@ -446,7 +450,7 @@ function ReferentielsPage() {
                       setModalType('DIPLOME');
                     }}
                   >
-                    ➕ Nouveau Diplôme
+                    Nouveau Diplôme
                   </button>
                 </div>
 
@@ -463,7 +467,7 @@ function ReferentielsPage() {
                       {diplomes.map(d => (
                         <tr key={d.id}>
                           <td><strong>#{d.id}</strong></td>
-                          <td>🎓 {d.nom}</td>
+                          <td>{d.nom}</td>
                           <td>
                             <div className="action-buttons-group">
                               <button
@@ -475,14 +479,14 @@ function ReferentielsPage() {
                                   setModalType('DIPLOME');
                                 }}
                               >
-                                ✏️
+                                Éditer
                               </button>
                               <button
                                 className="btn-icon btn-icon-delete"
                                 title="Supprimer"
                                 onClick={() => handleDeleteDiplome(d.id, d.nom)}
                               >
-                                🗑️
+                                Suppr.
                               </button>
                             </div>
                           </td>
@@ -503,7 +507,7 @@ function ReferentielsPage() {
           <div className="modal-content modal-sm">
             <div className="modal-header">
               <h2>
-                {editingItem ? '✏️ Modifier' : '➕ Ajouter'}{' '}
+                {editingItem ? 'Modifier' : 'Ajouter'}{' '}
                 {modalType === 'DEPT' ? 'un département' : modalType === 'PROFIL' ? 'un profil métier' : 'un diplôme'}
               </h2>
               <button className="modal-close-btn" onClick={() => setModalType(null)}>✕</button>

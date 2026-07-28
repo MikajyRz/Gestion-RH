@@ -1,0 +1,295 @@
+/* ==========================================================================
+   ENTRETIENS MANAGEMENT PAGE - STYLE LINKEDIN CORPORATE
+   ========================================================================== */
+
+/* --- AGENDA ET PLANNING DES ENTRETIENS --- */
+.agenda-day-group {
+  margin-bottom: 1.75rem;
+}
+
+.agenda-day-header {
+  background-color: #1d2226;
+  color: #ffffff;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+.agenda-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.agenda-interview-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.agenda-interview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  border-color: #0a66c2;
+}
+
+.agenda-card-time {
+  background-color: #e8f4f9;
+  color: #0a66c2;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #b3d7f5;
+}
+
+.agenda-card-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.agenda-card-body h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.9);
+  margin: 0;
+}
+
+.agenda-job-title {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 0;
+}
+
+.select-status-inline {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.badge-score-pill {
+  background-color: #fff8e1;
+  color: #b25900;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid #ffe082;
+}
+
+.badge-status-upcoming {
+  background-color: #f4f2ee;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+}
+
+.agenda-appreciation-box {
+  background-color: #f8f9fa;
+  border-left: 3px solid #0a66c2;
+  padding: 0.6rem 0.75rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.agenda-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.btn-linkedin-primary-sm {
+  background-color: #0a66c2;
+  color: #ffffff;
+  border: none;
+  border-radius: 16px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-linkedin-primary-sm:hover {
+  background-color: #004182;
+}
+
+/* --- VRAI CALENDRIER MENSUEL INTERACTIF --- */
+.full-calendar-card {
+  padding: 1.25rem;
+}
+
+.calendar-header-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.calendar-month-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.calendar-month-title h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.calendar-nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.full-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+.calendar-weekday-header {
+  background-color: #1d2226;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  padding: 0.65rem 0.25rem;
+}
+
+.calendar-day-cell {
+  background-color: #ffffff;
+  min-height: 110px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-day-cell:hover {
+  background-color: #f8f9fa;
+}
+
+.calendar-day-cell.other-month {
+  background-color: #f4f2ee;
+  opacity: 0.65;
+}
+
+.calendar-day-cell.today-cell {
+  background-color: #e8f4f9;
+  border: 2px solid #0a66c2;
+}
+
+.cell-day-number {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 0.4rem;
+}
+
+.today-badge {
+  background-color: #0a66c2;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 8px;
+}
+
+.cell-events-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow-y: auto;
+  max-height: 85px;
+}
+
+.event-chip {
+  padding: 0.25rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-chip:hover {
+  transform: scale(1.02);
+}
+
+.event-chip.chip-upcoming {
+  background-color: #e8f4f9;
+  color: #0a66c2;
+  border: 1px solid #b3d7f5;
+  font-weight: 600;
+}
+
+.event-chip.chip-completed {
+  background-color: #e6f4ea;
+  color: #057642;
+  border: 1px solid #b7e1cd;
+  font-weight: 600;
+}
+
+.event-chip.chip-cancelled {
+  background-color: #fce8e6;
+  color: #c00000;
+  border: 1px solid #f5c6cb;
+  font-weight: 500;
+}
+
+.chip-time {
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip-score {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 800;
+}

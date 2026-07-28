@@ -15,6 +15,7 @@ import {
 } from '../../services/backend/qcmService';
 import { getProfils } from '../../services/backend/referentielService';
 import '../../styles/Backoffice.css';
+import '../../styles/QcmManagementPage.css';
 
 function QcmManagementPage() {
   const [activeTab, setActiveTab] = useState('tests'); // 'tests' | 'results' | 'passation'
@@ -362,7 +363,7 @@ function QcmManagementPage() {
       {/* BANNIÈRE */}
       <div className="backoffice-banner">
         <div className="backoffice-banner-content">
-          <h1>📝 Tests QCM & Évaluations Techniques</h1>
+          <h1>Tests QCM & Évaluations Techniques</h1>
           <p>Administrez les banques de questionnaires, faites passer les tests aux candidats (statut "QCM Envoyé") et consultez les corrections automatiques</p>
         </div>
       </div>
@@ -370,7 +371,7 @@ function QcmManagementPage() {
       <div className="dashboard-container">
         {notification && (
           <div className={notification.isError ? "alert-linkedin-error" : "alert-linkedin-success"}>
-            {notification.isError ? '⚠️ ' : '✅ '} {notification.text}
+            {notification.text}
           </div>
         )}
 
@@ -380,19 +381,19 @@ function QcmManagementPage() {
             className={`bo-tab-btn ${activeTab === 'tests' ? 'active' : ''}`}
             onClick={() => setActiveTab('tests')}
           >
-            🧩 Banques de Tests QCM ({tests.length})
+            Banques de Tests QCM ({tests.length})
           </button>
           <button
             className={`bo-tab-btn ${activeTab === 'passation' ? 'active' : ''}`}
             onClick={() => setActiveTab('passation')}
           >
-            📝 Passation & Correction (Statut "QCM Envoyé" : {candidatsQcmEnvoye.length})
+            Passation & Correction (Statut "QCM Envoyé" : {candidatsQcmEnvoye.length})
           </button>
           <button
             className={`bo-tab-btn ${activeTab === 'results' ? 'active' : ''}`}
             onClick={() => setActiveTab('results')}
           >
-            📊 Résultats & Notes Candidats ({resultatsCandidats.length})
+            Résultats & Notes Candidats ({resultatsCandidats.length})
           </button>
         </div>
 
@@ -415,7 +416,7 @@ function QcmManagementPage() {
                       style={{ width: 'auto' }}
                       onClick={handleOpenCreateTest}
                     >
-                      ➕ Nouveau Test QCM
+                      Nouveau Test QCM
                     </button>
                   </div>
 
@@ -449,14 +450,14 @@ function QcmManagementPage() {
                                     title="Modifier"
                                     onClick={() => handleOpenEditTest(t)}
                                   >
-                                    ✏️
+                                    Éditer
                                   </button>
                                   <button
                                     className="btn-icon btn-icon-delete"
                                     title="Supprimer"
                                     onClick={() => handleDeleteTest(t.id, t.nom)}
                                   >
-                                    🗑️
+                                    Suppr.
                                   </button>
                                 </div>
                               </td>
@@ -472,7 +473,7 @@ function QcmManagementPage() {
                 <div className="bo-card">
                   <div className="bo-card-header">
                     <h3>
-                      📋 Questions du test :{' '}
+                      Questions du test :{' '}
                       <span style={{ color: '#0a66c2' }}>{selectedTest ? selectedTest.nom : 'Aucun test sélectionné'}</span>
                     </h3>
                     {selectedTest && (
@@ -481,14 +482,13 @@ function QcmManagementPage() {
                         style={{ width: 'auto' }}
                         onClick={handleOpenAddQuestion}
                       >
-                        ➕ Ajouter une Question
+                        Ajouter une Question
                       </button>
                     )}
                   </div>
 
                   {!selectedTest ? (
                     <div className="empty-state">
-                      <p className="empty-icon">👈</p>
                       <p>Cliquez sur un test QCM dans la liste de gauche pour en afficher les questions.</p>
                     </div>
                   ) : loadingQuestions ? (
@@ -498,10 +498,9 @@ function QcmManagementPage() {
                     </div>
                   ) : testQuestions.length === 0 ? (
                     <div className="empty-state">
-                      <p className="empty-icon">❓</p>
                       <p>Ce questionnaire ne contient encore aucune question.</p>
                       <button className="btn-linkedin-secondary" onClick={handleOpenAddQuestion} style={{ marginTop: '1rem' }}>
-                        ➕ Ajouter la première question
+                        Ajouter la première question
                       </button>
                     </div>
                   ) : (
@@ -519,7 +518,7 @@ function QcmManagementPage() {
                                 title="Supprimer la question"
                                 onClick={() => handleDeleteQuestion(q.id)}
                               >
-                                🗑️
+                                Suppr.
                               </button>
                             </div>
                           </div>
@@ -527,7 +526,7 @@ function QcmManagementPage() {
                           <ul className="choices-preview-list">
                             {(q.choix || []).map(ch => (
                               <li key={ch.id} className={ch.estcorrect ? 'correct-choice' : ''}>
-                                {ch.estcorrect ? '✅ ' : '⚪ '} {ch.texte}
+                                {ch.texte}
                                 {ch.estcorrect && <span className="correct-tag"> (Bonne réponse)</span>}
                               </li>
                             ))}
@@ -544,13 +543,13 @@ function QcmManagementPage() {
             {activeTab === 'passation' && (
               <div className="bo-card">
                 <div className="bo-card-header">
-                  <h3>📝 Passation et Correction des QCM (Candidats au statut "QCM Envoyé")</h3>
+                  <h3>Passation et Correction des QCM (Candidats au statut "QCM Envoyé")</h3>
                 </div>
 
                 {/* SÉLECTION DU CANDIDAT ÉLIGIBLE */}
                 <div className="form-group-linkedin" style={{ maxWidth: '600px', marginBottom: '1.5rem' }}>
                   <label style={{ fontSize: '1rem', fontWeight: 700 }}>
-                    🎯 Choisir un candidat ayant le statut "QCM Envoyé" ({candidatsQcmEnvoye.length} éligibles) :
+                    Choisir un candidat ayant le statut "QCM Envoyé" ({candidatsQcmEnvoye.length} éligibles) :
                   </label>
                   <select
                     value={selectedCandQcm?.id || ''}
@@ -572,12 +571,10 @@ function QcmManagementPage() {
                   </div>
                 ) : !selectedCandQcm ? (
                   <div className="empty-state">
-                    <p className="empty-icon">👥</p>
                     <p>Sélectionnez un candidat dans la liste déroulante ci-dessus pour démarrer le test QCM.</p>
                   </div>
                 ) : !candTestPayload || !candTestPayload.test ? (
                   <div className="empty-state">
-                    <p className="empty-icon">⚠️</p>
                     <p>Aucun test QCM n'est encore configuré pour le poste de ce candidat.</p>
                   </div>
                 ) : (
@@ -585,7 +582,7 @@ function QcmManagementPage() {
                     {/* EN-TÊTE DU TEST */}
                     <div className="qcm-test-taking-header">
                       <div>
-                        <h2>📋 {candTestPayload.test.nom}</h2>
+                        <h2>{candTestPayload.test.nom}</h2>
                         <p style={{ margin: 0, color: '#64748b' }}>
                           Candidat : <strong>{selectedCandQcm.prenom} {selectedCandQcm.nom}</strong> | Poste :{' '}
                           <strong>{selectedCandQcm.annonce?.nomposte || '—'}</strong>
@@ -638,7 +635,7 @@ function QcmManagementPage() {
                         style={{ padding: '0.75rem 2rem', fontSize: '1rem' }}
                         disabled={submittingQcmSession}
                       >
-                        {submittingQcmSession ? 'Correction en cours...' : '✅ Soumettre et Corriger le QCM'}
+                        {submittingQcmSession ? 'Correction en cours...' : 'Soumettre et Corriger le QCM'}
                       </button>
                     </div>
                   </form>
@@ -655,7 +652,6 @@ function QcmManagementPage() {
 
                 {resultatsCandidats.length === 0 ? (
                   <div className="empty-state">
-                    <p className="empty-icon">📊</p>
                     <p>Aucun candidat n'a encore passé de test QCM.</p>
                   </div>
                 ) : (
@@ -695,9 +691,9 @@ function QcmManagementPage() {
                               </td>
                               <td>
                                 {isPassed ? (
-                                  <span style={{ color: '#166534', fontWeight: 600 }}>🟢 Compétences Validées</span>
+                                  <span style={{ color: '#057642', fontWeight: 600 }}>Compétences Validées</span>
                                 ) : (
-                                  <span style={{ color: '#dc2626', fontWeight: 600 }}>🔴 Insuffisant</span>
+                                  <span style={{ color: '#c00000', fontWeight: 600 }}>Insuffisant</span>
                                 )}
                               </td>
                               <td>
@@ -707,7 +703,7 @@ function QcmManagementPage() {
                                     title="Consulter les réponses détaillées"
                                     onClick={() => handleOpenCandidateResultsDetail(res)}
                                   >
-                                    👁️ Réponses
+                                    Réponses
                                   </button>
                                 </div>
                               </td>
@@ -729,7 +725,7 @@ function QcmManagementPage() {
         <div className="modal-backdrop">
           <div className="modal-content modal-sm">
             <div className="modal-header">
-              <h2>{editingTest ? '✏️ Modifier le test QCM' : '➕ Nouveau Test QCM'}</h2>
+              <h2>{editingTest ? 'Modifier le test QCM' : 'Nouveau Test QCM'}</h2>
               <button className="modal-close-btn" onClick={() => setShowTestModal(false)}>✕</button>
             </div>
 
@@ -781,7 +777,7 @@ function QcmManagementPage() {
         <div className="modal-backdrop">
           <div className="modal-content modal-md">
             <div className="modal-header">
-              <h2>➕ Ajouter une question au test QCM</h2>
+              <h2>Ajouter une question au test QCM</h2>
               <button className="modal-close-btn" onClick={() => setShowQuestionModal(false)}>✕</button>
             </div>
 
@@ -819,7 +815,7 @@ function QcmManagementPage() {
                       checked={c.estcorrect}
                       onChange={() => handleSetCorrectChoice(i)}
                       title="Définir comme la bonne réponse"
-                      style={{ width: '20px', height: '20px', accentColor: '#166534', cursor: 'pointer' }}
+                      style={{ width: '20px', height: '20px', accentColor: '#057642', cursor: 'pointer' }}
                     />
                     <input
                       type="text"
@@ -847,7 +843,7 @@ function QcmManagementPage() {
                   onClick={handleAddChoiceField}
                   style={{ marginTop: '0.5rem', alignSelf: 'flex-start' }}
                 >
-                  ➕ Ajouter une option de réponse
+                  Ajouter une option de réponse
                 </button>
               </div>
 
@@ -879,7 +875,7 @@ function QcmManagementPage() {
         <div className="modal-backdrop">
           <div className="modal-content modal-md">
             <div className="modal-header">
-              <h2>📄 Réponses détaillées : {selectedCandidateResult.nomCandidat}</h2>
+              <h2>Réponses détaillées : {selectedCandidateResult.nomCandidat}</h2>
               <button className="modal-close-btn" onClick={() => setShowResultDetailModal(false)}>✕</button>
             </div>
 
@@ -888,7 +884,7 @@ function QcmManagementPage() {
                 <p><strong>Test :</strong> {selectedCandidateResult.nomTest}</p>
                 <p>
                   <strong>Score final :</strong>{' '}
-                  <span style={{ fontSize: '1.1rem', fontWeight: 700, color: selectedCandidateResult.pourcentage >= 50 ? '#166534' : '#dc2626' }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 700, color: selectedCandidateResult.pourcentage >= 50 ? '#057642' : '#c00000' }}>
                     {selectedCandidateResult.scoreObtenu} / {selectedCandidateResult.scoreMax} points ({selectedCandidateResult.pourcentage}%)
                   </span>
                 </p>
@@ -919,12 +915,12 @@ function QcmManagementPage() {
                         <tr key={ans.id}>
                           <td><strong>{ans.question}</strong></td>
                           <td>
-                            <span style={{ color: ans.estCorrect ? '#166534' : '#dc2626', fontWeight: 600 }}>
+                            <span style={{ color: ans.estCorrect ? '#057642' : '#c00000', fontWeight: 600 }}>
                               {ans.choixSelectionne}
                             </span>
                           </td>
                           <td>
-                            <span style={{ color: '#166534', fontWeight: 600 }}>
+                            <span style={{ color: '#057642', fontWeight: 600 }}>
                               {ans.bonneReponse}
                             </span>
                           </td>
@@ -953,14 +949,11 @@ function QcmManagementPage() {
         <div className="modal-backdrop">
           <div className="modal-content modal-sm" style={{ textAlign: 'center' }}>
             <div className="modal-header">
-              <h2>🎉 Correction Automatique Effectuée</h2>
+              <h2>Correction Automatique Effectuée</h2>
               <button className="modal-close-btn" onClick={() => setShowCorrectionModal(false)}>✕</button>
             </div>
 
             <div className="modal-body" style={{ padding: '1.5rem' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>
-                {correctionResult.pourcentage >= 50 ? '🟢' : '🔴'}
-              </div>
               <h3 style={{ margin: '0 0 0.5rem 0', color: '#0f172a' }}>
                 {correctionResult.candidat?.prenom} {correctionResult.candidat?.nom}
               </h3>
@@ -971,7 +964,7 @@ function QcmManagementPage() {
               <div className="details-dates-box" style={{ padding: '1rem', borderRadius: '10px' }}>
                 <p style={{ margin: '0.2rem 0', fontSize: '1rem' }}>
                   Score obtenu :{' '}
-                  <strong style={{ fontSize: '1.25rem', color: correctionResult.pourcentage >= 50 ? '#166534' : '#dc2626' }}>
+                  <strong style={{ fontSize: '1.25rem', color: correctionResult.pourcentage >= 50 ? '#057642' : '#c00000' }}>
                     {correctionResult.scoreObtenu} / {correctionResult.scoreMax} pts
                   </strong>
                 </p>
@@ -980,8 +973,8 @@ function QcmManagementPage() {
                 </p>
               </div>
 
-              <div style={{ marginTop: '1.25rem', padding: '0.75rem', backgroundColor: '#dcfce7', borderRadius: '8px', border: '1px solid #86efac', color: '#166534', fontWeight: 600, fontSize: '0.9rem' }}>
-                ✅ Le statut du candidat est passé automatiquement à <strong>"QCM Terminé"</strong> !
+              <div style={{ marginTop: '1.25rem', padding: '0.75rem', backgroundColor: '#e6f4ea', borderRadius: '8px', border: '1px solid #b7e1cd', color: '#057642', fontWeight: 600, fontSize: '0.9rem' }}>
+                Le statut du candidat est passé automatiquement à <strong>"QCM Terminé"</strong> !
               </div>
             </div>
 
@@ -993,7 +986,7 @@ function QcmManagementPage() {
                   setActiveTab('results');
                 }}
               >
-                Voir la liste des résultats 📊
+                Voir la liste des résultats
               </button>
             </div>
           </div>

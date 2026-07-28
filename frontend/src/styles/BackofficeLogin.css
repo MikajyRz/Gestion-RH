@@ -1,0 +1,109 @@
+/* ==========================================================================
+   BACKOFFICE LOGIN - STYLE LINKEDIN CORPORATE
+   ========================================================================== */
+
+.backoffice-login-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1d2226 0%, #0a66c2 100%);
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.backoffice-login-card {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.backoffice-login-card__header {
+  background-color: #1d2226;
+  color: #ffffff;
+  padding: 2.25rem 2rem;
+  text-align: center;
+  border-bottom: 3px solid #0a66c2;
+}
+
+.backoffice-login-card__logo {
+  width: 56px;
+  height: 56px;
+  background-color: #0a66c2;
+  color: #ffffff;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin: 0 auto 1rem auto;
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.4);
+}
+
+.backoffice-login-card__header h2 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
+
+.backoffice-login-card__header p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.88rem;
+}
+
+.backoffice-login-card__body {
+  padding: 2.25rem 2rem;
+  background-color: #ffffff;
+}
+
+.backoffice-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.backoffice-login-form .form-group-linkedin label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.backoffice-login-form .form-group-linkedin input {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.backoffice-login-form .form-group-linkedin input:focus {
+  border-color: #0a66c2;
+  box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.15);
+}
+
+.backoffice-login-form button[type="submit"] {
+  background-color: #0a66c2;
+  color: #ffffff;
+  border: none;
+  padding: 0.85rem 1.25rem;
+  border-radius: 24px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.3);
+  margin-top: 0.5rem;
+}
+
+.backoffice-login-form button[type="submit"]:hover {
+  background-color: #004182;
+  box-shadow: 0 6px 16px rgba(10, 102, 194, 0.4);
+}

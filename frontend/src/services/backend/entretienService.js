@@ -10,8 +10,16 @@ export const getStatutsEntretien = async () => {
   return response.data;
 };
 
-export const createEntretien = async (data) => {
-  const response = await backendClient.post('/api/entretiens', data);
+export const getCandidatsEligiblesEntretien = async () => {
+  const response = await backendClient.get('/api/entretiens/candidats-eligible');
+  return response.data;
+};
+
+export const createEntretien = async (idCandidatOrData, dateheure) => {
+  const payload = typeof idCandidatOrData === 'object'
+    ? idCandidatOrData
+    : { idCandidat: idCandidatOrData, dateheure };
+  const response = await backendClient.post('/api/entretiens', payload);
   return response.data;
 };
 

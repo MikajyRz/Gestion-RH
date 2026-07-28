@@ -51,10 +51,14 @@ export const getCandidatDetails = async (id) => {
   return response.data;
 };
 
+export const getCandidatDetailComplete = getCandidatDetails;
+
 export const updateCandidatStatut = async (idCandidat, idStatut) => {
   const response = await backendClient.put(`/candidats/${idCandidat}/statut`, { idStatut });
   return response.data;
 };
+
+export const updateStatutCandidat = updateCandidatStatut;
 
 export const getCvUrl = (cvPath) => {
   if (!cvPath) return null;

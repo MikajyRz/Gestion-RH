@@ -12,6 +12,7 @@ import {
   deleteCritereProfilRegle
 } from '../../services/backend/referentielService';
 import '../../styles/Backoffice.css';
+import '../../styles/CritereManagerPage.css';
 
 function CritereManagerPage() {
   const [activeTab, setActiveTab] = useState('rules'); // 'rules' | 'catalogue'
@@ -57,6 +58,7 @@ function CritereManagerPage() {
 
       if (profilsData && profilsData.length > 0) {
         setSelectedProfilId(profilsData[0].id.toString());
+        loadProfilRegles(profilsData[0].id.toString());
       }
     } catch (err) {
       console.error('Erreur chargement critères :', err);
@@ -69,7 +71,12 @@ function CritereManagerPage() {
     loadInitialData();
   }, []);
 
-  // Charger les règles du profil sélectionné
+  const notify = (msg, isError = false) => {
+    setNotification({ text: msg, isError });
+    setTimeout(() => setNotification(null), 4000);
+  };
+
+  // Charger les règles associées au profil sélectionné
   const loadProfilRegles = async (profilId) => {
     if (!profilId) return;
     try {
@@ -77,7 +84,7 @@ function CritereManagerPage() {
       const regles = await getCriteresByProfil(profilId);
       setProfilRegles(regles || []);
     } catch (err) {
-      console.error('Erreur chargement règles profil :', err);
+      console.error('Erreur chargement règles du profil :', err);
       setProfilRegles([]);
     } finally {
       setLoadingRegles(false);
@@ -90,12 +97,7 @@ function CritereManagerPage() {
     }
   }, [selectedProfilId]);
 
-  const notify = (msg, isError = false) => {
-    setNotification({ text: msg, isError });
-    setTimeout(() => setNotification(null), 4000);
-  };
-
-  // --- CATALOGUE DES CRITÈRES ---
+  // --- CATALOGUE CRITÈRES CRUD ---
   const handleOpenCreateCritere = () => {
     setEditingCritere(null);
     setCritereForm({
@@ -118,68 +120,59 @@ function CritereManagerPage() {
     e.preventDefault();
     if (!critereForm.nom.trim()) return;
 
-    const payload = {
-      nom: critereForm.nom.trim(),
-      typechamp: critereForm.idtypechamp ? { id: parseInt(critereForm.idtypechamp, 10) } : null
-    };
-
     try {
       if (editingCritere) {
-        await updateCritere(editingCritere.id, payload);
+        await updateCritere(editingCritere.id, critereForm.nom.trim(), parseInt(critereForm.idtypechamp, 10));
         notify(`Critère "${critereForm.nom}" mis à jour.`);
       } else {
-        await createCritere(payload);
+        await createCritere(critereForm.nom.trim(), parseInt(critereForm.idtypechamp, 10));
         notify(`Critère "${critereForm.nom}" créé.`);
       }
       setShowCritereModal(false);
       loadInitialData();
     } catch (err) {
-      notify('Erreur enregistrement du critère.', true);
+      notify('Erreur lors de l\'enregistrement du critère.', true);
     }
   };
 
   const handleDeleteCritere = async (id, nom) => {
-    if (!window.confirm(`Supprimer le critère "${nom}" ?`)) return;
+    if (!window.confirm(`Supprimer le critère "${nom}" du catalogue ?`)) return;
     try {
       await deleteCritere(id);
       notify(`Critère "${nom}" supprimé.`);
       loadInitialData();
     } catch (err) {
-      notify('Impossible de supprimer ce critère (il est utilisé dans des profils).', true);
+      notify('Erreur lors de la suppression du critère.', true);
     }
   };
 
-  // --- REGLES CRITERES PROFIL ---
-  const selectedCritereObj = criteres.find(c => c.id.toString() === newRegleCritereId);
-  const selectedTypeChampLibelle = selectedCritereObj?.typechamp?.libelle?.toLowerCase() || '';
+  // --- FORMULAIRES DYNAMIQUES PAR PROFIL ---
+  const selectedCritereForNewRegle = criteres.find(c => c.id.toString() === newRegleCritereId);
+  const selectedTypeChampLibelle = selectedCritereForNewRegle?.typechamp?.libelle?.toLowerCase() || '';
 
   const handleAddRegleToProfil = async (e) => {
     e.preventDefault();
-    if (!selectedProfilId || !newRegleCritereId) {
-      alert('Veuillez sélectionner un critère à ajouter.');
-      return;
-    }
-
-    const payload = {
-      critere: { id: parseInt(newRegleCritereId, 10) },
-      estobligatoire: newRegleObligatoire,
-      valeurvarchar: newRegleVarchar.trim() || null,
-      valeurdouble: newRegleDouble ? parseFloat(newRegleDouble) : null,
-      valeurbool: selectedTypeChampLibelle.includes('bool') ? newRegleBool : null
-    };
+    if (!selectedProfilId || !newRegleCritereId) return;
 
     try {
       setAddingRegle(true);
-      await addCritereToProfil(selectedProfilId, payload);
-      notify('Critère ajouté au profil avec succès.');
+      await addCritereToProfil({
+        idProfil: parseInt(selectedProfilId, 10),
+        idCritere: parseInt(newRegleCritereId, 10),
+        estObligatoire: newRegleObligatoire,
+        valeurVarchar: newRegleVarchar.trim() || null,
+        valeurDouble: newRegleDouble !== '' ? parseFloat(newRegleDouble) : null,
+        valeurBool: selectedTypeChampLibelle.includes('bool') ? newRegleBool : null
+      });
+
+      notify('Critère associé au profil métier avec succès.');
       setNewRegleCritereId('');
       setNewRegleVarchar('');
       setNewRegleDouble('');
       setNewRegleBool(false);
-      setNewRegleObligatoire(true);
       loadProfilRegles(selectedProfilId);
     } catch (err) {
-      notify('Erreur lors de l\'ajout du critère au profil.', true);
+      notify('Erreur lors de l\'association du critère au profil.', true);
     } finally {
       setAddingRegle(false);
     }
@@ -187,15 +180,11 @@ function CritereManagerPage() {
 
   const handleToggleObligatoireRegle = async (regle) => {
     try {
-      await updateCritereProfilRegle(regle.id, {
-        valeurdouble: regle.valeurdouble,
-        valeurvarchar: regle.valeurvarchar,
-        valeurbool: regle.valeurbool,
-        estobligatoire: !regle.estobligatoire
-      });
+      await updateCritereProfilRegle(regle.id, !regle.estobligatoire);
+      notify(`Règle mise à jour (${!regle.estobligatoire ? 'Obligatoire' : 'Optionnel'}).`);
       loadProfilRegles(selectedProfilId);
     } catch (err) {
-      notify('Erreur lors de la mise à jour.', true);
+      notify('Erreur lors de la mise à jour de la règle.', true);
     }
   };
 
@@ -217,7 +206,7 @@ function CritereManagerPage() {
       {/* BANNIÈRE */}
       <div className="backoffice-banner">
         <div className="backoffice-banner-content">
-          <h1>⚙️ Formulaires Dynamiques & Critères RH</h1>
+          <h1>Formulaires Dynamiques & Critères RH</h1>
           <p>Configurez les critères d'évaluation et définissez les règles d'exigence par profil métier</p>
         </div>
       </div>
@@ -225,7 +214,7 @@ function CritereManagerPage() {
       <div className="dashboard-container">
         {notification && (
           <div className={notification.isError ? "alert-linkedin-error" : "alert-linkedin-success"}>
-            {notification.isError ? '⚠️ ' : '✅ '} {notification.text}
+            {notification.text}
           </div>
         )}
 
@@ -235,13 +224,13 @@ function CritereManagerPage() {
             className={`bo-tab-btn ${activeTab === 'rules' ? 'active' : ''}`}
             onClick={() => setActiveTab('rules')}
           >
-            📋 Constructeur de Formulaires par Profil
+            Constructeur de Formulaires par Profil
           </button>
           <button
             className={`bo-tab-btn ${activeTab === 'catalogue' ? 'active' : ''}`}
             onClick={() => setActiveTab('catalogue')}
           >
-            🧩 Catalogue des Critères ({criteres.length})
+            Catalogue des Critères ({criteres.length})
           </button>
         </div>
 
@@ -259,7 +248,7 @@ function CritereManagerPage() {
                 <div className="bo-card">
                   <div className="form-group-linkedin" style={{ maxWidth: '400px' }}>
                     <label style={{ fontSize: '1rem', fontWeight: 700 }}>
-                      👤 Choisir le profil métier à configurer :
+                      Choisir le profil métier à configurer :
                     </label>
                     <select
                       style={{ fontSize: '1.05rem', fontWeight: 600, padding: '0.85rem 1rem' }}
@@ -290,7 +279,6 @@ function CritereManagerPage() {
                       </div>
                     ) : profilRegles.length === 0 ? (
                       <div className="empty-state">
-                        <p className="empty-icon">📂</p>
                         <p>Aucun critère dynamique n'est encore associé à ce profil.</p>
                       </div>
                     ) : (
@@ -311,11 +299,11 @@ function CritereManagerPage() {
                               let targetValDisplay = 'Libre / Non défini';
 
                               if (regle.valeurdouble !== null && regle.valeurdouble !== undefined) {
-                                targetValDisplay = `👉 ≥ ${regle.valeurdouble}`;
+                                targetValDisplay = `≥ ${regle.valeurdouble}`;
                               } else if (regle.valeurvarchar) {
-                                targetValDisplay = `👉 "${regle.valeurvarchar}"`;
+                                targetValDisplay = `"${regle.valeurvarchar}"`;
                               } else if (regle.valeurbool !== null && regle.valeurbool !== undefined) {
-                                targetValDisplay = regle.valeurbool ? '👉 Requis (Oui)' : '👉 Non requis';
+                                targetValDisplay = regle.valeurbool ? 'Requis (Oui)' : 'Non requis';
                               }
 
                               return (
@@ -338,7 +326,7 @@ function CritereManagerPage() {
                                       onClick={() => handleToggleObligatoireRegle(regle)}
                                       title="Cliquer pour changer le statut d'exigence"
                                     >
-                                      {regle.estobligatoire ? '🔴 Obligatoire' : '⚪ Optionnel'}
+                                      {regle.estobligatoire ? 'Obligatoire' : 'Optionnel'}
                                     </button>
                                   </td>
                                   <td>
@@ -348,7 +336,7 @@ function CritereManagerPage() {
                                         title="Retirer ce critère"
                                         onClick={() => handleDeleteRegle(regle.id, regle.critere?.nom)}
                                       >
-                                        🗑️
+                                        Suppr.
                                       </button>
                                     </div>
                                   </td>
@@ -364,7 +352,7 @@ function CritereManagerPage() {
                   {/* FORMULAIRE D'AJOUT D'UN CRITÈRE */}
                   <div className="bo-card">
                     <div className="bo-card-header">
-                      <h3>➕ Ajouter un critère au profil</h3>
+                      <h3>Ajouter un critère au profil</h3>
                     </div>
 
                     <form onSubmit={handleAddRegleToProfil} className="form-grid-1">
@@ -438,7 +426,7 @@ function CritereManagerPage() {
                         className="btn-linkedin-primary"
                         disabled={addingRegle || !newRegleCritereId}
                       >
-                        {addingRegle ? 'Ajout en cours...' : '➕ Ajouter ce critère au profil'}
+                        {addingRegle ? 'Ajout en cours...' : 'Ajouter ce critère au profil'}
                       </button>
                     </form>
                   </div>
@@ -456,7 +444,7 @@ function CritereManagerPage() {
                     style={{ width: 'auto' }}
                     onClick={handleOpenCreateCritere}
                   >
-                    ➕ Nouveau Critère
+                    Nouveau Critère
                   </button>
                 </div>
 
@@ -487,14 +475,14 @@ function CritereManagerPage() {
                                 title="Modifier"
                                 onClick={() => handleOpenEditCritere(c)}
                               >
-                                ✏️
+                                Éditer
                               </button>
                               <button
                                 className="btn-icon btn-icon-delete"
                                 title="Supprimer"
                                 onClick={() => handleDeleteCritere(c.id, c.nom)}
                               >
-                                🗑️
+                                Suppr.
                               </button>
                             </div>
                           </td>
@@ -514,7 +502,7 @@ function CritereManagerPage() {
         <div className="modal-backdrop">
           <div className="modal-content modal-sm">
             <div className="modal-header">
-              <h2>{editingCritere ? '✏️ Modifier le critère' : '➕ Nouveau Critère'}</h2>
+              <h2>{editingCritere ? 'Modifier le critère' : 'Nouveau Critère'}</h2>
               <button className="modal-close-btn" onClick={() => setShowCritereModal(false)}>✕</button>
             </div>
 

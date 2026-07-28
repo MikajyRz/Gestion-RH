@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/entretiens")
@@ -20,17 +21,23 @@ public class EntretienController {
     private final ResultatRepository resultatRepository;
     private final HistoriqueEntretienRepository historiqueEntretienRepository;
     private final CandidatRepository candidatRepository;
+    private final StatutCandidatRepository statutCandidatRepository;
+    private final HistoriqueCandidatureRepository historiqueCandidatureRepository;
 
     public EntretienController(EntretienRepository entretienRepository,
                                StatutEntretienRepository statutEntretienRepository,
                                ResultatRepository resultatRepository,
                                HistoriqueEntretienRepository historiqueEntretienRepository,
-                               CandidatRepository candidatRepository) {
+                               CandidatRepository candidatRepository,
+                               StatutCandidatRepository statutCandidatRepository,
+                               HistoriqueCandidatureRepository historiqueCandidatureRepository) {
         this.entretienRepository = entretienRepository;
         this.statutEntretienRepository = statutEntretienRepository;
         this.resultatRepository = resultatRepository;
         this.historiqueEntretienRepository = historiqueEntretienRepository;
         this.candidatRepository = candidatRepository;
+        this.statutCandidatRepository = statutCandidatRepository;
+        this.historiqueCandidatureRepository = historiqueCandidatureRepository;
     }
 
     @GetMapping
@@ -41,6 +48,21 @@ public class EntretienController {
     @GetMapping("/statuts")
     public ResponseEntity<List<StatutEntretien>> getStatutsEntretien() {
         return ResponseEntity.ok(statutEntretienRepository.findAll());
+    }
+
+    @GetMapping("/candidats-eligible")
+    public ResponseEntity<List<Candidat>> getCandidatsEligibleEntretien() {
+        // Seuls les candidats au statut "QCM Terminé" (ID 4) n'ayant pas encore d'entretien sont éligibles
+        List<Candidat> candidats = candidatRepository.findByStatutId(4);
+        if (candidats.isEmpty()) {
+            candidats = candidatRepository.findByStatutNom("QCM Terminé");
+        }
+
+        List<Candidat> eligibles = candidats.stream()
+                .filter(c -> entretienRepository.findByCandidatId(c.getId()).isEmpty())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(eligibles);
     }
 
     @PostMapping
@@ -66,8 +88,10 @@ public class EntretienController {
                 .orElseGet(() -> statutEntretienRepository.findByNom("En cours")
                 .orElseGet(() -> statutEntretienRepository.findAll().stream().findFirst().orElse(null)));
 
+        Candidat candidat = candOpt.get();
+
         Entretien entretien = new Entretien();
-        entretien.setCandidat(candOpt.get());
+        entretien.setCandidat(candidat);
         entretien.setDateheure(dateheure);
         entretien.setStatut(statut);
 
@@ -76,6 +100,15 @@ public class EntretienController {
         if (statut != null) {
             HistoriqueEntretien hist = new HistoriqueEntretien(saved, statut);
             historiqueEntretienRepository.save(hist);
+        }
+
+        // Mettre à jour le statut du candidat vers "Entretien Planifié" (ID 5)
+        StatutCandidat stEntretienPlanifie = statutCandidatRepository.findById(5)
+                .orElseGet(() -> statutCandidatRepository.findByNom("Entretien Planifié").orElse(null));
+        if (stEntretienPlanifie != null) {
+            candidat.setStatut(stEntretienPlanifie);
+            candidatRepository.save(candidat);
+            historiqueCandidatureRepository.save(new HistoriqueCandidature(candidat, stEntretienPlanifie));
         }
 
         return ResponseEntity.ok(saved);

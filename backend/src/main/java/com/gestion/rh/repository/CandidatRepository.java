@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface CandidatRepository extends JpaRepository<Candidat, Long> {
     List<Candidat> findByAnnonceId(Long idAnnonce);
+    List<Candidat> findByStatutId(Integer idStatut);
+    List<Candidat> findByStatutNom(String nomStatut);
 }

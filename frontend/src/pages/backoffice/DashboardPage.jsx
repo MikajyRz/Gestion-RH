@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { rechercherAnnonces } from '../../services/backend/annonceService';
 import { backendClient } from '../../services/backend/backendClient';
 import '../../styles/Backoffice.css';
+import '../../styles/DashboardPage.css';
 
 const DashboardPage = () => {
   const [annoncesCount, setAnnoncesCount] = useState(0);
@@ -44,9 +45,6 @@ const DashboardPage = () => {
         {/* CARTES DE STATISTIQUES */}
         <div className="stats-grid">
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper">
-              📢
-            </div>
             <div className="stat-info">
               <h4>Offres actives</h4>
               <p className="stat-value">{annoncesCount}</p>
@@ -54,9 +52,6 @@ const DashboardPage = () => {
           </div>
 
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper" style={{ backgroundColor: '#ecfdf5', color: '#16a34a' }}>
-              👥
-            </div>
             <div className="stat-info">
               <h4>Candidatures reçues</h4>
               <p className="stat-value">{candidats.length}</p>
@@ -64,9 +59,6 @@ const DashboardPage = () => {
           </div>
 
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper" style={{ backgroundColor: '#fff7ed', color: '#ea580c' }}>
-              🗓️
-            </div>
             <div className="stat-info">
               <h4>Entretiens prévus</h4>
               <p className="stat-value">1</p>
@@ -74,9 +66,6 @@ const DashboardPage = () => {
           </div>
 
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper" style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}>
-              🎯
-            </div>
             <div className="stat-info">
               <h4>Postes à pourvoir</h4>
               <p className="stat-value">3</p>
@@ -89,8 +78,8 @@ const DashboardPage = () => {
           backgroundColor: '#ffffff',
           borderRadius: '12px',
           padding: '1.5rem 1.75rem',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.08)'
+          border: '1px solid #e0e0e0',
+          boxShadow: '0 0 0 1px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.05)'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>
@@ -142,7 +131,7 @@ const DashboardPage = () => {
                         </span>
                       </td>
                       <td style={{ padding: '1rem', color: '#0a66c2' }}>
-                        📄 {c.cv ? c.cv.split('/').pop() : 'CV non joint'}
+                        {c.cv ? c.cv.split('/').pop() : 'CV non joint'}
                       </td>
                     </tr>
                   ))}

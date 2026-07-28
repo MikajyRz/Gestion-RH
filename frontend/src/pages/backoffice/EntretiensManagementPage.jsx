@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   getAllEntretiens,
   getStatutsEntretien,
+  getCandidatsEligiblesEntretien,
   createEntretien,
   updateEntretienStatut,
   evaluerEntretien,
@@ -9,6 +10,7 @@ import {
 } from '../../services/backend/entretienService';
 import { getTousLesCandidats } from '../../services/backend/candidatService';
 import '../../styles/Backoffice.css';
+import '../../styles/EntretiensManagementPage.css';
 
 function EntretiensManagementPage() {
   const [activeView, setActiveView] = useState('calendar'); // 'calendar' | 'agenda' | 'liste'
@@ -16,7 +18,7 @@ function EntretiensManagementPage() {
   // Data states
   const [entretiens, setEntretiens] = useState([]);
   const [statuts, setStatuts] = useState([]);
-  const [candidats, setCandidats] = useState([]);
+  const [candidatsQcmTermine, setCandidatsQcmTermine] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
@@ -47,17 +49,21 @@ function EntretiensManagementPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [entretiensData, statutsData, candidatsData] = await Promise.all([
+      const [entretiensData, statutsData, candidatsEligibles] = await Promise.all([
         getAllEntretiens(),
         getStatutsEntretien(),
-        getTousLesCandidats()
+        getCandidatsEligiblesEntretien()
       ]);
       setEntretiens(entretiensData || []);
       setStatuts(statutsData || []);
-      setCandidats(candidatsData || []);
 
-      if (candidatsData && candidatsData.length > 0) {
-        setScheduleForm(prev => ({ ...prev, idCandidat: candidatsData[0].id.toString() }));
+      const listEligibles = candidatsEligibles || [];
+      setCandidatsQcmTermine(listEligibles);
+
+      if (listEligibles.length > 0) {
+        setScheduleForm(prev => ({ ...prev, idCandidat: listEligibles[0].id.toString() }));
+      } else {
+        setScheduleForm(prev => ({ ...prev, idCandidat: '' }));
       }
     } catch (err) {
       console.error('Erreur chargement entretiens :', err);
@@ -97,146 +103,137 @@ function EntretiensManagementPage() {
       if (searchKeyword.trim()) {
         const kw = searchKeyword.toLowerCase();
         const candName = `${e.candidat?.prenom || ''} ${e.candidat?.nom || ''}`.toLowerCase();
-        const poste = e.candidat?.annonce?.nomposte?.toLowerCase() || '';
-        if (!candName.includes(kw) && !poste.includes(kw)) {
-          return false;
-        }
+        const jobName = (e.candidat?.annonce?.nomposte || '').toLowerCase();
+        if (!candName.includes(kw) && !jobName.includes(kw)) return false;
       }
+
       // Statut
-      if (selectedStatutId && e.statut?.id !== parseInt(selectedStatutId, 10)) {
+      if (selectedStatutId && e.statut?.id?.toString() !== selectedStatutId) {
         return false;
       }
-      // Filtre Date
-      if (dateFilter !== 'ALL' && e.dateheure) {
-        const itemDateStr = e.dateheure.split('T')[0];
-        if (dateFilter === 'TODAY' && itemDateStr !== todayStr) return false;
-        if (dateFilter === 'UPCOMING' && itemDateStr < todayStr) return false;
-        if (dateFilter === 'PAST' && itemDateStr > todayStr) return false;
+
+      // Date Filter
+      if (e.dateheure) {
+        const eDateStr = e.dateheure.split('T')[0];
+        if (dateFilter === 'TODAY' && eDateStr !== todayStr) return false;
+        if (dateFilter === 'UPCOMING' && eDateStr < todayStr) return false;
+        if (dateFilter === 'PAST' && eDateStr >= todayStr) return false;
       }
 
       return true;
     });
   }, [entretiens, searchKeyword, selectedStatutId, dateFilter]);
 
-  // Génération de la grille mensuelle du VRAI CALENDRIER (7 jours x N semaines)
+  // Statistiques calculées
+  const stats = useMemo(() => {
+    let pending = 0, completed = 0, cancelled = 0;
+    entretiens.forEach(e => {
+      if (e.resultat != null) completed++;
+      else if (e.statut?.nom?.toLowerCase().includes('annul')) cancelled++;
+      else pending++;
+    });
+    return { total: entretiens.length, pending, completed, cancelled };
+  }, [entretiens]);
+
+  // Construction de la grille du calendrier mensuel (7 colonnes)
   const calendarGridDays = useMemo(() => {
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
 
-    // Premier jour du mois (0 = Dimanche, 1 = Lundi ...)
-    const firstDay = new Date(year, month, 1);
-    // Indice du premier jour ajusté pour Lundi = 0
-    let startDayOfWeek = firstDay.getDay() - 1;
+    let startDayOfWeek = firstDayOfMonth.getDay() - 1; // 0 = Lundi, 6 = Dimanche
     if (startDayOfWeek === -1) startDayOfWeek = 6;
 
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const daysInPrevMonth = new Date(year, month, 0).getDate();
+    const totalDaysInMonth = lastDayOfMonth.getDate();
+    const days = [];
 
-    const grid = [];
-
-    // Jours du mois précédent pour compléter la première semaine
+    // Jours du mois précédent
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
     for (let i = startDayOfWeek - 1; i >= 0; i--) {
-      const dayNum = daysInPrevMonth - i;
-      const prevDate = new Date(year, month - 1, dayNum);
+      const d = prevMonthLastDay - i;
+      const prevDate = new Date(year, month - 1, d);
       const dateStr = prevDate.toISOString().split('T')[0];
-      grid.push({
-        dayNumber: dayNum,
+      days.push({
+        dayNumber: d,
         dateStr,
         isCurrentMonth: false,
-        isToday: dateStr === todayStr,
-        events: filteredEntretiens.filter(e => e.dateheure?.startsWith(dateStr))
+        isToday: false,
+        events: []
       });
     }
 
-    // Jours du mois courant
-    for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+    // Jours du mois actuel
+    const todayStr = new Date().toISOString().split('T')[0];
+    for (let d = 1; d <= totalDaysInMonth; d++) {
       const monthStr = (month + 1).toString().padStart(2, '0');
-      const dayStrFormatted = dayNum.toString().padStart(2, '0');
-      const dateStr = `${year}-${monthStr}-${dayStrFormatted}`;
-      grid.push({
-        dayNumber: dayNum,
+      const dayStr = d.toString().padStart(2, '0');
+      const dateStr = `${year}-${monthStr}-${dayStr}`;
+
+      const dayEvents = filteredEntretiens.filter(e => e.dateheure && e.dateheure.startsWith(dateStr));
+
+      days.push({
+        dayNumber: d,
         dateStr,
         isCurrentMonth: true,
         isToday: dateStr === todayStr,
-        events: filteredEntretiens.filter(e => e.dateheure?.startsWith(dateStr))
+        events: dayEvents
       });
     }
 
-    // Jours du mois suivant pour compléter la grille jusqu'à 35 ou 42 cases
-    const totalCells = grid.length <= 35 ? 35 : 42;
-    const remainingCells = totalCells - grid.length;
-    for (let dayNum = 1; dayNum <= remainingCells; dayNum++) {
-      const nextDate = new Date(year, month + 1, dayNum);
+    // Completer avec les jours du mois suivant pour boucler la grille à 35 ou 42 cases
+    const totalCells = days.length > 35 ? 42 : 35;
+    const remainingCells = totalCells - days.length;
+    for (let d = 1; d <= remainingCells; d++) {
+      const nextDate = new Date(year, month + 1, d);
       const dateStr = nextDate.toISOString().split('T')[0];
-      grid.push({
-        dayNumber: dayNum,
+      days.push({
+        dayNumber: d,
         dateStr,
         isCurrentMonth: false,
-        isToday: dateStr === todayStr,
-        events: filteredEntretiens.filter(e => e.dateheure?.startsWith(dateStr))
+        isToday: false,
+        events: []
       });
     }
 
-    return grid;
+    return days;
   }, [currentCalendarDate, filteredEntretiens]);
 
-  // Groupement par date pour la Vue Agenda
+  // Groupement des entretiens par date pour la Vue Agenda
   const agendaGroupedByDate = useMemo(() => {
     const map = {};
     filteredEntretiens.forEach(e => {
-      const dateKey = e.dateheure ? e.dateheure.split('T')[0] : 'Date non définie';
-      if (!map[dateKey]) map[dateKey] = [];
-      map[dateKey].push(e);
+      if (e.dateheure) {
+        const dateKey = e.dateheure.split('T')[0];
+        if (!map[dateKey]) map[dateKey] = [];
+        map[dateKey].push(e);
+      }
     });
     return map;
   }, [filteredEntretiens]);
 
-  // KPIs
-  const stats = useMemo(() => {
-    let pending = 0;
-    let completed = 0;
-    let cancelled = 0;
-
-    entretiens.forEach(e => {
-      const stName = e.statut?.nom?.toLowerCase() || '';
-      if (stName.includes('termin') || e.resultat != null) completed++;
-      else if (stName.includes('annul')) cancelled++;
-      else pending++;
-    });
-
-    return { total: entretiens.length, pending, completed, cancelled };
-  }, [entretiens]);
-
-  // Planifier un entretien
-  const handleOpenScheduleModal = (prefilledDateStr = null) => {
-    let defaultDateTime = new Date(Date.now() + 86400000).toISOString().slice(0, 16);
-    if (prefilledDateStr) {
-      defaultDateTime = `${prefilledDateStr}T10:00`;
+  // Ouverture modale Planification
+  const handleOpenScheduleModal = (defaultDateStr = null) => {
+    let initialDateHeure = new Date(Date.now() + 86400000).toISOString().slice(0, 16);
+    if (defaultDateStr) {
+      initialDateHeure = `${defaultDateStr}T10:00`;
     }
 
     setScheduleForm({
-      idCandidat: candidats[0]?.id?.toString() || '',
-      dateheure: defaultDateTime
+      idCandidat: candidatsQcmTermine[0]?.id?.toString() || '',
+      dateheure: initialDateHeure
     });
     setShowScheduleModal(true);
   };
 
   const handleSubmitSchedule = async (e) => {
     e.preventDefault();
-    if (!scheduleForm.idCandidat || !scheduleForm.dateheure) {
-      alert('Veuillez sélectionner un candidat et une date.');
-      return;
-    }
+    if (!scheduleForm.idCandidat || !scheduleForm.dateheure) return;
 
     try {
       setScheduling(true);
-      await createEntretien({
-        idCandidat: parseInt(scheduleForm.idCandidat, 10),
-        dateheure: scheduleForm.dateheure,
-        idStatut: 1 // En cours
-      });
+      await createEntretien(parseInt(scheduleForm.idCandidat, 10), scheduleForm.dateheure);
       notify('Entretien planifié avec succès.');
       setShowScheduleModal(false);
       loadData();
@@ -310,11 +307,11 @@ function EntretiensManagementPage() {
       <div className="backoffice-banner">
         <div className="backoffice-banner-content flex-between">
           <div>
-            <h1>📅 Planning & Conduite des Entretiens</h1>
+            <h1>Planning & Conduite des Entretiens</h1>
             <p>Orchestrez les rendez-vous RH et saisissez les grilles d'évaluation techniques</p>
           </div>
           <button className="btn-linkedin-action-header" onClick={() => handleOpenScheduleModal()}>
-            ➕ Planifier un Entretien
+            Planifier un Entretien
           </button>
         </div>
       </div>
@@ -322,14 +319,13 @@ function EntretiensManagementPage() {
       <div className="dashboard-container">
         {notification && (
           <div className={notification.isError ? "alert-linkedin-error" : "alert-linkedin-success"}>
-            {notification.isError ? '⚠️ ' : '✅ '} {notification.text}
+            {notification.text}
           </div>
         )}
 
         {/* CARTES KPI */}
         <div className="stats-grid">
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper">📅</div>
             <div className="stat-info">
               <h4>Total Entretiens</h4>
               <p className="stat-value">{stats.total}</p>
@@ -337,7 +333,6 @@ function EntretiensManagementPage() {
           </div>
 
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper upcoming-icon">🔵</div>
             <div className="stat-info">
               <h4>À venir / En cours</h4>
               <p className="stat-value">{stats.pending}</p>
@@ -345,7 +340,6 @@ function EntretiensManagementPage() {
           </div>
 
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper active-icon">🟢</div>
             <div className="stat-info">
               <h4>Évalués / Terminés</h4>
               <p className="stat-value">{stats.completed}</p>
@@ -353,7 +347,6 @@ function EntretiensManagementPage() {
           </div>
 
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper expired-icon">🔴</div>
             <div className="stat-info">
               <h4>Annulés</h4>
               <p className="stat-value">{stats.cancelled}</p>
@@ -369,19 +362,19 @@ function EntretiensManagementPage() {
                 className={`bo-tab-btn ${activeView === 'calendar' ? 'active' : ''}`}
                 onClick={() => setActiveView('calendar')}
               >
-                📅 Vue Calendrier Mensuel
+                Vue Calendrier Mensuel
               </button>
               <button
                 className={`bo-tab-btn ${activeView === 'agenda' ? 'active' : ''}`}
                 onClick={() => setActiveView('agenda')}
               >
-                📆 Vue Cartes Agenda
+                Vue Cartes Agenda
               </button>
               <button
                 className={`bo-tab-btn ${activeView === 'liste' ? 'active' : ''}`}
                 onClick={() => setActiveView('liste')}
               >
-                📜 Vue Liste
+                Vue Liste
               </button>
             </div>
 
@@ -415,7 +408,7 @@ function EntretiensManagementPage() {
 
           <div className="bo-filters-grid">
             <div className="form-group-linkedin search-input-group">
-              <label>🔍 Recherche Candidat ou Poste</label>
+              <label>Recherche Candidat ou Poste</label>
               <input
                 type="text"
                 placeholder="Nom du candidat, poste..."
@@ -449,18 +442,18 @@ function EntretiensManagementPage() {
                 {/* EN-TÊTE DU CALENDRIER AVEC NAVIGATION */}
                 <div className="calendar-header-nav">
                   <div className="calendar-month-title">
-                    📅 <h3>{monthTitleFormatted}</h3>
+                    <h3>{monthTitleFormatted}</h3>
                   </div>
 
                   <div className="calendar-nav-buttons">
                     <button className="btn-linkedin-secondary-sm" onClick={handlePrevMonth} title="Mois précédent">
-                      ◀ Précédent
+                      Précédent
                     </button>
                     <button className="btn-linkedin-secondary-sm" onClick={handleTodayMonth}>
                       Aujourd'hui
                     </button>
                     <button className="btn-linkedin-secondary-sm" onClick={handleNextMonth} title="Mois suivant">
-                      Suivant ▶
+                      Suivant
                     </button>
                   </div>
                 </div>
@@ -511,7 +504,7 @@ function EntretiensManagementPage() {
                                 {ev.candidat ? `${ev.candidat.prenom} ${ev.candidat.nom.charAt(0)}.` : 'Candidat'}
                               </span>
                               {isEvaluated && (
-                                <span className="chip-score">⭐{ev.resultat.note}</span>
+                                <span className="chip-score">({ev.resultat.note}/20)</span>
                               )}
                             </div>
                           );
@@ -528,7 +521,6 @@ function EntretiensManagementPage() {
               <div>
                 {Object.keys(agendaGroupedByDate).length === 0 ? (
                   <div className="bo-card empty-state">
-                    <p className="empty-icon">📅</p>
                     <p>Aucun entretien ne correspond à vos critères de recherche.</p>
                   </div>
                 ) : (
@@ -544,7 +536,7 @@ function EntretiensManagementPage() {
                     return (
                       <div key={dateKey} className="agenda-day-group">
                         <div className="agenda-day-header">
-                          📅 {dateFormatted.toUpperCase()} ({listForDate.length} rendez-vous)
+                          {dateFormatted.toUpperCase()} ({listForDate.length} rendez-vous)
                         </div>
 
                         <div className="agenda-cards-grid">
@@ -555,15 +547,15 @@ function EntretiensManagementPage() {
                             return (
                               <div key={ent.id} className="agenda-interview-card">
                                 <div className="agenda-card-time">
-                                  ⏰ {timeStr}
+                                  Heure : {timeStr}
                                 </div>
 
                                 <div className="agenda-card-body">
                                   <h4>
-                                    👤 {ent.candidat ? `${ent.candidat.prenom} ${ent.candidat.nom}` : 'Candidat inconnu'}
+                                    {ent.candidat ? `${ent.candidat.prenom} ${ent.candidat.nom}` : 'Candidat inconnu'}
                                   </h4>
                                   <p className="agenda-job-title">
-                                    💼 {ent.candidat?.annonce?.nomposte || 'Offre d\'emploi'}
+                                    {ent.candidat?.annonce?.nomposte || 'Offre d\'emploi'}
                                   </p>
 
                                   <div className="flex-between" style={{ marginTop: '0.75rem' }}>
@@ -579,7 +571,7 @@ function EntretiensManagementPage() {
 
                                     {hasResult ? (
                                       <span className="badge-score-pill">
-                                        ⭐ {ent.resultat.note} / 20
+                                        Note : {ent.resultat.note} / 20
                                       </span>
                                     ) : (
                                       <span className="badge-status-upcoming">Non évalué</span>
@@ -597,14 +589,14 @@ function EntretiensManagementPage() {
                                       className="btn-linkedin-primary-sm"
                                       onClick={() => handleOpenEvalModal(ent)}
                                     >
-                                      {hasResult ? '✏️ Modifier l\'évaluation' : '📝 Saisir la note (sur 20)'}
+                                      {hasResult ? 'Modifier l\'évaluation' : 'Saisir la note (sur 20)'}
                                     </button>
                                     <button
                                       className="btn-icon btn-icon-delete"
                                       title="Supprimer l'entretien"
                                       onClick={() => handleDeleteEntretien(ent.id, `${ent.candidat?.prenom} ${ent.candidat?.nom}`)}
                                     >
-                                      🗑️
+                                      Suppr.
                                     </button>
                                   </div>
                                 </div>
@@ -628,7 +620,6 @@ function EntretiensManagementPage() {
 
                 {filteredEntretiens.length === 0 ? (
                   <div className="empty-state">
-                    <p className="empty-icon">📭</p>
                     <p>Aucun entretien ne correspond à vos filtres.</p>
                   </div>
                 ) : (
@@ -652,7 +643,7 @@ function EntretiensManagementPage() {
                           return (
                             <tr key={ent.id}>
                               <td>
-                                <strong>📅 {dateFormatted}</strong>
+                                <strong>{dateFormatted}</strong>
                               </td>
                               <td>
                                 <strong>{ent.candidat ? `${ent.candidat.prenom} ${ent.candidat.nom}` : '—'}</strong>
@@ -671,8 +662,8 @@ function EntretiensManagementPage() {
                               </td>
                               <td>
                                 {ent.resultat?.note != null ? (
-                                  <strong style={{ fontSize: '1.05rem', color: ent.resultat.note >= 10 ? '#166534' : '#dc2626' }}>
-                                    ⭐ {ent.resultat.note} / 20
+                                  <strong style={{ fontSize: '1.05rem', color: ent.resultat.note >= 10 ? '#057642' : '#c00000' }}>
+                                    {ent.resultat.note} / 20
                                   </strong>
                                 ) : (
                                   <span className="text-muted">En attente</span>
@@ -692,14 +683,14 @@ function EntretiensManagementPage() {
                                     title="Saisir / Modifier l'évaluation"
                                     onClick={() => handleOpenEvalModal(ent)}
                                   >
-                                    📝
+                                    Évaluer
                                   </button>
                                   <button
                                     className="btn-icon btn-icon-delete"
                                     title="Supprimer"
                                     onClick={() => handleDeleteEntretien(ent.id, `${ent.candidat?.prenom} ${ent.candidat?.nom}`)}
                                   >
-                                    🗑️
+                                    Suppr.
                                   </button>
                                 </div>
                               </td>
@@ -721,19 +712,20 @@ function EntretiensManagementPage() {
         <div className="modal-backdrop">
           <div className="modal-content modal-sm">
             <div className="modal-header">
-              <h2>➕ Planifier un Rendez-vous d'Entretien</h2>
+              <h2>Planifier un Rendez-vous d'Entretien</h2>
               <button className="modal-close-btn" onClick={() => setShowScheduleModal(false)}>✕</button>
             </div>
 
             <form onSubmit={handleSubmitSchedule} className="modal-body form-grid-1">
               <div className="form-group-linkedin">
-                <label>Sélectionner le candidat *</label>
+                <label>Sélectionner le candidat (Statut "QCM Terminé" uniquement) *</label>
                 <select
                   required
                   value={scheduleForm.idCandidat}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, idCandidat: e.target.value })}
                 >
-                  {candidats.map(c => (
+                  <option value="">-- Sélectionner un candidat éligible --</option>
+                  {candidatsQcmTermine.map(c => (
                     <option key={c.id} value={c.id}>
                       {c.prenom} {c.nom} — ({c.annonce?.nomposte || 'Sans poste'})
                     </option>
@@ -775,7 +767,7 @@ function EntretiensManagementPage() {
           <div className="modal-content modal-md">
             <div className="modal-header">
               <h2>
-                📝 Évaluation RH :{' '}
+                Évaluation RH :{' '}
                 {selectedEntretienForEval.candidat
                   ? `${selectedEntretienForEval.candidat.prenom} ${selectedEntretienForEval.candidat.nom}`
                   : ''}
@@ -786,17 +778,17 @@ function EntretiensManagementPage() {
             <form onSubmit={handleSubmitEval} className="modal-body form-grid-1">
               <div className="details-dates-box" style={{ marginBottom: '1rem' }}>
                 <p>
-                  <strong>💼 Poste :</strong> {selectedEntretienForEval.candidat?.annonce?.nomposte || 'Non spécifié'}
+                  <strong>Poste :</strong> {selectedEntretienForEval.candidat?.annonce?.nomposte || 'Non spécifié'}
                 </p>
                 <p>
-                  <strong>📅 Date de l'entretien :</strong>{' '}
+                  <strong>Date de l'entretien :</strong>{' '}
                   {new Date(selectedEntretienForEval.dateheure).toLocaleString('fr-FR')}
                 </p>
               </div>
 
               <div className="form-group-linkedin">
                 <label style={{ fontSize: '1rem', fontWeight: 700 }}>
-                  ⭐ Note attribuée (sur 20) : <span style={{ color: '#0a66c2', fontSize: '1.3rem' }}>{evalNote} / 20</span>
+                  Note attribuée (sur 20) : <span style={{ color: '#0a66c2', fontSize: '1.3rem' }}>{evalNote} / 20</span>
                 </label>
                 <input
                   type="range"
@@ -841,7 +833,7 @@ function EntretiensManagementPage() {
                   Annuler
                 </button>
                 <button type="submit" className="btn-linkedin-primary" style={{ width: 'auto' }} disabled={submittingEval}>
-                  {submittingEval ? 'Enregistrement...' : '💾 Valider l\'évaluation (Passer à Terminé)'}
+                  {submittingEval ? 'Enregistrement...' : 'Valider l\'évaluation (Passer à Terminé)'}
                 </button>
               </div>
             </form>

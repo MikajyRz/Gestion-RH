@@ -1,0 +1,46 @@
+/* ==========================================================================
+   ANNONCES MANAGEMENT PAGE - STYLE LINKEDIN CORPORATE
+   ========================================================================== */
+
+.bo-filters-card {
+  padding: 1.25rem;
+}
+
+.bo-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.poste-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.poste-desc-preview {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 0.2rem;
+}
+
+.tag-active {
+  background-color: #e6f4ea;
+  color: #057642;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  border: 1px solid #b7e1cd;
+  font-size: 0.78rem;
+}
+
+.tag-expired {
+  background-color: #fce8e6;
+  color: #c00000;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  border: 1px solid #f5c6cb;
+  font-size: 0.78rem;
+}

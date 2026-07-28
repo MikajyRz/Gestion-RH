@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   getTousLesCandidats,
-  getStatutsCandidat,
-  getCandidatDetails,
-  updateCandidatStatut,
+  getCandidatDetailComplete,
+  updateStatutCandidat,
   getCvUrl
 } from '../../services/backend/candidatService';
 import { getAllAnnonces } from '../../services/backend/annonceService';
 import '../../styles/Backoffice.css';
+import '../../styles/CandidatsManagementPage.css';
 
 function CandidatsManagementPage() {
   // Etats de données
@@ -15,7 +15,7 @@ function CandidatsManagementPage() {
   const [statuts, setStatuts] = useState([]);
   const [annonces, setAnnonces] = useState([]);
 
-  // Etats d'interface
+  // Etats d'affichage
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' | 'liste'
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
@@ -24,32 +24,57 @@ function CandidatsManagementPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedAnnonceId, setSelectedAnnonceId] = useState('');
   const [selectedStatutId, setSelectedStatutId] = useState('');
-  const [selectedComplianceFilter, setSelectedComplianceFilter] = useState(''); // '' | 'VALID' | 'INVALID'
 
-  // Modale Fiche Détaillée
+  // Drag and drop state
+  const [draggedCandidatId, setDraggedCandidatId] = useState(null);
+  const [dragOverColumnId, setDragOverColumnId] = useState(null);
+
+  // Modale Fiche Détallée Candidat
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedCandidatId, setSelectedCandidatId] = useState(null);
   const [detailData, setDetailData] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [updatingStatutId, setUpdatingStatutId] = useState(false);
 
-  // Drag & Drop State
-  const [draggedCandidatId, setDraggedCandidatId] = useState(null);
-  const [dragOverColumnId, setDragOverColumnId] = useState(null);
-
-  // Charger toutes les données
+  // Charger les données initiales
   const loadData = async () => {
     try {
       setLoading(true);
-      const [candidatsData, statutsData, annoncesData] = await Promise.all([
+      const [candidatsData, annoncesData] = await Promise.all([
         getTousLesCandidats(),
-        getStatutsCandidat(),
         getAllAnnonces()
       ]);
-      setCandidats(candidatsData || []);
-      setStatuts(statutsData || []);
+
+      const candList = candidatsData || [];
+      setCandidats(candList);
       setAnnonces(annoncesData || []);
+
+      // Extraire la liste unique des statuts depuis les candidats
+      const statutsMap = new Map();
+      candList.forEach(c => {
+        if (c.statut && c.statut.id) {
+          statutsMap.set(c.statut.id, c.statut);
+        }
+      });
+
+      // Liste des statuts ordonnée par id
+      const sortedStatuts = Array.from(statutsMap.values()).sort((a, b) => a.id - b.id);
+
+      // Si la base ne renvoie pas tous les statuts, créer la liste complète par défaut
+      const defaultStatuts = [
+        { id: 1, nom: 'En attente' },
+        { id: 2, nom: 'Présélectionné' },
+        { id: 3, nom: 'QCM Envoyé' },
+        { id: 4, nom: 'QCM Terminé' },
+        { id: 5, nom: 'Entretien Planifié' },
+        { id: 6, nom: 'Offre Transmise' },
+        { id: 7, nom: 'Embauché' },
+        { id: 8, nom: 'Refusé' }
+      ];
+
+      setStatuts(sortedStatuts.length >= 4 ? sortedStatuts : defaultStatuts);
     } catch (err) {
-      console.error('Erreur chargement candidatures :', err);
+      console.error('Erreur lors du chargement ATS :', err);
     } finally {
       setLoading(false);
     }
@@ -64,32 +89,32 @@ function CandidatsManagementPage() {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  // Traitement et filtrage des candidats
+  // Filtrage combiné des candidats
   const filteredCandidats = useMemo(() => {
-    return candidats.filter(cand => {
-      // Mot-clé
+    return candidats.filter(c => {
+      // 1. Recherche par nom, prénom, email ou intitulé de poste
       if (searchKeyword.trim()) {
         const kw = searchKeyword.toLowerCase();
-        const fullName = `${cand.prenom || ''} ${cand.nom || ''}`.toLowerCase();
-        const email = cand.compteCandidat?.email?.toLowerCase() || '';
-        const poste = cand.annonce?.nomposte?.toLowerCase() || '';
-        if (!fullName.includes(kw) && !email.includes(kw) && !poste.includes(kw)) {
+        const nomComplet = `${c.nom} ${c.prenom}`.toLowerCase();
+        const email = (c.compteCandidat?.email || '').toLowerCase();
+        const poste = (c.annonce?.nomposte || '').toLowerCase();
+        if (!nomComplet.includes(kw) && !email.includes(kw) && !poste.includes(kw)) {
           return false;
         }
       }
-      // Annonce
-      if (selectedAnnonceId && cand.annonce?.id !== parseInt(selectedAnnonceId, 10)) {
+      // 2. Filtre Annonce / Offre
+      if (selectedAnnonceId && c.annonce?.id?.toString() !== selectedAnnonceId) {
         return false;
       }
-      // Statut
-      if (selectedStatutId && cand.statut?.id !== parseInt(selectedStatutId, 10)) {
+      // 3. Filtre Statut (Vue liste)
+      if (selectedStatutId && c.statut?.id?.toString() !== selectedStatutId) {
         return false;
       }
       return true;
     });
   }, [candidats, searchKeyword, selectedAnnonceId, selectedStatutId]);
 
-  // Déplacement Kanban Drag & Drop
+  // --- KANBAN DRAG AND DROP HANDLERS ---
   const handleDragStart = (e, candidatId) => {
     setDraggedCandidatId(candidatId);
     e.dataTransfer.setData('text/plain', candidatId.toString());
@@ -100,70 +125,67 @@ function CandidatsManagementPage() {
     setDragOverColumnId(statutId);
   };
 
-  const handleDragLeave = (e) => {
-    e.preventDefault();
+  const handleDragLeave = () => {
     setDragOverColumnId(null);
   };
 
   const handleDrop = async (e, targetStatutId) => {
     e.preventDefault();
     setDragOverColumnId(null);
+
     const candidatIdStr = e.dataTransfer.getData('text/plain') || draggedCandidatId;
     if (!candidatIdStr) return;
 
-    const candidatId = parseInt(candidatIdStr, 10);
-    const candidateObj = candidats.find(c => c.id === candidatId);
-    if (!candidateObj || candidateObj.statut?.id === targetStatutId) return;
+    const candId = parseInt(candidatIdStr, 10);
+    const candidate = candidats.find(c => c.id === candId);
+    const targetStatut = statuts.find(s => s.id === targetStatutId);
 
-    const targetStatutObj = statuts.find(s => s.id === targetStatutId);
-
-    // Mise à jour optimiste dans l'UI
-    setCandidats(prev => prev.map(c => {
-      if (c.id === candidatId) {
-        return { ...c, statut: targetStatutObj };
-      }
-      return c;
-    }));
+    if (!candidate || candidate.statut?.id === targetStatutId) {
+      return; // Aucun changement de statut
+    }
 
     try {
-      await updateCandidatStatut(candidatId, targetStatutId);
-      notify(`Statut de ${candidateObj.prenom} ${candidateObj.nom} changé vers "${targetStatutObj?.nom}".`);
+      // Mise à jour optimiste dans l'UI
+      setCandidats(prev => prev.map(c => c.id === candId ? { ...c, statut: targetStatut } : c));
+
+      await updateStatutCandidat(candId, targetStatutId);
+      notify(`Statut de ${candidate.prenom} ${candidate.nom} mis à jour : "${targetStatut.nom}".`);
       loadData();
     } catch (err) {
-      console.error('Erreur mise à jour statut :', err);
-      notify('Erreur lors du changement de statut.', true);
-      loadData();
+      console.error('Erreur changement de statut :', err);
+      notify('Erreur lors de la mise à jour du statut.', true);
+      loadData(); // Recharger en cas d'erreur
     } finally {
       setDraggedCandidatId(null);
     }
   };
 
-  // Ouverture modale Fiche Détaillée
+  // --- FICHE DÉTAILLÉE CANDIDAT ---
   const handleOpenDetailModal = async (candidatId) => {
+    setSelectedCandidatId(candidatId);
     setShowDetailModal(true);
     setLoadingDetail(true);
-    setDetailData(null);
+
     try {
-      const data = await getCandidatDetails(candidatId);
+      const data = await getCandidatDetailComplete(candidatId);
       setDetailData(data);
     } catch (err) {
-      console.error('Erreur détails candidat :', err);
-      notify('Erreur lors de la récupération de la fiche candidat.', true);
+      console.error('Erreur chargement fiche candidat :', err);
+      notify('Impossible de charger la fiche du candidat.', true);
     } finally {
       setLoadingDetail(false);
     }
   };
 
-  // Changement de statut depuis la modale
   const handleChangeStatutFromModal = async (newStatutId) => {
     if (!detailData || !detailData.candidat) return;
     try {
       setUpdatingStatutId(true);
-      const updatedCandidat = await updateCandidatStatut(detailData.candidat.id, newStatutId);
-      notify(`Statut mis à jour pour ${updatedCandidat.prenom} ${updatedCandidat.nom}.`);
-      // Recharger la fiche
-      const newData = await getCandidatDetails(detailData.candidat.id);
-      setDetailData(newData);
+      await updateStatutCandidat(detailData.candidat.id, newStatutId);
+      notify('Statut du candidat mis à jour.');
+      // Recharger la modale et la liste
+      const refreshed = await getCandidatDetailComplete(detailData.candidat.id);
+      setDetailData(refreshed);
       loadData();
     } catch (err) {
       notify('Erreur lors de la mise à jour du statut.', true);
@@ -172,9 +194,11 @@ function CandidatsManagementPage() {
     }
   };
 
-  // Helper analyse conformité d'un critère saisi vs exigé
+  // Évaluation de la conformité d'un critère exigé vs réponse candidat
   const evaluateCritereCompliance = (critereExige, criteresSaisis) => {
-    if (!critereExige || !critereExige.critere) return { status: 'UNKNOWN', text: 'Non spécifié' };
+    if (!critereExige || !critereExige.critere) {
+      return { status: 'NEUTRAL', text: 'N/A' };
+    }
 
     const critId = critereExige.critere.id;
     const saisi = (criteresSaisis || []).find(cs => cs.critere?.id === critId);
@@ -224,7 +248,7 @@ function CandidatsManagementPage() {
       <div className="backoffice-banner">
         <div className="backoffice-banner-content flex-between">
           <div>
-            <h1>👥 Traitement des Candidatures (ATS)</h1>
+            <h1>Traitement des Candidatures (ATS)</h1>
             <p>Pilotez l'avancement des candidats avec le tableau Kanban interactif et l'analyse de conformité</p>
           </div>
 
@@ -233,13 +257,13 @@ function CandidatsManagementPage() {
               className={`view-btn ${viewMode === 'kanban' ? 'active' : ''}`}
               onClick={() => setViewMode('kanban')}
             >
-              🔲 Vue Kanban
+              Vue Kanban
             </button>
             <button
               className={`view-btn ${viewMode === 'liste' ? 'active' : ''}`}
               onClick={() => setViewMode('liste')}
             >
-              📜 Vue Liste
+              Vue Liste
             </button>
           </div>
         </div>
@@ -248,7 +272,7 @@ function CandidatsManagementPage() {
       <div className="dashboard-container">
         {notification && (
           <div className={notification.isError ? "alert-linkedin-error" : "alert-linkedin-success"}>
-            {notification.isError ? '⚠️ ' : '✅ '} {notification.text}
+            {notification.text}
           </div>
         )}
 
@@ -256,7 +280,7 @@ function CandidatsManagementPage() {
         <div className="bo-card bo-filters-card">
           <div className="bo-filters-grid">
             <div className="form-group-linkedin search-input-group">
-              <label>🔍 Recherche Candidat</label>
+              <label>Recherche Candidat</label>
               <input
                 type="text"
                 placeholder="Nom, prénom, email, poste..."
@@ -334,14 +358,14 @@ function CandidatsManagementPage() {
                                   {cand.prenom} {cand.nom}
                                 </h5>
                                 <p className="candidate-job">
-                                  💼 {cand.annonce?.nomposte || 'Candidature spontanée'}
+                                  {cand.annonce?.nomposte || 'Candidature spontanée'}
                                 </p>
                               </div>
                             </div>
 
                             <div className="kanban-card-footer">
                               <span className="cand-date">
-                                📅 {cand.compteCandidat?.email ? cand.compteCandidat.email : 'Formulaire web'}
+                                {cand.compteCandidat?.email ? cand.compteCandidat.email : 'Formulaire web'}
                               </span>
                               <button
                                 className="btn-icon-view-sm"
@@ -351,7 +375,7 @@ function CandidatsManagementPage() {
                                   handleOpenDetailModal(cand.id);
                                 }}
                               >
-                                👁️ Fiche
+                                Fiche
                               </button>
                             </div>
                           </div>
@@ -378,7 +402,6 @@ function CandidatsManagementPage() {
 
                 {filteredCandidats.length === 0 ? (
                   <div className="empty-state">
-                    <p className="empty-icon">📭</p>
                     <p>Aucun candidat ne correspond à vos filtres.</p>
                   </div>
                 ) : (
@@ -422,7 +445,7 @@ function CandidatsManagementPage() {
                                   title="Consulter la fiche détaillée et le CV"
                                   onClick={() => handleOpenDetailModal(cand.id)}
                                 >
-                                  👁️ Fiche
+                                  Fiche
                                 </button>
                               </div>
                             </td>
@@ -444,7 +467,7 @@ function CandidatsManagementPage() {
           <div className="modal-content modal-lg">
             <div className="modal-header">
               <h2>
-                📄 Fiche Candidat :{' '}
+                Fiche Candidat :{' '}
                 {detailData?.candidat ? `${detailData.candidat.prenom} ${detailData.candidat.nom}` : 'Chargement...'}
               </h2>
               <button className="modal-close-btn" onClick={() => setShowDetailModal(false)}>✕</button>
@@ -462,7 +485,7 @@ function CandidatsManagementPage() {
                   {/* BLOC INFO & CHANGEMENT STATUT RAPIDE */}
                   <div className="ats-box">
                     <div className="flex-between" style={{ marginBottom: '0.75rem' }}>
-                      <h4 style={{ margin: 0 }}>👤 Profil Candidat</h4>
+                      <h4 style={{ margin: 0 }}>Profil Candidat</h4>
                       <div className="form-group-linkedin" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem' }}>
                         <label style={{ margin: 0, fontSize: '0.85rem' }}>Statut ATS :</label>
                         <select
@@ -491,7 +514,7 @@ function CandidatsManagementPage() {
 
                   {/* VÉRIFICATION CONFORMITÉ AUX CRITÈRES EXIGÉS */}
                   <div className="ats-box">
-                    <h4 style={{ margin: '0 0 0.75rem 0' }}>🎯 Conformité aux Critères Exigés</h4>
+                    <h4 style={{ margin: '0 0 0.75rem 0' }}>Conformité aux Critères Exigés</h4>
 
                     {detailData.criteresExiges && detailData.criteresExiges.length > 0 ? (
                       <div className="bo-table-responsive">
@@ -515,15 +538,15 @@ function CandidatsManagementPage() {
                                   <td>{evalRes.text}</td>
                                   <td>
                                     {evalRes.status === 'VALID' && (
-                                      <span className="badge-status-active">🟢 Validé</span>
+                                      <span className="badge-status-active">Validé</span>
                                     )}
                                     {evalRes.status === 'INVALID' && (
                                       <span className="badge-status-expired" style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}>
-                                        🔴 Non conforme
+                                        Non conforme
                                       </span>
                                     )}
                                     {evalRes.status === 'NEUTRAL' && (
-                                      <span className="badge-status-expired">⚪ Information</span>
+                                      <span className="badge-status-expired">Information</span>
                                     )}
                                   </td>
                                 </tr>
@@ -541,7 +564,7 @@ function CandidatsManagementPage() {
 
                   {/* HISTORIQUE CHRONOLOGIQUE DES STATUTS */}
                   <div className="ats-box">
-                    <h4 style={{ margin: '0 0 0.75rem 0' }}>⏳ Historique du Candidat (Timeline)</h4>
+                    <h4 style={{ margin: '0 0 0.75rem 0' }}>Historique du Candidat (Timeline)</h4>
                     {detailData.historique && detailData.historique.length > 0 ? (
                       <ul className="timeline-list">
                         {detailData.historique.map(h => (
@@ -566,7 +589,7 @@ function CandidatsManagementPage() {
                 <div className="ats-col-right">
                   <div className="ats-box cv-preview-box">
                     <div className="flex-between" style={{ marginBottom: '0.75rem' }}>
-                      <h4 style={{ margin: 0 }}>📄 Prévisualisation du CV</h4>
+                      <h4 style={{ margin: 0 }}>Prévisualisation du CV</h4>
                       {detailData.candidat.cv && (
                         <a
                           href={getCvUrl(detailData.candidat.cv)}
@@ -575,7 +598,7 @@ function CandidatsManagementPage() {
                           className="btn-linkedin-secondary-sm"
                           style={{ textDecoration: 'none' }}
                         >
-                          📥 Télécharger le PDF
+                          Télécharger le PDF
                         </a>
                       )}
                     </div>
@@ -592,7 +615,6 @@ function CandidatsManagementPage() {
                       </div>
                     ) : (
                       <div className="empty-state">
-                        <p className="empty-icon">📄</p>
                         <p>Aucun fichier CV joint par le candidat.</p>
                       </div>
                     )}

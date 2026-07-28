@@ -11,6 +11,7 @@ import {
   getDiplomesExigesByAnnonceId
 } from '../../services/backend/annonceService';
 import '../../styles/Backoffice.css';
+import '../../styles/AnnoncesManagementPage.css';
 
 function AnnoncesManagementPage() {
   // Etats des données
@@ -67,14 +68,13 @@ function AnnoncesManagementPage() {
         getProfils(),
         getTypesAnnonce()
       ]);
-
       setAnnonces(annoncesData || []);
       setDepartements(deptsData || []);
       setProfils(profilsData || []);
       setTypesAnnonce(typesData || []);
     } catch (err) {
-      console.error('Erreur lors du chargement des données :', err);
-      setError('Impossible de charger la liste des annonces et des références.');
+      console.error('Erreur chargement des annonces :', err);
+      setError('Impossible de charger la liste des annonces backend.');
     } finally {
       setLoading(false);
     }
@@ -84,71 +84,66 @@ function AnnoncesManagementPage() {
     loadData();
   }, []);
 
-  // Affichage temporaire des messages de succès
   const notifySuccess = (msg) => {
     setSuccessMessage(msg);
-    setTimeout(() => {
-      setSuccessMessage(null);
-    }, 4000);
+    setTimeout(() => setSuccessMessage(null), 4000);
   };
 
-  // Helper statut annonce
+  // Calcul du statut d'une annonce
   const getAnnonceStatus = (annonce) => {
     const today = new Date().toISOString().split('T')[0];
-    if (annonce.datefin && annonce.datefin < today) {
-      return { code: 'EXPIRED', label: 'Expirée', css: 'badge-status-expired' };
-    }
     if (annonce.datedebut && annonce.datedebut > today) {
-      return { code: 'UPCOMING', label: 'À venir', css: 'badge-status-upcoming' };
+      return { label: 'À venir', css: 'badge-status-upcoming' };
     }
-    return { code: 'ACTIVE', label: 'Active', css: 'badge-status-active' };
+    if (annonce.datefin && annonce.datefin < today) {
+      return { label: 'Expirée', css: 'badge-status-expired' };
+    }
+    return { label: 'Active', css: 'badge-status-active' };
   };
 
-  // Annonces filtrées et statistiques
+  // Filtrage combiné des annonces
   const filteredAnnonces = useMemo(() => {
-    return annonces.filter(item => {
-      // Mot-clé
+    return annonces.filter(a => {
+      // 1. Recherche mots-clés
       if (searchKeyword.trim()) {
         const kw = searchKeyword.toLowerCase();
-        const matchTitle = item.nomposte?.toLowerCase().includes(kw);
-        const matchDesc = item.description?.toLowerCase().includes(kw);
+        const matchTitle = a.nomposte?.toLowerCase().includes(kw);
+        const matchDesc = a.description?.toLowerCase().includes(kw);
         if (!matchTitle && !matchDesc) return false;
       }
-      // Département
-      if (selectedDept && item.departement?.id !== parseInt(selectedDept, 10)) {
+      // 2. Filtre Département
+      if (selectedDept && a.departement?.id?.toString() !== selectedDept) {
         return false;
       }
-      // Profil
-      if (selectedProfil && item.profil?.id !== parseInt(selectedProfil, 10)) {
+      // 3. Filtre Profil
+      if (selectedProfil && a.profil?.id?.toString() !== selectedProfil) {
         return false;
       }
-      // Type annonce
-      if (selectedType && item.typeannonce?.id !== parseInt(selectedType, 10)) {
+      // 4. Filtre Type d'annonce
+      if (selectedType && a.typeannonce?.id?.toString() !== selectedType) {
         return false;
       }
-      // Statut
+      // 5. Filtre Statut
       if (selectedStatut) {
-        const status = getAnnonceStatus(item).code;
-        if (status !== selectedStatut) return false;
+        const statusObj = getAnnonceStatus(a);
+        if (selectedStatut === 'ACTIVE' && statusObj.label !== 'Active') return false;
+        if (selectedStatut === 'UPCOMING' && statusObj.label !== 'À venir') return false;
+        if (selectedStatut === 'EXPIRED' && statusObj.label !== 'Expirée') return false;
       }
-
       return true;
     });
   }, [annonces, searchKeyword, selectedDept, selectedProfil, selectedType, selectedStatut]);
 
+  // Statistiques calculées
   const stats = useMemo(() => {
-    let active = 0;
-    let expired = 0;
-    let upcoming = 0;
-
+    let active = 0, upcoming = 0, expired = 0;
     annonces.forEach(a => {
-      const st = getAnnonceStatus(a).code;
-      if (st === 'ACTIVE') active++;
-      else if (st === 'EXPIRED') expired++;
-      else if (st === 'UPCOMING') upcoming++;
+      const st = getAnnonceStatus(a);
+      if (st.label === 'Active') active++;
+      else if (st.label === 'À venir') upcoming++;
+      else if (st.label === 'Expirée') expired++;
     });
-
-    return { total: annonces.length, active, expired, upcoming };
+    return { total: annonces.length, active, upcoming, expired };
   }, [annonces]);
 
   // Ouverture modale Création
@@ -160,14 +155,14 @@ function AnnoncesManagementPage() {
       datedebut: '',
       datefin: '',
       datepublication: new Date().toISOString().split('T')[0],
-      iddepartement: departements[0]?.id || '',
-      idprofil: profils[0]?.id || '',
-      idtypeannonce: typesAnnonce[0]?.id || ''
+      iddepartement: departements[0]?.id?.toString() || '',
+      idprofil: profils[0]?.id?.toString() || '',
+      idtypeannonce: typesAnnonce[0]?.id?.toString() || ''
     });
     setShowFormModal(true);
   };
 
-  // Ouverture modale Edition
+  // Ouverture modale Édition
   const handleOpenEditModal = (annonce) => {
     setEditingAnnonce(annonce);
     setFormData({
@@ -176,9 +171,9 @@ function AnnoncesManagementPage() {
       datedebut: annonce.datedebut || '',
       datefin: annonce.datefin || '',
       datepublication: annonce.datepublication || new Date().toISOString().split('T')[0],
-      iddepartement: annonce.departement?.id || '',
-      idprofil: annonce.profil?.id || '',
-      idtypeannonce: annonce.typeannonce?.id || ''
+      iddepartement: annonce.departement?.id?.toString() || '',
+      idprofil: annonce.profil?.id?.toString() || '',
+      idtypeannonce: annonce.typeannonce?.id?.toString() || ''
     });
     setShowFormModal(true);
   };
@@ -186,14 +181,11 @@ function AnnoncesManagementPage() {
   // Soumission Formulaire (Créer / Modifier)
   const handleSubmitForm = async (e) => {
     e.preventDefault();
-    if (!formData.nomposte.trim()) {
-      alert('Le nom du poste est obligatoire.');
-      return;
-    }
+    if (!formData.nomposte.trim()) return;
 
     const payload = {
-      nomposte: formData.nomposte,
-      description: formData.description,
+      nomposte: formData.nomposte.trim(),
+      description: formData.description.trim(),
       datedebut: formData.datedebut || null,
       datefin: formData.datefin || null,
       datepublication: formData.datepublication || null,
@@ -272,11 +264,11 @@ function AnnoncesManagementPage() {
       <div className="backoffice-banner">
         <div className="backoffice-banner-content flex-between">
           <div>
-            <h1>📢 Gestion des Annonces</h1>
+            <h1>Gestion des Annonces</h1>
             <p>Créez, modifiez et gérez les offres d'emploi diffusées pour l'entreprise</p>
           </div>
           <button className="btn-linkedin-action-header" onClick={handleOpenCreateModal}>
-            ➕ Nouvelle Annonce
+            Nouvelle Annonce
           </button>
         </div>
       </div>
@@ -285,19 +277,18 @@ function AnnoncesManagementPage() {
         {/* MESSAGES DE SUCCÈS OU D'ERREUR */}
         {successMessage && (
           <div className="alert-linkedin-success">
-            ✅ {successMessage}
+            {successMessage}
           </div>
         )}
         {error && (
           <div className="alert-linkedin-error">
-            ⚠️ {error}
+            {error}
           </div>
         )}
 
         {/* CARTES DE STATISTIQUES */}
         <div className="stats-grid">
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper">📋</div>
             <div className="stat-info">
               <h4>Total des annonces</h4>
               <p className="stat-value">{stats.total}</p>
@@ -305,7 +296,6 @@ function AnnoncesManagementPage() {
           </div>
 
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper active-icon">🟢</div>
             <div className="stat-info">
               <h4>Annonces actives</h4>
               <p className="stat-value">{stats.active}</p>
@@ -313,7 +303,6 @@ function AnnoncesManagementPage() {
           </div>
 
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper upcoming-icon">⏳</div>
             <div className="stat-info">
               <h4>À venir</h4>
               <p className="stat-value">{stats.upcoming}</p>
@@ -321,7 +310,6 @@ function AnnoncesManagementPage() {
           </div>
 
           <div className="stat-card-linkedin">
-            <div className="stat-icon-wrapper expired-icon">🔴</div>
             <div className="stat-info">
               <h4>Expirées</h4>
               <p className="stat-value">{stats.expired}</p>
@@ -333,7 +321,7 @@ function AnnoncesManagementPage() {
         <div className="bo-card bo-filters-card">
           <div className="bo-filters-grid">
             <div className="form-group-linkedin search-input-group">
-              <label>🔍 Recherche</label>
+              <label>Recherche</label>
               <input
                 type="text"
                 placeholder="Titre du poste, mots-clés..."
@@ -395,7 +383,7 @@ function AnnoncesManagementPage() {
                   setSelectedStatut('');
                 }}
               >
-                🔄 Réinitialiser les filtres
+                Réinitialiser les filtres
               </button>
             </div>
           )}
@@ -414,7 +402,6 @@ function AnnoncesManagementPage() {
             </div>
           ) : filteredAnnonces.length === 0 ? (
             <div className="empty-state">
-              <p className="empty-icon">📭</p>
               <p>Aucune annonce ne correspond à vos critères.</p>
             </div>
           ) : (
@@ -473,21 +460,21 @@ function AnnoncesManagementPage() {
                               title="Voir les détails"
                               onClick={() => handleOpenDetailsModal(annonce)}
                             >
-                              👁️
+                              Détails
                             </button>
                             <button
                               className="btn-icon btn-icon-edit"
                               title="Modifier"
                               onClick={() => handleOpenEditModal(annonce)}
                             >
-                              ✏️
+                              Éditer
                             </button>
                             <button
                               className="btn-icon btn-icon-delete"
                               title="Supprimer"
                               onClick={() => handleOpenDeleteModal(annonce)}
                             >
-                              🗑️
+                              Suppr.
                             </button>
                           </div>
                         </td>
@@ -506,7 +493,7 @@ function AnnoncesManagementPage() {
         <div className="modal-backdrop">
           <div className="modal-content modal-lg">
             <div className="modal-header">
-              <h2>{editingAnnonce ? `✏️ Modifier l'annonce : ${editingAnnonce.nomposte}` : '➕ Créer une nouvelle annonce'}</h2>
+              <h2>{editingAnnonce ? `Modifier l'annonce : ${editingAnnonce.nomposte}` : 'Créer une nouvelle annonce'}</h2>
               <button className="modal-close-btn" onClick={() => setShowFormModal(false)}>✕</button>
             </div>
 
@@ -625,24 +612,24 @@ function AnnoncesManagementPage() {
         <div className="modal-backdrop">
           <div className="modal-content modal-md">
             <div className="modal-header">
-              <h2>📄 Détails de l'annonce : {detailsAnnonce.nomposte}</h2>
+              <h2>Détails de l'annonce : {detailsAnnonce.nomposte}</h2>
               <button className="modal-close-btn" onClick={() => setShowDetailsModal(false)}>✕</button>
             </div>
 
             <div className="modal-body details-body">
               <div className="details-header-badges">
-                <span className="badge-dept">🏢 Département : {detailsAnnonce.departement?.nom || 'N/A'}</span>
-                <span className="badge-profil">👤 Profil : {detailsAnnonce.profil?.nom || 'N/A'}</span>
-                <span className="badge-type">📌 Type : {detailsAnnonce.typeannonce?.libelle || 'Standard'}</span>
+                <span className="badge-dept">Département : {detailsAnnonce.departement?.nom || 'N/A'}</span>
+                <span className="badge-profil">Profil : {detailsAnnonce.profil?.nom || 'N/A'}</span>
+                <span className="badge-type">Type : {detailsAnnonce.typeannonce?.libelle || 'Standard'}</span>
               </div>
 
               <div className="details-dates-box">
-                <p><strong>📅 Date de publication :</strong> {detailsAnnonce.datepublication || 'Non précisée'}</p>
-                <p><strong>🏁 Période de candidature :</strong> Du {detailsAnnonce.datedebut || 'N/A'} au {detailsAnnonce.datefin || 'Illimitée'}</p>
+                <p><strong>Date de publication :</strong> {detailsAnnonce.datepublication || 'Non précisée'}</p>
+                <p><strong>Période de candidature :</strong> Du {detailsAnnonce.datedebut || 'N/A'} au {detailsAnnonce.datefin || 'Illimitée'}</p>
               </div>
 
               <div className="details-section">
-                <h4>📝 Description de l'offre</h4>
+                <h4>Description de l'offre</h4>
                 <div className="details-desc-text">
                   {detailsAnnonce.description ? detailsAnnonce.description : <em>Aucune description fournie.</em>}
                 </div>
@@ -656,7 +643,7 @@ function AnnoncesManagementPage() {
               ) : (
                 <>
                   <div className="details-section">
-                    <h4>🎯 Critères requis pour le profil</h4>
+                    <h4>Critères requis pour le profil</h4>
                     {detailsCriteres.length === 0 ? (
                       <p className="text-muted">Aucun critère spécifique configuré pour ce profil.</p>
                     ) : (
@@ -673,13 +660,13 @@ function AnnoncesManagementPage() {
                   </div>
 
                   <div className="details-section">
-                    <h4>🎓 Diplômes exigés</h4>
+                    <h4>Diplômes exigés</h4>
                     {detailsDiplomes.length === 0 ? (
                       <p className="text-muted">Aucun diplôme spécifique requis pour ce profil.</p>
                     ) : (
                       <ul className="details-list">
                         {detailsDiplomes.map(d => (
-                          <li key={d.id}>🎓 {d.diplome?.nom}</li>
+                          <li key={d.id}>{d.diplome?.nom}</li>
                         ))}
                       </ul>
                     )}
@@ -702,7 +689,7 @@ function AnnoncesManagementPage() {
         <div className="modal-backdrop">
           <div className="modal-content modal-sm">
             <div className="modal-header">
-              <h2>⚠️ Confirmation de suppression</h2>
+              <h2>Confirmation de suppression</h2>
               <button className="modal-close-btn" onClick={() => setShowDeleteModal(false)}>✕</button>
             </div>
 

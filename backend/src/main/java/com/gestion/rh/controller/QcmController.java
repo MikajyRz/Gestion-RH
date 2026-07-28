@@ -20,19 +20,28 @@ public class QcmController {
     private final QcmReponseRepository qcmReponseRepository;
     private final ProfilRepository profilRepository;
     private final CandidatRepository candidatRepository;
+    private final TestAnnonceRepository testAnnonceRepository;
+    private final StatutCandidatRepository statutCandidatRepository;
+    private final HistoriqueCandidatureRepository historiqueCandidatureRepository;
 
     public QcmController(QcmTestRepository qcmTestRepository,
                          QcmQuestionRepository qcmQuestionRepository,
                          QcmChoixRepository qcmChoixRepository,
                          QcmReponseRepository qcmReponseRepository,
                          ProfilRepository profilRepository,
-                         CandidatRepository candidatRepository) {
+                         CandidatRepository candidatRepository,
+                         TestAnnonceRepository testAnnonceRepository,
+                         StatutCandidatRepository statutCandidatRepository,
+                         HistoriqueCandidatureRepository historiqueCandidatureRepository) {
         this.qcmTestRepository = qcmTestRepository;
         this.qcmQuestionRepository = qcmQuestionRepository;
         this.qcmChoixRepository = qcmChoixRepository;
         this.qcmReponseRepository = qcmReponseRepository;
         this.profilRepository = profilRepository;
         this.candidatRepository = candidatRepository;
+        this.testAnnonceRepository = testAnnonceRepository;
+        this.statutCandidatRepository = statutCandidatRepository;
+        this.historiqueCandidatureRepository = historiqueCandidatureRepository;
     }
 
     // --- 1. GESTION DES TESTS QCM ---
@@ -215,5 +224,164 @@ public class QcmController {
         }
 
         return ResponseEntity.ok(details);
+    }
+
+    // --- 4. EXÉCUTION & CORRECTION AUTOMATIQUE DES QCM (STATUT 'QCM ENVOYÉ' -> 'QCM TERMINÉ') ---
+    @GetMapping("/candidats-eligible")
+    public ResponseEntity<List<Candidat>> getCandidatsEligiblesQcm() {
+        List<Candidat> tous = candidatRepository.findAll();
+        List<Candidat> eligibles = tous.stream()
+                .filter(c -> c.getStatut() != null &&
+                        ("QCM Envoyé".equalsIgnoreCase(c.getStatut().getNom()) || Integer.valueOf(3).equals(c.getStatut().getId())))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(eligibles);
+    }
+
+    @GetMapping("/candidat/{idCandidat}/test")
+    public ResponseEntity<?> getTestForCandidat(@PathVariable Long idCandidat) {
+        Optional<Candidat> candOpt = candidatRepository.findById(idCandidat);
+        if (candOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Candidat candidat = candOpt.get();
+        QcmTest testTrouve = null;
+
+        // 1. Chercher par TestAnnonce si lié directement à l'annonce
+        if (candidat.getAnnonce() != null) {
+            Long idAnnonce = candidat.getAnnonce().getId();
+            List<TestAnnonce> testAnnonces = testAnnonceRepository.findByAnnonceId(idAnnonce);
+            if (!testAnnonces.isEmpty()) {
+                testTrouve = testAnnonces.get(0).getTest();
+            }
+        }
+
+        // 2. Sinon chercher par idprofil de l'annonce
+        if (testTrouve == null && candidat.getAnnonce() != null && candidat.getAnnonce().getProfil() != null) {
+            Integer idProfil = candidat.getAnnonce().getProfil().getId();
+            List<QcmTest> testsProfil = qcmTestRepository.findByProfilId(idProfil);
+            if (!testsProfil.isEmpty()) {
+                testTrouve = testsProfil.get(0);
+            }
+        }
+
+        // 3. Fallback: premier test disponible
+        if (testTrouve == null) {
+            List<QcmTest> tousTests = qcmTestRepository.findAll();
+            if (!tousTests.isEmpty()) {
+                testTrouve = tousTests.get(0);
+            }
+        }
+
+        if (testTrouve == null) {
+            return ResponseEntity.badRequest().body("Aucun test QCM configuré pour ce poste.");
+        }
+
+        List<QcmQuestion> questions = qcmQuestionRepository.findByTestIdOrderByNumeroAsc(testTrouve.getId());
+        List<Map<String, Object>> questionsMap = new ArrayList<>();
+        for (QcmQuestion q : questions) {
+            Map<String, Object> qm = new HashMap<>();
+            qm.put("id", q.getId());
+            qm.put("numero", q.getNumero());
+            qm.put("question", q.getQuestion());
+            qm.put("points", q.getPoints());
+            qm.put("choix", qcmChoixRepository.findByQuestionId(q.getId()));
+            questionsMap.add(qm);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("test", testTrouve);
+        response.put("candidat", candidat);
+        response.put("questions", questionsMap);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/soumettre")
+    @Transactional
+    public ResponseEntity<?> soumettreEtCorrigerQcm(@RequestBody Map<String, Object> body) {
+        if (body.get("idCandidat") == null || body.get("idTest") == null || body.get("reponses") == null) {
+            return ResponseEntity.badRequest().body("Données de soumission incomplètes.");
+        }
+
+        Long idCandidat = Long.valueOf(body.get("idCandidat").toString());
+        Integer idTest = Integer.valueOf(body.get("idTest").toString());
+
+        Optional<Candidat> candOpt = candidatRepository.findById(idCandidat);
+        Optional<QcmTest> testOpt = qcmTestRepository.findById(idTest);
+
+        if (candOpt.isEmpty() || testOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Candidat candidat = candOpt.get();
+        QcmTest test = testOpt.get();
+
+        List<Map<String, Object>> reponsesList = (List<Map<String, Object>>) body.get("reponses");
+
+        int totalObtenu = 0;
+
+        for (Map<String, Object> rMap : reponsesList) {
+            if (rMap.get("idQuestion") == null) continue;
+
+            Integer idQuestion = Integer.valueOf(rMap.get("idQuestion").toString());
+            Integer idChoix = rMap.get("idChoix") != null ? Integer.valueOf(rMap.get("idChoix").toString()) : null;
+
+            Optional<QcmQuestion> qOpt = qcmQuestionRepository.findById(idQuestion);
+            if (qOpt.isEmpty()) continue;
+
+            QcmQuestion question = qOpt.get();
+            QcmChoix choix = null;
+            int pointsObtenus = 0;
+
+            if (idChoix != null) {
+                Optional<QcmChoix> cOpt = qcmChoixRepository.findById(idChoix);
+                if (cOpt.isPresent()) {
+                    choix = cOpt.get();
+                    if (Boolean.TRUE.equals(choix.getEstcorrect())) {
+                        pointsObtenus = question.getPoints() != null ? question.getPoints() : 1;
+                    }
+                }
+            }
+
+            totalObtenu += pointsObtenus;
+
+            QcmReponse reponse = new QcmReponse();
+            reponse.setCandidat(candidat);
+            reponse.setTest(test);
+            reponse.setQuestion(question);
+            reponse.setChoix(choix);
+            reponse.setPointsobtenus(pointsObtenus);
+
+            qcmReponseRepository.save(reponse);
+        }
+
+        // Passer automatiquement le statut à "QCM Terminé" (ID 4)
+        StatutCandidat statutQcmTermine = statutCandidatRepository.findByNom("QCM Terminé")
+                .orElseGet(() -> statutCandidatRepository.findById(4).orElse(candidat.getStatut()));
+
+        if (statutQcmTermine != null) {
+            candidat.setStatut(statutQcmTermine);
+            candidatRepository.save(candidat);
+
+            HistoriqueCandidature hist = new HistoriqueCandidature(candidat, statutQcmTermine);
+            historiqueCandidatureRepository.save(hist);
+        }
+
+        // Calcul score max
+        List<QcmQuestion> questions = qcmQuestionRepository.findByTestIdOrderByNumeroAsc(idTest);
+        int totalMax = questions.stream().mapToInt(q -> q.getPoints() != null ? q.getPoints() : 1).sum();
+        if (totalMax == 0) totalMax = 1;
+
+        double pourcentage = Math.round(((double) totalObtenu / totalMax) * 100.0 * 10.0) / 10.0;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("candidat", candidat);
+        result.put("scoreObtenu", totalObtenu);
+        result.put("scoreMax", totalMax);
+        result.put("pourcentage", pourcentage);
+        result.put("message", "Test QCM soumis et corrigé. Statut candidat mis à jour vers QCM Terminé.");
+
+        return ResponseEntity.ok(result);
     }
 }

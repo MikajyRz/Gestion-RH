@@ -47,3 +47,19 @@ export const getDetailsReponsesCandidat = async (idCandidat) => {
   const response = await backendClient.get(`/api/qcm/resultats/candidats/${idCandidat}`);
   return response.data;
 };
+
+// --- EXÉCUTION & CORRECTION AUTOMATIQUE DES QCM ---
+export const getCandidatsQcmEnvoye = async () => {
+  const response = await backendClient.get('/api/qcm/candidats-eligible');
+  return response.data;
+};
+
+export const getTestForCandidat = async (idCandidat) => {
+  const response = await backendClient.get(`/api/qcm/candidat/${idCandidat}/test`);
+  return response.data;
+};
+
+export const soumettreQcmCandidat = async (payload) => {
+  const response = await backendClient.post('/api/qcm/soumettre', payload);
+  return response.data;
+};

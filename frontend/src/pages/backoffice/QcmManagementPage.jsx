@@ -8,18 +8,22 @@ import {
   addQuestionToTest,
   deleteQuestion,
   getResultatsCandidats,
-  getDetailsReponsesCandidat
+  getDetailsReponsesCandidat,
+  getCandidatsQcmEnvoye,
+  getTestForCandidat,
+  soumettreQcmCandidat
 } from '../../services/backend/qcmService';
 import { getProfils } from '../../services/backend/referentielService';
 import '../../styles/Backoffice.css';
 
 function QcmManagementPage() {
-  const [activeTab, setActiveTab] = useState('tests'); // 'tests' | 'results'
+  const [activeTab, setActiveTab] = useState('tests'); // 'tests' | 'results' | 'passation'
 
   // Data states
   const [tests, setTests] = useState([]);
   const [profils, setProfils] = useState([]);
   const [resultatsCandidats, setResultatsCandidats] = useState([]);
+  const [candidatsQcmEnvoye, setCandidatsQcmEnvoye] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
@@ -51,17 +55,30 @@ function QcmManagementPage() {
   const [candidateAnswersDetail, setCandidateAnswersDetail] = useState([]);
   const [loadingAnswersDetail, setLoadingAnswersDetail] = useState(false);
 
+  // PASSATION & CORRECTION QCM STATES
+  const [selectedCandQcm, setSelectedCandQcm] = useState(null);
+  const [candTestPayload, setCandTestPayload] = useState(null); // { test, candidat, questions }
+  const [userAnswers, setUserAnswers] = useState({}); // { idQuestion: idChoix }
+  const [loadingCandTest, setLoadingCandTest] = useState(false);
+  const [submittingQcmSession, setSubmittingQcmSession] = useState(false);
+
+  // Submission Result Modal
+  const [showCorrectionModal, setShowCorrectionModal] = useState(false);
+  const [correctionResult, setCorrectionResult] = useState(null);
+
   const loadData = async () => {
     try {
       setLoading(true);
-      const [testsData, profilsData, resultatsData] = await Promise.all([
+      const [testsData, profilsData, resultatsData, cQcmEnvoye] = await Promise.all([
         getAllQcmTests(),
         getProfils(),
-        getResultatsCandidats()
+        getResultatsCandidats(),
+        getCandidatsQcmEnvoye()
       ]);
       setTests(testsData || []);
       setProfils(profilsData || []);
       setResultatsCandidats(resultatsData || []);
+      setCandidatsQcmEnvoye(cQcmEnvoye || []);
 
       if (testsData && testsData.length > 0 && !selectedTest) {
         handleSelectTest(testsData[0]);
@@ -196,7 +213,6 @@ function QcmManagementPage() {
       return;
     }
     const filtered = choices.filter((_, i) => i !== index);
-    // S'assurer qu'au moins 1 choix reste marqué comme correct
     if (!filtered.some(c => c.estcorrect)) {
       filtered[0].estcorrect = true;
     }
@@ -264,13 +280,90 @@ function QcmManagementPage() {
     }
   };
 
+  // --- 4. PASSATION & CORRECTION AUTOMATIQUE DES QCM (STATUT 'QCM ENVOYÉ') ---
+  const handleSelectCandidateForPassation = async (candidatId) => {
+    if (!candidatId) {
+      setSelectedCandQcm(null);
+      setCandTestPayload(null);
+      setUserAnswers({});
+      return;
+    }
+
+    const candObj = candidatsQcmEnvoye.find(c => c.id === parseInt(candidatId, 10));
+    setSelectedCandQcm(candObj);
+    setUserAnswers({});
+
+    try {
+      setLoadingCandTest(true);
+      const testData = await getTestForCandidat(candidatId);
+      setCandTestPayload(testData);
+    } catch (err) {
+      console.error('Erreur test candidat :', err);
+      notify('Impossible de charger le test QCM pour ce candidat.', true);
+      setCandTestPayload(null);
+    } finally {
+      setLoadingCandTest(false);
+    }
+  };
+
+  const handleSelectUserAnswer = (questionId, choixId) => {
+    setUserAnswers(prev => ({
+      ...prev,
+      [questionId]: choixId
+    }));
+  };
+
+  const handleSubmitAndCorrectQcm = async (e) => {
+    e.preventDefault();
+    if (!selectedCandQcm || !candTestPayload || !candTestPayload.test) return;
+
+    const questions = candTestPayload.questions || [];
+    const answeredCount = Object.keys(userAnswers).length;
+
+    if (answeredCount < questions.length) {
+      if (!window.confirm(`Vous avez répondu à ${answeredCount} sur ${questions.length} questions. Soumettre quand même ?`)) {
+        return;
+      }
+    }
+
+    const reponsesPayload = Object.keys(userAnswers).map(qId => ({
+      idQuestion: parseInt(qId, 10),
+      idChoix: userAnswers[qId] ? parseInt(userAnswers[qId], 10) : null
+    }));
+
+    const payload = {
+      idCandidat: selectedCandQcm.id,
+      idTest: candTestPayload.test.id,
+      reponses: reponsesPayload
+    };
+
+    try {
+      setSubmittingQcmSession(true);
+      const res = await soumettreQcmCandidat(payload);
+      setCorrectionResult(res);
+      setShowCorrectionModal(true);
+      notify(`QCM corrigé ! Score : ${res.scoreObtenu}/${res.scoreMax} (${res.pourcentage}%). Statut candidat -> QCM Terminé.`);
+
+      // Réinitialiser la vue de passation et recharger les listes
+      setSelectedCandQcm(null);
+      setCandTestPayload(null);
+      setUserAnswers({});
+      loadData();
+    } catch (err) {
+      console.error('Erreur soumission QCM :', err);
+      notify('Erreur lors de la soumission du QCM.', true);
+    } finally {
+      setSubmittingQcmSession(false);
+    }
+  };
+
   return (
     <div className="backoffice-page">
       {/* BANNIÈRE */}
       <div className="backoffice-banner">
         <div className="backoffice-banner-content">
           <h1>📝 Tests QCM & Évaluations Techniques</h1>
-          <p>Administrez les banques de questionnaires par profil métier et consultez les notes obtenues par les candidats</p>
+          <p>Administrez les banques de questionnaires, faites passer les tests aux candidats (statut "QCM Envoyé") et consultez les corrections automatiques</p>
         </div>
       </div>
 
@@ -288,6 +381,12 @@ function QcmManagementPage() {
             onClick={() => setActiveTab('tests')}
           >
             🧩 Banques de Tests QCM ({tests.length})
+          </button>
+          <button
+            className={`bo-tab-btn ${activeTab === 'passation' ? 'active' : ''}`}
+            onClick={() => setActiveTab('passation')}
+          >
+            📝 Passation & Correction (Statut "QCM Envoyé" : {candidatsQcmEnvoye.length})
           </button>
           <button
             className={`bo-tab-btn ${activeTab === 'results' ? 'active' : ''}`}
@@ -441,7 +540,113 @@ function QcmManagementPage() {
               </div>
             )}
 
-            {/* TAB 2: CONSULTATION DES RÉSULTATS CANDIDATS */}
+            {/* TAB 2: PASSATION & CORRECTION AUTOMATIQUE DES QCM (STATUT 'QCM ENVOYÉ') */}
+            {activeTab === 'passation' && (
+              <div className="bo-card">
+                <div className="bo-card-header">
+                  <h3>📝 Passation et Correction des QCM (Candidats au statut "QCM Envoyé")</h3>
+                </div>
+
+                {/* SÉLECTION DU CANDIDAT ÉLIGIBLE */}
+                <div className="form-group-linkedin" style={{ maxWidth: '600px', marginBottom: '1.5rem' }}>
+                  <label style={{ fontSize: '1rem', fontWeight: 700 }}>
+                    🎯 Choisir un candidat ayant le statut "QCM Envoyé" ({candidatsQcmEnvoye.length} éligibles) :
+                  </label>
+                  <select
+                    value={selectedCandQcm?.id || ''}
+                    onChange={(e) => handleSelectCandidateForPassation(e.target.value)}
+                  >
+                    <option value="">-- Sélectionner un candidat éligible --</option>
+                    {candidatsQcmEnvoye.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.prenom} {c.nom} — ({c.annonce?.nomposte || 'Offre d\'emploi'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {loadingCandTest ? (
+                  <div className="loading-spinner-container">
+                    <div className="spinner"></div>
+                    <p>Chargement du questionnaire QCM associé au candidat...</p>
+                  </div>
+                ) : !selectedCandQcm ? (
+                  <div className="empty-state">
+                    <p className="empty-icon">👥</p>
+                    <p>Sélectionnez un candidat dans la liste déroulante ci-dessus pour démarrer le test QCM.</p>
+                  </div>
+                ) : !candTestPayload || !candTestPayload.test ? (
+                  <div className="empty-state">
+                    <p className="empty-icon">⚠️</p>
+                    <p>Aucun test QCM n'est encore configuré pour le poste de ce candidat.</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmitAndCorrectQcm} className="qcm-test-taking-container">
+                    {/* EN-TÊTE DU TEST */}
+                    <div className="qcm-test-taking-header">
+                      <div>
+                        <h2>📋 {candTestPayload.test.nom}</h2>
+                        <p style={{ margin: 0, color: '#64748b' }}>
+                          Candidat : <strong>{selectedCandQcm.prenom} {selectedCandQcm.nom}</strong> | Poste :{' '}
+                          <strong>{selectedCandQcm.annonce?.nomposte || '—'}</strong>
+                        </p>
+                      </div>
+                      <div className="qcm-progress-badge">
+                        Répondu : {Object.keys(userAnswers).length} / {candTestPayload.questions.length} questions
+                      </div>
+                    </div>
+
+                    {/* QUESTIONS & CHOIX MULTIPLES */}
+                    <div className="qcm-questions-taking-list">
+                      {candTestPayload.questions.map((q, idx) => (
+                        <div key={q.id} className="qcm-question-card">
+                          <div className="flex-between" style={{ marginBottom: '0.75rem' }}>
+                            <h4 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>
+                              Question {idx + 1} : {q.question}
+                            </h4>
+                            <span className="badge-points">{q.points} pt(s)</span>
+                          </div>
+
+                          <div className="qcm-choices-taking-group">
+                            {(q.choix || []).map(c => {
+                              const isChecked = userAnswers[q.id] === c.id;
+                              return (
+                                <label
+                                  key={c.id}
+                                  className={`qcm-choice-taking-label ${isChecked ? 'selected' : ''}`}
+                                >
+                                  <input
+                                    type="radio"
+                                    name={`q_${q.id}`}
+                                    checked={isChecked}
+                                    onChange={() => handleSelectUserAnswer(q.id, c.id)}
+                                  />
+                                  <span>{c.texte}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* BOUTON SOUMISSION & CORRECTION */}
+                    <div className="qcm-submit-footer">
+                      <button
+                        type="submit"
+                        className="btn-linkedin-primary"
+                        style={{ padding: '0.75rem 2rem', fontSize: '1rem' }}
+                        disabled={submittingQcmSession}
+                      >
+                        {submittingQcmSession ? 'Correction en cours...' : '✅ Soumettre et Corriger le QCM'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {/* TAB 3: CONSULTATION DES RÉSULTATS CANDIDATS */}
             {activeTab === 'results' && (
               <div className="bo-card">
                 <div className="bo-card-header">
@@ -737,6 +942,58 @@ function QcmManagementPage() {
             <div className="modal-footer">
               <button className="btn-linkedin-primary" onClick={() => setShowResultDetailModal(false)}>
                 Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODALE RÉSULTAT CORRECTION AUTOMATIQUE SOUMISSION */}
+      {showCorrectionModal && correctionResult && (
+        <div className="modal-backdrop">
+          <div className="modal-content modal-sm" style={{ textAlign: 'center' }}>
+            <div className="modal-header">
+              <h2>🎉 Correction Automatique Effectuée</h2>
+              <button className="modal-close-btn" onClick={() => setShowCorrectionModal(false)}>✕</button>
+            </div>
+
+            <div className="modal-body" style={{ padding: '1.5rem' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>
+                {correctionResult.pourcentage >= 50 ? '🟢' : '🔴'}
+              </div>
+              <h3 style={{ margin: '0 0 0.5rem 0', color: '#0f172a' }}>
+                {correctionResult.candidat?.prenom} {correctionResult.candidat?.nom}
+              </h3>
+              <p className="text-muted" style={{ margin: '0 0 1rem 0' }}>
+                Poste : {correctionResult.candidat?.annonce?.nomposte || '—'}
+              </p>
+
+              <div className="details-dates-box" style={{ padding: '1rem', borderRadius: '10px' }}>
+                <p style={{ margin: '0.2rem 0', fontSize: '1rem' }}>
+                  Score obtenu :{' '}
+                  <strong style={{ fontSize: '1.25rem', color: correctionResult.pourcentage >= 50 ? '#166534' : '#dc2626' }}>
+                    {correctionResult.scoreObtenu} / {correctionResult.scoreMax} pts
+                  </strong>
+                </p>
+                <p style={{ margin: '0.2rem 0', fontSize: '1.1rem', fontWeight: 700 }}>
+                  Taux de réussite : {correctionResult.pourcentage}%
+                </p>
+              </div>
+
+              <div style={{ marginTop: '1.25rem', padding: '0.75rem', backgroundColor: '#dcfce7', borderRadius: '8px', border: '1px solid #86efac', color: '#166534', fontWeight: 600, fontSize: '0.9rem' }}>
+                ✅ Le statut du candidat est passé automatiquement à <strong>"QCM Terminé"</strong> !
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ justifyContent: 'center' }}>
+              <button
+                className="btn-linkedin-primary"
+                onClick={() => {
+                  setShowCorrectionModal(false);
+                  setActiveTab('results');
+                }}
+              >
+                Voir la liste des résultats 📊
               </button>
             </div>
           </div>

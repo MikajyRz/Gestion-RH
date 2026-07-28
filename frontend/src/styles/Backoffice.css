@@ -1549,6 +1549,96 @@
   font-weight: 800;
 }
 
+/* --- INTERFACE DE PASSATION QCM CANDIDAT --- */
+.qcm-test-taking-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.qcm-test-taking-header {
+  background-color: #f8fafc;
+  padding: 1.25rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.qcm-progress-badge {
+  background-color: #eff6ff;
+  color: #0a66c2;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  border: 1px solid #bfdbfe;
+}
+
+.qcm-questions-taking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.qcm-question-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 1.25rem;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.qcm-choices-taking-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.qcm-choice-taking-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  cursor: pointer;
+  font-size: 0.92rem;
+  color: #334155;
+  transition: all 0.2s ease;
+}
+
+.qcm-choice-taking-label:hover {
+  background-color: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.qcm-choice-taking-label.selected {
+  background-color: #eff6ff;
+  border-color: #0a66c2;
+  box-shadow: 0 0 0 1px #0a66c2;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.qcm-choice-taking-label input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #0a66c2;
+  cursor: pointer;
+}
+
+.qcm-submit-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+
 
 
 

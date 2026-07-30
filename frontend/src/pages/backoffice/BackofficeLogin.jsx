@@ -31,7 +31,7 @@ const BackofficeLogin = () => {
       <div className="backoffice-login-card">
         <div className="backoffice-login-card__header">
           <div className="backoffice-login-card__logo">
-            in
+            ERP
           </div>
           <h2>Administration RH</h2>
           <p>Espace sécurisé - Connexion au Backoffice</p>

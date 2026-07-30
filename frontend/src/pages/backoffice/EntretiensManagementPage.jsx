@@ -8,17 +8,21 @@ import {
   evaluerEntretien,
   deleteEntretien
 } from '../../services/backend/entretienService';
-import { getTousLesCandidats } from '../../services/backend/candidatService';
+import { getAllAnnonces } from '../../services/backend/annonceService';
+import { getResultatsCandidats } from '../../services/backend/qcmService';
+import { updateCandidatStatut } from '../../services/backend/candidatService';
 import '../../styles/Backoffice.css';
 import '../../styles/EntretiensManagementPage.css';
 
 function EntretiensManagementPage() {
-  const [activeView, setActiveView] = useState('calendar'); // 'calendar' | 'agenda' | 'liste'
+  const [activeView, setActiveView] = useState('calendar'); // 'calendar' | 'agenda' | 'liste' | 'ranking'
 
   // Data states
   const [entretiens, setEntretiens] = useState([]);
   const [statuts, setStatuts] = useState([]);
   const [candidatsQcmTermine, setCandidatsQcmTermine] = useState([]);
+  const [annonces, setAnnonces] = useState([]);
+  const [qcmResultats, setQcmResultats] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
@@ -30,6 +34,7 @@ function EntretiensManagementPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedStatutId, setSelectedStatutId] = useState('');
   const [dateFilter, setDateFilter] = useState('ALL'); // 'ALL' | 'TODAY' | 'UPCOMING' | 'PAST'
+  const [selectedRankingAnnonceId, setSelectedRankingAnnonceId] = useState('');
 
   // Modale Planification
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -49,13 +54,17 @@ function EntretiensManagementPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [entretiensData, statutsData, candidatsEligibles] = await Promise.all([
+      const [entretiensData, statutsData, candidatsEligibles, annoncesData, qcmResultatsData] = await Promise.all([
         getAllEntretiens(),
         getStatutsEntretien(),
-        getCandidatsEligiblesEntretien()
+        getCandidatsEligiblesEntretien(),
+        getAllAnnonces(),
+        getResultatsCandidats()
       ]);
       setEntretiens(entretiensData || []);
       setStatuts(statutsData || []);
+      setAnnonces(annoncesData || []);
+      setQcmResultats(qcmResultatsData || []);
 
       const listEligibles = candidatsEligibles || [];
       setCandidatsQcmTermine(listEligibles);
@@ -123,6 +132,42 @@ function EntretiensManagementPage() {
       return true;
     });
   }, [entretiens, searchKeyword, selectedStatutId, dateFilter]);
+
+  // Calcul du classement et score combiné (40% QCM + 60% Entretien) pour chaque offre
+  const rankedCandidates = useMemo(() => {
+    let evaluatedList = entretiens.filter(e => e.resultat != null && e.candidat != null);
+
+    if (selectedRankingAnnonceId) {
+      evaluatedList = evaluatedList.filter(e => e.candidat.annonce?.id?.toString() === selectedRankingAnnonceId);
+    }
+
+    const items = evaluatedList.map(e => {
+      const cand = e.candidat;
+      const noteEntretien = e.resultat.note || 0;
+
+      const qcmRes = qcmResultats.find(q => q.idCandidat === cand.id || q.email === cand.compteCandidat?.email);
+      const pourcentageQcm = qcmRes ? qcmRes.pourcentage : 0;
+      const noteQcmSur20 = Math.round((pourcentageQcm / 100.0) * 20.0 * 10.0) / 10.0;
+
+      // Score combiné : 40% QCM + 60% Entretien
+      const scoreGlobal = Math.round(((noteQcmSur20 * 0.40) + (noteEntretien * 0.60)) * 10.0) / 10.0;
+
+      return {
+        entretienId: e.id,
+        candidat: cand,
+        annonce: cand.annonce,
+        noteEntretien,
+        appreciation: e.resultat.appreciation,
+        pourcentageQcm,
+        noteQcmSur20,
+        scoreGlobal
+      };
+    });
+
+    items.sort((a, b) => b.scoreGlobal - a.scoreGlobal);
+
+    return items;
+  }, [entretiens, qcmResultats, selectedRankingAnnonceId]);
 
   // Statistiques calculées
   const stats = useMemo(() => {
@@ -244,7 +289,7 @@ function EntretiensManagementPage() {
     }
   };
 
-  // Changement de statut rapide
+  // Changement de statut rapide entretien
   const handleChangeStatut = async (idEntretien, newStatutId) => {
     try {
       await updateEntretienStatut(idEntretien, newStatutId);
@@ -252,6 +297,17 @@ function EntretiensManagementPage() {
       loadData();
     } catch (err) {
       notify('Erreur lors de la mise à jour du statut.', true);
+    }
+  };
+
+  // Mise à jour directe du statut candidat (ex: Embaucher, Offre transmise, Refuser)
+  const handleUpdateCandidatStatutDirect = async (candidatId, newStatutId, statutLibelle) => {
+    try {
+      await updateCandidatStatut(candidatId, newStatutId);
+      notify(`Statut du candidat mis à jour vers "${statutLibelle}".`);
+      loadData();
+    } catch (err) {
+      notify('Erreur lors de la mise à jour du statut candidat.', true);
     }
   };
 
@@ -308,7 +364,7 @@ function EntretiensManagementPage() {
         <div className="backoffice-banner-content flex-between">
           <div>
             <h1>Planning & Conduite des Entretiens</h1>
-            <p>Orchestrez les rendez-vous RH et saisissez les grilles d'évaluation techniques</p>
+            <p>Orchestrez les rendez-vous RH, saisissez les évaluations et classez les meilleurs candidats par offre</p>
           </div>
           <button className="btn-linkedin-action-header" onClick={() => handleOpenScheduleModal()}>
             Planifier un Entretien
@@ -357,7 +413,7 @@ function EntretiensManagementPage() {
         {/* BARRE DE FILTRES & SWITCHER DE VUE */}
         <div className="bo-card bo-filters-card">
           <div className="flex-between" style={{ marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
                 className={`bo-tab-btn ${activeView === 'calendar' ? 'active' : ''}`}
                 onClick={() => setActiveView('calendar')}
@@ -376,57 +432,67 @@ function EntretiensManagementPage() {
               >
                 Vue Liste
               </button>
+              <button
+                className={`bo-tab-btn ${activeView === 'ranking' ? 'active' : ''}`}
+                onClick={() => setActiveView('ranking')}
+              >
+                Classement par Offre & Décision
+              </button>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button
-                className={`btn-linkedin-secondary-sm ${dateFilter === 'ALL' ? 'active' : ''}`}
-                onClick={() => setDateFilter('ALL')}
-              >
-                Tous
-              </button>
-              <button
-                className={`btn-linkedin-secondary-sm ${dateFilter === 'TODAY' ? 'active' : ''}`}
-                onClick={() => setDateFilter('TODAY')}
-              >
-                Aujourd'hui
-              </button>
-              <button
-                className={`btn-linkedin-secondary-sm ${dateFilter === 'UPCOMING' ? 'active' : ''}`}
-                onClick={() => setDateFilter('UPCOMING')}
-              >
-                À venir
-              </button>
-              <button
-                className={`btn-linkedin-secondary-sm ${dateFilter === 'PAST' ? 'active' : ''}`}
-                onClick={() => setDateFilter('PAST')}
-              >
-                Passés
-              </button>
-            </div>
+            {activeView !== 'ranking' && (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className={`btn-linkedin-secondary-sm ${dateFilter === 'ALL' ? 'active' : ''}`}
+                  onClick={() => setDateFilter('ALL')}
+                >
+                  Tous
+                </button>
+                <button
+                  className={`btn-linkedin-secondary-sm ${dateFilter === 'TODAY' ? 'active' : ''}`}
+                  onClick={() => setDateFilter('TODAY')}
+                >
+                  Aujourd'hui
+                </button>
+                <button
+                  className={`btn-linkedin-secondary-sm ${dateFilter === 'UPCOMING' ? 'active' : ''}`}
+                  onClick={() => setDateFilter('UPCOMING')}
+                >
+                  À venir
+                </button>
+                <button
+                  className={`btn-linkedin-secondary-sm ${dateFilter === 'PAST' ? 'active' : ''}`}
+                  onClick={() => setDateFilter('PAST')}
+                >
+                  Passés
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="bo-filters-grid">
-            <div className="form-group-linkedin search-input-group">
-              <label>Recherche Candidat ou Poste</label>
-              <input
-                type="text"
-                placeholder="Nom du candidat, poste..."
-                value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
-              />
-            </div>
+          {activeView !== 'ranking' && (
+            <div className="bo-filters-grid">
+              <div className="form-group-linkedin search-input-group">
+                <label>Recherche Candidat ou Poste</label>
+                <input
+                  type="text"
+                  placeholder="Nom du candidat, poste..."
+                  value={searchKeyword}
+                  onChange={(e) => setSearchKeyword(e.target.value)}
+                />
+              </div>
 
-            <div className="form-group-linkedin">
-              <label>Statut Entretien</label>
-              <select value={selectedStatutId} onChange={(e) => setSelectedStatutId(e.target.value)}>
-                <option value="">Tous les statuts</option>
-                {statuts.map(s => (
-                  <option key={s.id} value={s.id}>{s.nom}</option>
-                ))}
-              </select>
+              <div className="form-group-linkedin">
+                <label>Statut Entretien</label>
+                <select value={selectedStatutId} onChange={(e) => setSelectedStatutId(e.target.value)}>
+                  <option value="">Tous les statuts</option>
+                  {statuts.map(s => (
+                    <option key={s.id} value={s.id}>{s.nom}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {loading ? (
@@ -691,6 +757,150 @@ function EntretiensManagementPage() {
                                     onClick={() => handleDeleteEntretien(ent.id, `${ent.candidat?.prenom} ${ent.candidat?.nom}`)}
                                   >
                                     Suppr.
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* VUE 4: CLASSEMENT DES CANDIDATS PAR OFFRE D'EMPLOI & DÉCISION FINALE */}
+            {activeView === 'ranking' && (
+              <div className="bo-card">
+                <div className="bo-card-header flex-between" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+                  <div>
+                    <h3>Classement et Comparatif des Candidats par Offre</h3>
+                    <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '0.9rem' }}>
+                      Calcul du score combiné (40% QCM Technique + 60% Entretien RH) pour sélectionner le meilleur profil
+                    </p>
+                  </div>
+
+                  <div className="form-group-linkedin" style={{ margin: 0, minWidth: '280px' }}>
+                    <select
+                      value={selectedRankingAnnonceId}
+                      onChange={(e) => setSelectedRankingAnnonceId(e.target.value)}
+                      style={{ padding: '0.6rem 1rem', fontSize: '0.95rem' }}
+                    >
+                      <option value="">Toutes les offres d'emploi ({annonces.length})</option>
+                      {annonces.map(a => (
+                        <option key={a.id} value={a.id}>
+                          {a.nomposte} ({a.departement?.nom || 'Département'})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {rankedCandidates.length === 0 ? (
+                  <div className="empty-state">
+                    <p>Aucun candidat évalué ne correspond à cette offre d'emploi.</p>
+                  </div>
+                ) : (
+                  <div className="bo-table-responsive">
+                    <table className="bo-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '100px' }}>Rang</th>
+                          <th>Candidat</th>
+                          <th>Offre / Poste</th>
+                          <th>Note QCM (/20)</th>
+                          <th>Note Entretien (/20)</th>
+                          <th>Score Global /20</th>
+                          <th>Appréciation Recruteur</th>
+                          <th>Statut Actuel</th>
+                          <th style={{ textAlign: 'right' }}>Décision RH</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rankedCandidates.map((item, index) => {
+                          const rank = index + 1;
+                          const isBest = rank === 1;
+                          const candStatutNom = item.candidat.statut?.nom || 'En cours';
+                          const candStatutId = item.candidat.statut?.id;
+
+                          let candBadgeClass = 'badge-status-neutral';
+                          if (candStatutId === 8 || candStatutNom.toLowerCase().includes('refus')) candBadgeClass = 'badge-status-expired';
+                          else if (candStatutId === 7 || candStatutNom.toLowerCase().includes('embauch') || candStatutNom.toLowerCase().includes('admis')) candBadgeClass = 'badge-status-active';
+                          else if (candStatutId === 6 || candStatutNom.toLowerCase().includes('offre')) candBadgeClass = 'badge-status-info';
+                          else if (candStatutId === 5 || candStatutNom.toLowerCase().includes('entretien')) candBadgeClass = 'badge-status-upcoming';
+
+                          let scoreBadgeClass = 'badge-status-active';
+                          if (item.scoreGlobal < 10) scoreBadgeClass = 'badge-status-expired';
+                          else if (item.scoreGlobal < 14) scoreBadgeClass = 'badge-status-upcoming';
+
+                          return (
+                            <tr key={item.candidat.id} style={{ backgroundColor: isBest ? '#f0fdf4' : 'transparent' }}>
+                              <td>
+                                <span style={{
+                                  fontWeight: 800,
+                                  fontSize: isBest ? '1.1rem' : '0.95rem',
+                                  color: isBest ? '#057642' : '#475569'
+                                }}>
+                                  #{rank} {isBest && '(Meilleur)'}
+                                </span>
+                              </td>
+                              <td>
+                                <strong>{item.candidat.prenom} {item.candidat.nom}</strong>
+                                <span className="poste-desc-preview">
+                                  {item.candidat.compteCandidat?.email || '—'}
+                                </span>
+                              </td>
+                              <td>{item.annonce?.nomposte || '—'}</td>
+                              <td>
+                                <strong>{item.noteQcmSur20} / 20</strong>
+                                <span className="text-muted" style={{ fontSize: '0.8rem', display: 'block' }}>
+                                  ({item.pourcentageQcm}%)
+                                </span>
+                              </td>
+                              <td>
+                                <strong>{item.noteEntretien} / 20</strong>
+                              </td>
+                              <td>
+                                <span className={`status-pill ${scoreBadgeClass}`} style={{ fontSize: '1rem', fontWeight: 700 }}>
+                                  {item.scoreGlobal} / 20
+                                </span>
+                              </td>
+                              <td>
+                                {item.appreciation ? (
+                                  <em style={{ fontSize: '0.85rem' }}>"{item.appreciation}"</em>
+                                ) : (
+                                  <span className="text-muted">—</span>
+                                )}
+                              </td>
+                              <td>
+                                <span className={`status-pill ${candBadgeClass}`}>
+                                  {candStatutNom}
+                                </span>
+                              </td>
+                              <td>
+                                <div className="action-buttons-group" style={{ justifyContent: 'flex-end', gap: '0.35rem' }}>
+                                  <button
+                                    className="btn-icon btn-icon-view"
+                                    title="Proposer une offre au candidat"
+                                    onClick={() => handleUpdateCandidatStatutDirect(item.candidat.id, 6, 'Offre Transmise')}
+                                  >
+                                    <span>Offre</span>
+                                  </button>
+                                  <button
+                                    className="btn-icon btn-icon-edit"
+                                    style={{ backgroundColor: '#365f91', borderColor: '#2a4b73', color: '#ffffff' }}
+                                    title="Embaucher directement ce candidat"
+                                    onClick={() => handleUpdateCandidatStatutDirect(item.candidat.id, 7, 'Admis / Embauché')}
+                                  >
+                                    <span>Embaucher</span>
+                                  </button>
+                                  <button
+                                    className="btn-icon btn-icon-delete"
+                                    title="Refuser ce candidat"
+                                    onClick={() => handleUpdateCandidatStatutDirect(item.candidat.id, 8, 'Refusé')}
+                                  >
+                                    <span>Refuser</span>
                                   </button>
                                 </div>
                               </td>

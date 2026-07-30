@@ -268,7 +268,11 @@ function AnnoncesManagementPage() {
             <p>Créez, modifiez et gérez les offres d'emploi diffusées pour l'entreprise</p>
           </div>
           <button className="btn-linkedin-action-header" onClick={handleOpenCreateModal}>
-            Nouvelle Annonce
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Nouvelle Annonce</span>
           </button>
         </div>
       </div>
@@ -374,7 +378,7 @@ function AnnoncesManagementPage() {
           {(searchKeyword || selectedDept || selectedProfil || selectedType || selectedStatut) && (
             <div style={{ marginTop: '1rem', textAlign: 'right' }}>
               <button
-                className="btn-linkedin-secondary-sm"
+                className="btn-linkedin-secondary-sm btn-reset-filters"
                 onClick={() => {
                   setSearchKeyword('');
                   setSelectedDept('');
@@ -383,7 +387,11 @@ function AnnoncesManagementPage() {
                   setSelectedStatut('');
                 }}
               >
-                Réinitialiser les filtres
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                  <path d="M3 3v5h5"></path>
+                </svg>
+                <span>Réinitialiser les filtres</span>
               </button>
             </div>
           )}
@@ -457,24 +465,36 @@ function AnnoncesManagementPage() {
                           <div className="action-buttons-group">
                             <button
                               className="btn-icon btn-icon-view"
-                              title="Voir les détails"
+                              title="Voir les détails de l'annonce"
                               onClick={() => handleOpenDetailsModal(annonce)}
                             >
-                              Détails
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                              </svg>
+                              <span>Détails</span>
                             </button>
                             <button
                               className="btn-icon btn-icon-edit"
-                              title="Modifier"
+                              title="Modifier l'annonce"
                               onClick={() => handleOpenEditModal(annonce)}
                             >
-                              Éditer
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                              </svg>
+                              <span>Éditer</span>
                             </button>
                             <button
                               className="btn-icon btn-icon-delete"
-                              title="Supprimer"
+                              title="Supprimer l'annonce"
                               onClick={() => handleOpenDeleteModal(annonce)}
                             >
-                              Suppr.
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                              </svg>
+                              <span>Suppr.</span>
                             </button>
                           </div>
                         </td>
@@ -493,8 +513,19 @@ function AnnoncesManagementPage() {
         <div className="modal-backdrop">
           <div className="modal-content modal-lg">
             <div className="modal-header">
-              <h2>{editingAnnonce ? `Modifier l'annonce : ${editingAnnonce.nomposte}` : 'Créer une nouvelle annonce'}</h2>
-              <button className="modal-close-btn" onClick={() => setShowFormModal(false)}>✕</button>
+              <div className="details-title-wrapper">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9ab4d6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <h2>{editingAnnonce ? `Modifier l'annonce : ${editingAnnonce.nomposte}` : 'Créer une nouvelle annonce'}</h2>
+              </div>
+              <button className="modal-close-btn" onClick={() => setShowFormModal(false)} aria-label="Fermer">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
             </div>
 
             <form onSubmit={handleSubmitForm} className="modal-body form-grid-2">
@@ -610,74 +641,221 @@ function AnnoncesManagementPage() {
       {/* MODALE DÉTAILS D'UNE ANNONCE */}
       {showDetailsModal && detailsAnnonce && (
         <div className="modal-backdrop">
-          <div className="modal-content modal-md">
+          <div className="modal-content modal-md details-modal-content">
             <div className="modal-header">
-              <h2>Détails de l'annonce : {detailsAnnonce.nomposte}</h2>
-              <button className="modal-close-btn" onClick={() => setShowDetailsModal(false)}>✕</button>
+              <div className="details-title-wrapper">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a66c2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <h2>{detailsAnnonce.nomposte}</h2>
+              </div>
+              <button className="modal-close-btn" onClick={() => setShowDetailsModal(false)} aria-label="Fermer">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
             </div>
 
             <div className="modal-body details-body">
+              {/* Statut & Badges principaux */}
               <div className="details-header-badges">
-                <span className="badge-dept">Département : {detailsAnnonce.departement?.nom || 'N/A'}</span>
-                <span className="badge-profil">Profil : {detailsAnnonce.profil?.nom || 'N/A'}</span>
-                <span className="badge-type">Type : {detailsAnnonce.typeannonce?.libelle || 'Standard'}</span>
+                {(() => {
+                  const status = getAnnonceStatus(detailsAnnonce);
+                  return (
+                    <span className={`status-pill ${status.css}`}>
+                      {status.label}
+                    </span>
+                  );
+                })()}
+                {detailsAnnonce.departement && (
+                  <span className="badge-dept">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                      <line x1="9" y1="6" x2="9" y2="6.01"></line>
+                      <line x1="15" y1="6" x2="15" y2="6.01"></line>
+                      <line x1="9" y1="10" x2="9" y2="10.01"></line>
+                      <line x1="15" y1="10" x2="15" y2="10.01"></line>
+                      <line x1="9" y1="14" x2="9" y2="14.01"></line>
+                      <line x1="15" y1="14" x2="15" y2="14.01"></line>
+                      <line x1="9" y1="18" x2="15" y2="18"></line>
+                    </svg>
+                    {detailsAnnonce.departement.nom}
+                  </span>
+                )}
+                {detailsAnnonce.profil && (
+                  <span className="badge-profil">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    {detailsAnnonce.profil.nom}
+                  </span>
+                )}
+                {detailsAnnonce.typeannonce && (
+                  <span className="badge-type-pill">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="4" y1="9" x2="20" y2="9"></line>
+                      <line x1="4" y1="15" x2="20" y2="15"></line>
+                      <line x1="10" y1="3" x2="8" y2="21"></line>
+                      <line x1="16" y1="3" x2="14" y2="21"></line>
+                    </svg>
+                    {detailsAnnonce.typeannonce.libelle}
+                  </span>
+                )}
               </div>
 
-              <div className="details-dates-box">
-                <p><strong>Date de publication :</strong> {detailsAnnonce.datepublication || 'Non précisée'}</p>
-                <p><strong>Période de candidature :</strong> Du {detailsAnnonce.datedebut || 'N/A'} au {detailsAnnonce.datefin || 'Illimitée'}</p>
-              </div>
+              {/* Grid des dates importantes */}
+              <div className="details-dates-grid">
+                <div className="date-card">
+                  <div className="date-icon-box">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                  </div>
+                  <div className="date-info">
+                    <span className="date-label">Publication</span>
+                    <strong className="date-value">{detailsAnnonce.datepublication || 'Non précisée'}</strong>
+                  </div>
+                </div>
 
-              <div className="details-section">
-                <h4>Description de l'offre</h4>
-                <div className="details-desc-text">
-                  {detailsAnnonce.description ? detailsAnnonce.description : <em>Aucune description fournie.</em>}
+                <div className="date-card">
+                  <div className="date-icon-box green">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </div>
+                  <div className="date-info">
+                    <span className="date-label">Début de candidature</span>
+                    <strong className="date-value">{detailsAnnonce.datedebut || 'Immédaiate'}</strong>
+                  </div>
+                </div>
+
+                <div className="date-card">
+                  <div className="date-icon-box orange">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                      <path d="M8 14h.01"></path>
+                      <path d="M12 14h.01"></path>
+                      <path d="M16 14h.01"></path>
+                    </svg>
+                  </div>
+                  <div className="date-info">
+                    <span className="date-label">Limite de candidature</span>
+                    <strong className="date-value">{detailsAnnonce.datefin || 'Illimitée'}</strong>
+                  </div>
                 </div>
               </div>
 
+              {/* Description de l'offre */}
+              <div className="details-section">
+                <div className="details-section-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                  </svg>
+                  <h4>Description du poste</h4>
+                </div>
+                <div className="details-desc-box">
+                  {detailsAnnonce.description ? detailsAnnonce.description : <em className="text-muted">Aucune description fournie pour cette offre.</em>}
+                </div>
+              </div>
+
+              {/* Critères et Diplômes */}
               {loadingDetails ? (
                 <div className="loading-spinner-container">
                   <div className="spinner-sm"></div>
                   <p>Chargement des critères et diplômes exigés...</p>
                 </div>
               ) : (
-                <>
+                <div className="details-grid-2">
                   <div className="details-section">
-                    <h4>Critères requis pour le profil</h4>
+                    <div className="details-section-title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                      </svg>
+                      <h4>Critères exigés</h4>
+                    </div>
                     {detailsCriteres.length === 0 ? (
-                      <p className="text-muted">Aucun critère spécifique configuré pour ce profil.</p>
+                      <div className="empty-details-card">Aucun critère configuré.</div>
                     ) : (
-                      <ul className="details-list">
+                      <div className="criteres-chip-list">
                         {detailsCriteres.map(c => (
-                          <li key={c.id}>
-                            <strong>{c.critere?.nom} :</strong>{' '}
-                            {c.valeurvarchar || c.valeurdouble || (c.valeurbool !== null ? (c.valeurbool ? 'Oui' : 'Non') : 'Non spécifié')}
-                            {c.estobligatoire && <span className="tag-obligatoire"> (Obligatoire)</span>}
-                          </li>
+                          <div key={c.id} className="critere-chip-item">
+                            <div className="critere-name">
+                              <strong>{c.critere?.nom || 'Critère'}</strong>
+                              {c.estobligatoire && (
+                                <span className="tag-obligatoire">
+                                  ★ Obligatoire
+                                </span>
+                              )}
+                            </div>
+                            <div className="critere-value">
+                              {c.valeurvarchar || c.valeurdouble || (c.valeurbool !== null ? (c.valeurbool ? 'Oui' : 'Non') : 'Non spécifié')}
+                            </div>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     )}
                   </div>
 
                   <div className="details-section">
-                    <h4>Diplômes exigés</h4>
+                    <div className="details-section-title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                      </svg>
+                      <h4>Diplômes requis</h4>
+                    </div>
                     {detailsDiplomes.length === 0 ? (
-                      <p className="text-muted">Aucun diplôme spécifique requis pour ce profil.</p>
+                      <div className="empty-details-card">Aucun diplôme spécifique requis.</div>
                     ) : (
-                      <ul className="details-list">
+                      <div className="diplomes-chip-list">
                         {detailsDiplomes.map(d => (
-                          <li key={d.id}>{d.diplome?.nom}</li>
+                          <div key={d.id} className="diplome-chip-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a66c2" strokeWidth="2">
+                              <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                              <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                            </svg>
+                            <span>{d.diplome?.nom || 'Diplôme non spécifié'}</span>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     )}
                   </div>
-                </>
+                </div>
               )}
             </div>
 
             <div className="modal-footer">
-              <button className="btn-linkedin-primary" onClick={() => setShowDetailsModal(false)}>
+              <button className="btn-linkedin-secondary" onClick={() => setShowDetailsModal(false)}>
                 Fermer
+              </button>
+              <button
+                className="btn-linkedin-primary"
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  handleOpenEditModal(detailsAnnonce);
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <span>Modifier cette annonce</span>
               </button>
             </div>
           </div>
@@ -689,8 +867,19 @@ function AnnoncesManagementPage() {
         <div className="modal-backdrop">
           <div className="modal-content modal-sm">
             <div className="modal-header">
-              <h2>Confirmation de suppression</h2>
-              <button className="modal-close-btn" onClick={() => setShowDeleteModal(false)}>✕</button>
+              <div className="details-title-wrapper">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <h2>Confirmation de suppression</h2>
+              </div>
+              <button className="modal-close-btn" onClick={() => setShowDeleteModal(false)} aria-label="Fermer">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
             </div>
 
             <div className="modal-body">

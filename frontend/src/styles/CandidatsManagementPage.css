@@ -1,22 +1,22 @@
 /* ==========================================================================
-   CANDIDATS MANAGEMENT PAGE (ATS / KANBAN) - STYLE LINKEDIN CORPORATE
+   CANDIDATS MANAGEMENT PAGE (ATS / KANBAN) - THEME DOLIBARR ERP
    ========================================================================== */
 
 /* --- BOUTONS BASCULE DE VUE (KANBAN / LISTE) --- */
 .view-mode-toggle {
   display: flex;
-  background: #f4f2ee;
+  background: #eaeff5;
   padding: 0.25rem;
-  border-radius: 20px;
-  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
 }
 
 .view-btn {
   background: transparent;
   border: none;
-  color: rgba(0, 0, 0, 0.6);
+  color: #475569;
   padding: 0.45rem 1rem;
-  border-radius: 16px;
+  border-radius: 4px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -24,16 +24,16 @@
 }
 
 .view-btn:hover {
-  color: #0a66c2;
+  color: #365f91;
 }
 
 .view-btn.active {
-  background: #0a66c2;
+  background: #365f91;
   color: #ffffff;
-  box-shadow: 0 2px 6px rgba(10, 102, 194, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-/* --- TABLEAU KANBAN ATS LINKEDIN --- */
+/* --- TABLEAU KANBAN ATS DOLIBARR --- */
 .kanban-board-container {
   display: flex;
   gap: 1.25rem;
@@ -44,9 +44,9 @@
 
 .kanban-column {
   flex: 0 0 300px;
-  background-color: #f4f2ee;
-  border-radius: 12px;
-  border: 1px solid #e0e0e0;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
   display: flex;
   flex-direction: column;
   max-height: 80vh;
@@ -54,41 +54,41 @@
 }
 
 .kanban-column.drag-over {
-  background-color: #e8f4f9;
-  border-color: #0a66c2;
-  box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.3);
+  background-color: #eff6ff;
+  border-color: #365f91;
+  box-shadow: 0 0 0 2px rgba(54, 95, 145, 0.3);
 }
 
 .kanban-column-header {
-  padding: 1rem 1.25rem;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+  padding: 0.85rem 1rem;
+  background-color: #eaeff5;
+  border-bottom: 1px solid #cbd5e1;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-left: 4px solid #365f91;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .kanban-column-header h4 {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  color: rgba(0, 0, 0, 0.9);
+  color: #2c3e50;
   margin: 0;
 }
 
 .kanban-count-badge {
-  background-color: #e8f4f9;
-  color: #0a66c2;
-  font-size: 0.8rem;
+  background-color: #365f91;
+  color: #ffffff;
+  font-size: 0.78rem;
   font-weight: 700;
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  border: 1px solid #b3d7f5;
+  padding: 0.15rem 0.55rem;
+  border-radius: 3px;
 }
 
 .kanban-cards-list {
-  padding: 1rem;
+  padding: 0.85rem;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -98,18 +98,18 @@
 
 .kanban-card {
   background-color: #ffffff;
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 1rem;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.05);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   cursor: grab;
   transition: all 0.2s ease;
 }
 
 .kanban-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-  border-color: #0a66c2;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border-color: #365f91;
 }
 
 .kanban-card:active {
@@ -124,29 +124,29 @@
 }
 
 .candidate-avatar {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background-color: #0a66c2;
+  background-color: #365f91;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.95rem;
   flex-shrink: 0;
 }
 
 .candidate-name {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  color: rgba(0, 0, 0, 0.9);
+  color: #2c3e50;
   margin: 0 0 0.2rem 0;
 }
 
 .candidate-job {
   font-size: 0.8rem;
-  color: rgba(0, 0, 0, 0.6);
+  color: #64748b;
   margin: 0;
 }
 
@@ -154,21 +154,21 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid #f3f6f8;
+  border-top: 1px solid #f1f5f9;
   padding-top: 0.6rem;
   margin-top: 0.5rem;
 }
 
 .cand-date {
   font-size: 0.75rem;
-  color: rgba(0, 0, 0, 0.6);
+  color: #64748b;
 }
 
 .btn-icon-view-sm {
-  background-color: #e8f4f9;
-  color: #0a66c2;
-  border: 1px solid #b3d7f5;
-  border-radius: 14px;
+  background-color: #eff6ff;
+  color: #365f91;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
   padding: 0.25rem 0.65rem;
   font-size: 0.75rem;
   font-weight: 600;
@@ -177,24 +177,26 @@
 }
 
 .btn-icon-view-sm:hover {
-  background-color: #d0e8f7;
+  background-color: #365f91;
+  color: #ffffff;
+  border-color: #365f91;
 }
 
 .kanban-empty-dropzone {
   text-align: center;
   padding: 2rem 1rem;
   border: 2px dashed #cbd5e1;
-  border-radius: 8px;
+  border-radius: 4px;
   color: #94a3b8;
   font-size: 0.82rem;
   font-weight: 500;
 }
 
-/* --- FICHE CANDIDAT ATS SPLIT VIEW --- */
+/* --- FICHE CANDIDAT ATS SPLIT VIEW DOLIBARR --- */
 .ats-split-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 @media (max-width: 950px) {
@@ -211,8 +213,8 @@
 
 .ats-box {
   background-color: #ffffff;
-  border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
   padding: 1.25rem;
 }
 
@@ -221,7 +223,7 @@
   list-style: none;
   padding: 0 0 0 1rem;
   margin: 0;
-  border-left: 2px solid #0a66c2;
+  border-left: 2px solid #365f91;
 }
 
 .timeline-item {
@@ -241,9 +243,9 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: #0a66c2;
+  background-color: #365f91;
   border: 2px solid #ffffff;
-  box-shadow: 0 0 0 2px #e8f4f9;
+  box-shadow: 0 0 0 2px #eff6ff;
 }
 
 .timeline-content {
@@ -254,6 +256,6 @@
 
 .timeline-date {
   font-size: 0.75rem;
-  color: rgba(0, 0, 0, 0.6);
+  color: #64748b;
   margin-top: 0.15rem;
 }

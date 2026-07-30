@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   getTousLesCandidats,
+  getStatutsCandidat,
   getCandidatDetailComplete,
   updateStatutCandidat,
   getCvUrl
@@ -40,27 +41,17 @@ function CandidatsManagementPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [candidatsData, annoncesData] = await Promise.all([
+      const [candidatsData, annoncesData, backendStatuts] = await Promise.all([
         getTousLesCandidats(),
-        getAllAnnonces()
+        getAllAnnonces(),
+        getStatutsCandidat().catch(() => [])
       ]);
 
       const candList = candidatsData || [];
       setCandidats(candList);
       setAnnonces(annoncesData || []);
 
-      // Extraire la liste unique des statuts depuis les candidats
-      const statutsMap = new Map();
-      candList.forEach(c => {
-        if (c.statut && c.statut.id) {
-          statutsMap.set(c.statut.id, c.statut);
-        }
-      });
-
-      // Liste des statuts ordonnée par id
-      const sortedStatuts = Array.from(statutsMap.values()).sort((a, b) => a.id - b.id);
-
-      // Si la base ne renvoie pas tous les statuts, créer la liste complète par défaut
+      // Liste des statuts par défaut de la chaîne d'évaluation RH
       const defaultStatuts = [
         { id: 1, nom: 'En attente' },
         { id: 2, nom: 'Présélectionné' },
@@ -72,7 +63,23 @@ function CandidatsManagementPage() {
         { id: 8, nom: 'Refusé' }
       ];
 
-      setStatuts(sortedStatuts.length >= 4 ? sortedStatuts : defaultStatuts);
+      const statutsMap = new Map();
+      // 1. Ajouter d'abord les statuts par défaut
+      defaultStatuts.forEach(s => statutsMap.set(s.id, s));
+      // 2. Remplacer/ajouter avec les statuts retournés par le backend
+      (backendStatuts || []).forEach(s => {
+        if (s && s.id) statutsMap.set(s.id, s);
+      });
+      // 3. Inclure tout statut associé aux candidats existants
+      candList.forEach(c => {
+        if (c.statut && c.statut.id) {
+          statutsMap.set(c.statut.id, c.statut);
+        }
+      });
+
+      // Trier tous les statuts par ID
+      const allStatuts = Array.from(statutsMap.values()).sort((a, b) => a.id - b.id);
+      setStatuts(allStatuts);
     } catch (err) {
       console.error('Erreur lors du chargement ATS :', err);
     } finally {

@@ -1,39 +1,54 @@
 /* ==========================================================================
-   CRITERE MANAGER PAGE (FORMULAIRES DYNAMIQUES) - STYLE LINKEDIN CORPORATE
+   CRITERE MANAGER PAGE (FORMULAIRES DYNAMIQUES) - THEME DOLIBARR ERP
    ========================================================================== */
 
 .btn-toggle-badge {
-  padding: 0.35rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
   border: 1px solid transparent;
   transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .btn-toggle-badge.is-mandatory {
-  background-color: #fce8e6;
-  color: #c00000;
-  border-color: #f5c6cb;
+  background-color: var(--dolibarr-danger);
+  color: #ffffff;
+  border-color: #a00000;
 }
 
 .btn-toggle-badge.is-mandatory:hover {
-  background-color: #f7d4d0;
+  background-color: #a00000;
+  box-shadow: 0 2px 4px rgba(160, 0, 0, 0.25);
 }
 
 .btn-toggle-badge.is-optional {
-  background-color: #f4f2ee;
-  color: rgba(0, 0, 0, 0.6);
-  border-color: #e0e0e0;
+  background-color: #64748b;
+  color: #ffffff;
+  border-color: #475569;
 }
 
 .btn-toggle-badge.is-optional:hover {
-  background-color: #e0e0e0;
+  background-color: #475569;
+  box-shadow: 0 2px 4px rgba(71, 85, 105, 0.25);
 }
 
 .active-tag-sm {
   font-size: 0.75rem;
-  color: #0a66c2;
+  color: var(--dolibarr-primary);
   font-weight: 600;
+}
+
+.badge-type {
+  background-color: #eff6ff;
+  color: var(--dolibarr-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 3px;
+  border: 1px solid #bfdbfe;
 }

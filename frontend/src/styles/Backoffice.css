@@ -1,45 +1,46 @@
 /* ==========================================================================
-   BACKOFFICE RH - DESIGN SYSTEM BASE (STYLE LINKEDIN CORPORATE)
-   ========================================================================== */
+   BACKOFFICE RH - DESIGN SYSTEM BASE (THEME DOLIBARR ERP)
+   ========================================================================= */
 
 :root {
-  /* Palette Officielle LinkedIn Corporate */
-  --linkedin-blue: #0a66c2;
-  --linkedin-blue-hover: #004182;
-  --linkedin-blue-light: #e8f4f9;
-  --linkedin-blue-border: #b3d7f5;
+  /* Palette Officielle Dolibarr ERP / CRM */
+  --dolibarr-primary: #365f91;        /* Bleu Corporate Dolibarr */
+  --dolibarr-primary-hover: #2a4b73;  /* Bleu Survol */
+  --dolibarr-primary-light: #eaeff5;  /* Fond d'en-tête / Onglet */
+  --dolibarr-primary-border: #9ab4d6;
 
-  --linkedin-bg-canvas: #f4f2ee; /* Fond beige/gris signature LinkedIn */
-  --linkedin-card-bg: #ffffff;
-  --linkedin-border: #e0e0e0;
+  --dolibarr-dark-slate: #2c3e50;     /* Navigation & Topbar ERP */
+  --dolibarr-dark-hover: #34495e;
 
-  --linkedin-text-dark: rgba(0, 0, 0, 0.9);
-  --linkedin-text-body: rgba(0, 0, 0, 0.75);
-  --linkedin-text-secondary: rgba(0, 0, 0, 0.6);
+  --dolibarr-bg-canvas: #f4f6f9;      /* Fond principal ERP */
+  --dolibarr-card-bg: #ffffff;
+  --dolibarr-border: #cbd5e1;         /* Bordures tableaux & fiches */
+  --dolibarr-border-light: #e2e8f0;
 
-  --linkedin-sidebar-bg: #1d2226; /* Dark LinkedIn header / sidebar */
-  --linkedin-sidebar-hover: #2d3339;
+  --dolibarr-text-dark: #1e293b;
+  --dolibarr-text-body: #334155;
+  --dolibarr-text-muted: #64748b;
 
-  --linkedin-success: #057642;
-  --linkedin-success-bg: #e6f4ea;
-  --linkedin-danger: #c00000;
-  --linkedin-danger-bg: #fce8e6;
-  --linkedin-warning: #b25900;
-  --linkedin-warning-bg: #fff8e1;
+  --dolibarr-success: #27ae60;
+  --dolibarr-success-bg: #e8f8f0;
+  --dolibarr-warning: #f39c12;
+  --dolibarr-warning-bg: #fef5e7;
+  --dolibarr-danger: #c00000;
+  --dolibarr-danger-bg: #fce8e6;
 
-  --linkedin-radius-pill: 20px;
-  --linkedin-radius-card: 10px;
-  --linkedin-radius-sm: 6px;
-  --linkedin-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+  --dolibarr-radius-card: 6px;
+  --dolibarr-radius-sm: 4px;
+  --dolibarr-radius-pill: 16px;
+  --dolibarr-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 /* Base Body & Reset */
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: var(--linkedin-bg-canvas);
-  color: var(--linkedin-text-body);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: var(--dolibarr-bg-canvas);
+  color: var(--dolibarr-text-body);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -50,17 +51,19 @@ body {
   width: 100%;
 }
 
-/* SIDEBAR LINKEDIN CORPORATE (DESIGN PUR & ÉLÉGANT) */
+/* ==========================================================================
+   SIDEBAR DOLIBARR ERP (DARK SLATE BLUE)
+   ========================================================================== */
 .backoffice-sidebar {
   width: 270px;
-  background-color: #ffffff;
-  border-right: 1px solid #e0e0e0;
-  color: rgba(0, 0, 0, 0.9);
+  background-color: var(--dolibarr-dark-slate);
+  border-right: 1px solid #1a252f;
+  color: #ecf0f1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 1.25rem 1rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.03);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
   flex-shrink: 0;
   z-index: 10;
 }
@@ -70,15 +73,15 @@ body {
   align-items: center;
   gap: 0.75rem;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #34495e;
   margin-bottom: 1rem;
 }
 
 .brand-badge-linkedin {
-  background-color: #0a66c2;
+  background: linear-gradient(135deg, #365f91 0%, #2a4b73 100%);
   color: #ffffff;
   font-weight: 900;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   width: 38px;
   height: 38px;
   border-radius: 6px;
@@ -86,40 +89,39 @@ body {
   align-items: center;
   justify-content: center;
   letter-spacing: -0.5px;
-  font-family: Arial, sans-serif;
-  box-shadow: 0 2px 4px rgba(10, 102, 194, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .brand-title-linkedin {
   font-size: 1.1rem;
   font-weight: 800;
-  color: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
   line-height: 1.2;
 }
 
 .brand-subtitle-linkedin {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #0a66c2;
+  color: #9ab4d6;
 }
 
-/* USER PROFILE WIDGET IN SIDEBAR */
+/* WIDGET PROFIL DANS LA SIDEBAR DOLIBARR */
 .user-profile-widget-linkedin {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.85rem;
-  background-color: #e8f4f9;
-  border: 1px solid #b3d7f5;
-  border-radius: 10px;
+  background-color: #34495e;
+  border: 1px solid #4a6278;
+  border-radius: 6px;
   margin-bottom: 1.25rem;
 }
 
 .user-avatar-linkedin {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background-color: #0a66c2;
+  background-color: #365f91;
   color: #ffffff;
   font-weight: 700;
   font-size: 1.05rem;
@@ -127,6 +129,7 @@ body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border: 2px solid #9ab4d6;
 }
 
 .user-info-linkedin {
@@ -138,14 +141,14 @@ body {
 
 .user-label-linkedin {
   font-size: 0.7rem;
-  color: rgba(0, 0, 0, 0.55);
+  color: #bdc3c7;
   font-weight: 600;
 }
 
 .user-name-linkedin {
   font-size: 0.88rem;
   font-weight: 700;
-  color: #0a66c2;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -154,23 +157,23 @@ body {
 .user-role-badge {
   font-size: 0.7rem;
   font-weight: 600;
-  color: #057642;
+  color: #2ecc71;
 }
 
-/* NAVIGATION LINKS LINKEDIN */
+/* NAVIGATION LINKS DOLIBARR */
 .nav-section-title {
   font-size: 0.72rem;
   font-weight: 800;
-  color: rgba(0, 0, 0, 0.5);
+  color: #95a5a6;
   letter-spacing: 0.6px;
-  margin: 0.5rem 0 0.4rem 0.5rem;
+  margin: 0.6rem 0 0.4rem 0.5rem;
   text-transform: uppercase;
 }
 
 .backoffice-nav {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
 }
 
 .nav-item-linkedin {
@@ -178,11 +181,11 @@ body {
   align-items: center;
   gap: 0.75rem;
   padding: 0.65rem 0.85rem;
-  color: rgba(0, 0, 0, 0.7);
+  color: #ecf0f1;
   text-decoration: none;
   font-size: 0.88rem;
   font-weight: 600;
-  border-radius: 20px;
+  border-radius: 4px;
   transition: all 0.2s ease;
   border-left: 3px solid transparent;
 }
@@ -192,33 +195,36 @@ body {
 }
 
 .nav-item-linkedin:hover {
-  background-color: #e8f4f9;
-  color: #0a66c2;
+  background-color: #34495e;
+  color: #ffffff;
+  border-left-color: #9ab4d6;
 }
 
 .nav-item-linkedin.active {
-  background-color: #0a66c2;
+  background-color: #365f91;
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 2px 6px rgba(10, 102, 194, 0.3);
+  border-left-color: #60a5fa;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .nav-item-external {
-  color: #0a66c2;
-  background-color: #f4f2ee;
+  color: #9ab4d6;
+  background-color: #1e2b37;
 }
 
 .nav-item-external:hover {
-  background-color: #e8f4f9;
+  background-color: #34495e;
+  color: #ffffff;
 }
 
-/* BUTTON LOGOUT SIDEBAR */
+/* BOUTON DÉCONNEXION SIDEBAR */
 .btn-linkedin-logout-sidebar {
-  background-color: #ffffff;
-  color: #c00000;
-  border: 1px solid #f5c6cb;
+  background-color: #34495e;
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
   padding: 0.65rem 1rem;
-  border-radius: 20px;
+  border-radius: 4px;
   font-weight: 600;
   font-size: 0.88rem;
   cursor: pointer;
@@ -229,7 +235,8 @@ body {
 }
 
 .btn-linkedin-logout-sidebar:hover {
-  background-color: #fce8e6;
+  background-color: #c00000;
+  color: #ffffff;
   border-color: #c00000;
 }
 
@@ -242,34 +249,34 @@ body {
   overflow-y: auto;
 }
 
-/* BANNIÈRE EN-TÊTE PAGE LINKEDIN CORPORATE */
+/* BANNIÈRE EN-TÊTE PAGE DOLIBARR ERP */
 .backoffice-banner {
   background: #ffffff;
-  color: var(--linkedin-text-dark);
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid var(--linkedin-border);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  color: var(--dolibarr-text-dark);
+  padding: 1.25rem 2rem;
+  border-bottom: 2px solid var(--dolibarr-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .backoffice-banner-content h1 {
   margin: 0 0 0.3rem 0;
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 800;
-  color: var(--linkedin-text-dark);
+  color: var(--dolibarr-dark-slate);
 }
 
 .backoffice-banner-content p {
   margin: 0;
-  color: var(--linkedin-text-secondary);
-  font-size: 0.92rem;
+  color: var(--dolibarr-text-muted);
+  font-size: 0.9rem;
 }
 
 /* Dashboard & Page Container */
 .dashboard-container {
-  padding: 1.75rem 2rem;
+  padding: 1.5rem 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 /* FLEX UTILITIES */
@@ -282,7 +289,7 @@ body {
 .grid-2-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 @media (max-width: 1024px) {
@@ -291,72 +298,77 @@ body {
   }
 }
 
-/* CARTES STYLE LINKEDIN */
+/* CARTES ET BLOCS STYLE DOLIBARR ERP */
 .bo-card {
-  background-color: var(--linkedin-card-bg);
-  border-radius: var(--linkedin-radius-card);
-  border: 1px solid var(--linkedin-border);
-  box-shadow: var(--linkedin-shadow);
-  padding: 1.5rem;
+  background-color: var(--dolibarr-card-bg);
+  border-radius: var(--dolibarr-radius-card);
+  border: 1px solid var(--dolibarr-border);
+  box-shadow: var(--dolibarr-shadow);
+  padding: 1.25rem;
 }
 
 .bo-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--linkedin-border);
+  margin-bottom: 1rem;
+  padding: 0.65rem 0.85rem;
+  background-color: var(--dolibarr-primary-light);
+  border-left: 4px solid var(--dolibarr-primary);
+  border-bottom: 1px solid var(--dolibarr-border);
+  border-radius: 4px 4px 0 0;
+  margin: -1.25rem -1.25rem 1.25rem -1.25rem;
 }
 
 .bo-card-header h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: var(--linkedin-text-dark);
+  color: var(--dolibarr-dark-slate);
 }
 
-/* BOUTONS GENERIQUES STYLE LINKEDIN (BOUTONS PILULES) */
+/* BOUTONS DOLIBARR ERP */
 .btn-linkedin-primary, .btn-linkedin-action-header {
-  background-color: var(--linkedin-blue);
+  background-color: var(--dolibarr-primary);
   color: #ffffff;
-  border: none;
-  padding: 0.6rem 1.4rem;
-  border-radius: var(--linkedin-radius-pill);
+  border: 1px solid var(--dolibarr-primary-hover);
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--dolibarr-radius-sm);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(10, 102, 194, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn-linkedin-primary:hover, .btn-linkedin-action-header:hover {
-  background-color: var(--linkedin-blue-hover);
-  box-shadow: 0 4px 8px rgba(10, 102, 194, 0.3);
+  background-color: var(--dolibarr-primary-hover);
+  border-color: #1e3756;
 }
 
 .btn-linkedin-secondary {
   background-color: #ffffff;
-  color: var(--linkedin-blue);
-  border: 1px solid var(--linkedin-blue);
-  padding: 0.6rem 1.4rem;
-  border-radius: var(--linkedin-radius-pill);
+  color: var(--dolibarr-primary);
+  border: 1px solid var(--dolibarr-border);
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--dolibarr-radius-sm);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-linkedin-secondary:hover {
-  background-color: var(--linkedin-blue-light);
+  background-color: var(--dolibarr-primary-light);
+  border-color: var(--dolibarr-primary);
 }
 
 .btn-linkedin-secondary-sm {
   background-color: #ffffff;
-  color: var(--linkedin-blue);
-  border: 1px solid var(--linkedin-blue);
-  padding: 0.35rem 0.85rem;
-  border-radius: var(--linkedin-radius-pill);
+  color: var(--dolibarr-text-body);
+  border: 1px solid var(--dolibarr-border);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--dolibarr-radius-sm);
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -364,11 +376,12 @@ body {
 }
 
 .btn-linkedin-secondary-sm:hover, .btn-linkedin-secondary-sm.active {
-  background-color: var(--linkedin-blue-light);
-  border-color: var(--linkedin-blue);
+  background-color: var(--dolibarr-primary-light);
+  color: var(--dolibarr-primary);
+  border-color: var(--dolibarr-primary);
 }
 
-/* BOUTONS ICÔNES TABLEAU */
+/* BOUTONS ICÔNES ET ACTIONS TABLEAU DOLIBARR */
 .action-buttons-group {
   display: flex;
   align-items: center;
@@ -377,36 +390,69 @@ body {
 }
 
 .btn-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid var(--linkedin-border);
-  background-color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  height: 28px;
+  border-radius: 3px;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #334155;
+  transition: all 0.15s ease-in-out;
+  white-space: nowrap;
+  outline: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-icon svg {
+  flex-shrink: 0;
+}
+
+.btn-icon-view {
+  background-color: #ffffff;
+  border-color: #9ab4d6;
+  color: #365f91;
 }
 
 .btn-icon-view:hover {
-  background-color: var(--linkedin-blue-light);
-  border-color: var(--linkedin-blue-border);
-  color: var(--linkedin-blue);
+  background-color: #365f91;
+  border-color: #2a4b73;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(54, 95, 145, 0.25);
+}
+
+.btn-icon-edit {
+  background-color: #ffffff;
+  border-color: #fcd34d;
+  color: #b45309;
 }
 
 .btn-icon-edit:hover {
-  background-color: #fff8e1;
-  border-color: #ffe082;
+  background-color: #d97706;
+  border-color: #b45309;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(217, 119, 6, 0.25);
+}
+
+.btn-icon-delete {
+  background-color: #ffffff;
+  border-color: #fca5a5;
+  color: #c00000;
 }
 
 .btn-icon-delete:hover {
-  background-color: var(--linkedin-danger-bg);
-  border-color: #ffcdd2;
+  background-color: #c00000;
+  border-color: #a00000;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(192, 0, 0, 0.25);
 }
 
-/* TABLEAUX LINKEDIN */
+/* TABLEAUX DOLIBARR ERP */
 .bo-table-responsive {
   width: 100%;
   overflow-x: auto;
@@ -416,73 +462,94 @@ body {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .bo-table th {
-  background-color: #f8f9fa;
-  color: var(--linkedin-text-secondary);
+  background-color: #f1f5f9;
+  color: #334155;
   font-weight: 700;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--linkedin-border);
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--dolibarr-border);
   font-size: 0.82rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .bo-table td {
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid var(--linkedin-border);
-  color: var(--linkedin-text-body);
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--dolibarr-border-light);
+  color: var(--dolibarr-text-body);
+  background-color: #ffffff;
 }
 
-.bo-table tbody tr:hover {
-  background-color: #f3f6f8;
+.bo-table tbody tr:hover td {
+  background-color: #f8fafc;
 }
 
-/* BADGES & STATUTS LINKEDIN */
+/* BADGES & STATUTS DOLIBARR ERP */
 .status-pill {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .badge-status-active {
-  background-color: var(--linkedin-success-bg);
-  color: var(--linkedin-success);
-  border: 1px solid #b7e1cd;
+  background-color: var(--dolibarr-success);
+  color: #ffffff;
+  border: 1px solid #219653;
+}
+
+.badge-status-upcoming {
+  background-color: var(--dolibarr-warning);
+  color: #ffffff;
+  border: 1px solid #d68910;
 }
 
 .badge-status-expired {
-  background-color: var(--linkedin-danger-bg);
-  color: var(--linkedin-danger);
-  border: 1px solid #f5c6cb;
+  background-color: var(--dolibarr-danger);
+  color: #ffffff;
+  border: 1px solid #a00000;
 }
 
-/* FORMULAIRES & FILTRES */
+.badge-status-info {
+  background-color: #365f91;
+  color: #ffffff;
+  border: 1px solid #2a4b73;
+}
+
+.badge-status-neutral {
+  background-color: #64748b;
+  color: #ffffff;
+  border: 1px solid #475569;
+}
+
+/* FORMULAIRES & FILTRES DOLIBARR */
 .form-group-linkedin {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .form-group-linkedin label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: var(--linkedin-text-dark);
+  color: var(--dolibarr-dark-slate);
 }
 
 .form-group-linkedin input,
 .form-group-linkedin select,
 .form-group-linkedin textarea {
-  padding: 0.6rem 0.85rem;
-  border-radius: 6px;
-  border: 1px solid var(--linkedin-border);
+  padding: 0.55rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid var(--dolibarr-border);
   background-color: #ffffff;
-  font-size: 0.9rem;
-  color: var(--linkedin-text-dark);
+  font-size: 0.88rem;
+  color: var(--dolibarr-text-dark);
   transition: all 0.2s ease;
 }
 
@@ -490,26 +557,71 @@ body {
 .form-group-linkedin select:focus,
 .form-group-linkedin textarea:focus {
   outline: none;
-  border-color: var(--linkedin-blue);
-  box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.15);
+  border-color: var(--dolibarr-primary);
+  box-shadow: 0 0 0 3px rgba(54, 95, 145, 0.15);
 }
 
-/* ALERTES / NOTIFICATIONS */
+/* LISTE DE CHECKBOXES SOUS FORME DE CARTES ERP */
+.checkboxes-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.checkbox-item-card {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.85rem;
+  background-color: #ffffff;
+  border: 1px solid var(--dolibarr-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--dolibarr-dark-slate);
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+}
+
+.checkbox-item-card:hover {
+  border-color: var(--dolibarr-primary);
+  background-color: #f8fafc;
+}
+
+.checkbox-item-card.checked {
+  background-color: #eff6ff;
+  border-color: var(--dolibarr-primary);
+  color: var(--dolibarr-primary);
+  box-shadow: 0 0 0 1px var(--dolibarr-primary);
+}
+
+.checkbox-item-card input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--dolibarr-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+/* ALERTES DOLIBARR */
 .alert-linkedin-success {
-  background-color: var(--linkedin-success-bg);
-  color: var(--linkedin-success);
+  background-color: var(--dolibarr-success-bg);
+  color: #1e7e34;
   border: 1px solid #b7e1cd;
-  padding: 0.85rem 1.25rem;
-  border-radius: 8px;
+  padding: 0.75rem 1.1rem;
+  border-radius: 4px;
   font-weight: 600;
 }
 
 .alert-linkedin-error {
-  background-color: var(--linkedin-danger-bg);
-  color: var(--linkedin-danger);
+  background-color: var(--dolibarr-danger-bg);
+  color: var(--dolibarr-danger);
   border: 1px solid #f5c6cb;
-  padding: 0.85rem 1.25rem;
-  border-radius: 8px;
+  padding: 0.75rem 1.1rem;
+  border-radius: 4px;
   font-weight: 600;
 }
 
@@ -519,25 +631,25 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1rem;
-  color: var(--linkedin-text-secondary);
+  padding: 2.5rem 1rem;
+  color: var(--dolibarr-text-muted);
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--linkedin-border);
-  border-top-color: var(--linkedin-blue);
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--dolibarr-border);
+  border-top-color: var(--dolibarr-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
 
 .spinner-sm {
-  width: 24px;
-  height: 24px;
-  border: 3px solid var(--linkedin-border);
-  border-top-color: var(--linkedin-blue);
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--dolibarr-border);
+  border-top-color: var(--dolibarr-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -546,109 +658,182 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* MODALES BASE */
+/* MODALES BASE DOLIBARR ERP */
 .modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1.5rem;
+  padding: 1.25rem;
 }
 
 .modal-content {
   background-color: #ffffff;
-  border-radius: var(--linkedin-radius-card);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  border-radius: var(--dolibarr-radius-card);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border: 1px solid var(--dolibarr-dark-slate);
 }
 
 .modal-sm { max-width: 450px; }
-.modal-md { max-width: 650px; }
+.modal-md { max-width: 700px; }
 .modal-lg { max-width: 1050px; }
 
 .modal-header {
-  padding: 1.25rem 1.5rem;
-  background-color: #ffffff;
-  border-bottom: 1px solid var(--linkedin-border);
+  padding: 0.9rem 1.25rem;
+  background-color: var(--dolibarr-dark-slate) !important;
+  color: #ffffff !important;
+  border-bottom: 3px solid var(--dolibarr-primary);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.modal-header h2 {
+.modal-header h2,
+.details-title-wrapper h2 {
   margin: 0;
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--linkedin-text-dark);
+  color: #ffffff !important;
+}
+
+.details-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.details-title-wrapper svg {
+  stroke: #9ab4d6 !important;
+  flex-shrink: 0;
 }
 
 .modal-close-btn {
-  background: transparent;
-  border: none;
-  font-size: 1.25rem;
-  color: var(--linkedin-text-secondary);
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #ffffff !important;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn svg {
+  stroke: #ffffff !important;
+}
+
+.modal-close-btn:hover {
+  background-color: var(--dolibarr-danger) !important;
+  border-color: var(--dolibarr-danger) !important;
+}
+
+/* FORM GRID 2 COLS */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal-close-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: var(--dolibarr-danger);
+  border-color: var(--dolibarr-danger);
 }
 
 .modal-body {
-  padding: 1.5rem;
+  padding: 1.25rem;
   overflow-y: auto;
+  background-color: #f8fafc;
 }
 
 .modal-footer {
-  padding: 1rem 1.5rem;
-  background-color: #f8f9fa;
-  border-top: 1px solid var(--linkedin-border);
+  padding: 0.75rem 1.25rem;
+  background-color: #eaeff5;
+  border-top: 1px solid var(--dolibarr-border);
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
 }
 
-/* ONGLETS BASE STYLE LINKEDIN */
+/* ONGLETS DOLIBARR ERP */
 .bo-tabs-header {
   display: flex;
-  gap: 0.5rem;
-  border-bottom: 1px solid var(--linkedin-border);
+  gap: 0.35rem;
+  border-bottom: 2px solid var(--dolibarr-border);
 }
 
 .bo-tab-btn {
-  background: transparent;
-  border: none;
-  padding: 0.75rem 1.25rem;
+  background: #eaeff5;
+  border: 1px solid var(--dolibarr-border);
+  border-bottom: none;
+  padding: 0.65rem 1.1rem;
   font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--linkedin-text-secondary);
+  font-size: 0.88rem;
+  color: var(--dolibarr-text-body);
   cursor: pointer;
-  border-bottom: 3px solid transparent;
+  border-radius: 4px 4px 0 0;
   transition: all 0.2s ease;
 }
 
 .bo-tab-btn:hover {
-  color: var(--linkedin-blue);
+  background: #ffffff;
+  color: var(--dolibarr-primary);
 }
 
 .bo-tab-btn.active {
-  color: var(--linkedin-blue);
-  border-bottom-color: var(--linkedin-blue);
+  background: #ffffff;
+  color: var(--dolibarr-primary);
+  border-top: 3px solid var(--dolibarr-primary);
+  border-bottom: 2px solid #ffffff;
+  margin-bottom: -2px;
   font-weight: 700;
 }
 
 .empty-state {
   text-align: center;
   padding: 2.5rem 1rem;
-  color: var(--linkedin-text-secondary);
+  color: var(--dolibarr-text-muted);
 }
 
 .empty-icon {

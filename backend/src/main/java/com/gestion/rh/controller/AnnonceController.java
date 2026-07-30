@@ -24,12 +24,12 @@ public class AnnonceController {
     private final ProfilDiplomeRepository profilDiplomeRepository;
 
     public AnnonceController(AnnonceRepository annonceRepository,
-                             DepartementRepository departementRepository,
-                             ProfilRepository profilRepository,
-                             TypeAnnonceRepository typeAnnonceRepository,
-                             CritereProfilRepository critereProfilRepository,
-                             DiplomeRepository diplomeRepository,
-                             ProfilDiplomeRepository profilDiplomeRepository) {
+            DepartementRepository departementRepository,
+            ProfilRepository profilRepository,
+            TypeAnnonceRepository typeAnnonceRepository,
+            CritereProfilRepository critereProfilRepository,
+            DiplomeRepository diplomeRepository,
+            ProfilDiplomeRepository profilDiplomeRepository) {
         this.annonceRepository = annonceRepository;
         this.departementRepository = departementRepository;
         this.profilRepository = profilRepository;
@@ -49,8 +49,7 @@ public class AnnonceController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin) {
 
         List<Annonce> resultats = annonceRepository.rechercheMulticritere(
-            motCle, idDepartement, idProfil, idTypeAnnonce, dateDebut, dateFin
-        );
+                motCle, idDepartement, idProfil, idTypeAnnonce, dateDebut, dateFin);
         return ResponseEntity.ok(resultats);
     }
 
@@ -103,5 +102,79 @@ public class AnnonceController {
                     return ResponseEntity.ok(Collections.<ProfilDiplome>emptyList());
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("")
+    public ResponseEntity<List<Annonce>> getAllAnnonces() {
+        List<Annonce> list = annonceRepository.rechercheMulticritere(null, null, null, null, null, null);
+        return ResponseEntity.ok(list);
+    }
+
+    @PostMapping("")
+    public ResponseEntity<Annonce> createAnnonce(@RequestBody Annonce annonce) {
+        if (annonce.getDatepublication() == null) {
+            annonce.setDatepublication(LocalDate.now());
+        }
+        if (annonce.getDepartement() != null && annonce.getDepartement().getId() != null) {
+            departementRepository.findById(annonce.getDepartement().getId())
+                .ifPresent(annonce::setDepartement);
+        }
+        if (annonce.getProfil() != null && annonce.getProfil().getId() != null) {
+            profilRepository.findById(annonce.getProfil().getId())
+                .ifPresent(annonce::setProfil);
+        }
+        if (annonce.getTypeannonce() != null && annonce.getTypeannonce().getId() != null) {
+            typeAnnonceRepository.findById(annonce.getTypeannonce().getId())
+                .ifPresent(annonce::setTypeannonce);
+        }
+        Annonce saved = annonceRepository.save(annonce);
+        return ResponseEntity.ok(saved);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Annonce> updateAnnonce(@PathVariable Long id, @RequestBody Annonce annonceDetails) {
+        return annonceRepository.findById(id).map(existing -> {
+            existing.setNomposte(annonceDetails.getNomposte());
+            existing.setDescription(annonceDetails.getDescription());
+            existing.setDatedebut(annonceDetails.getDatedebut());
+            existing.setDatefin(annonceDetails.getDatefin());
+
+            if (annonceDetails.getDatepublication() != null) {
+                existing.setDatepublication(annonceDetails.getDatepublication());
+            }
+
+            if (annonceDetails.getDepartement() != null && annonceDetails.getDepartement().getId() != null) {
+                departementRepository.findById(annonceDetails.getDepartement().getId())
+                    .ifPresent(existing::setDepartement);
+            } else {
+                existing.setDepartement(null);
+            }
+
+            if (annonceDetails.getProfil() != null && annonceDetails.getProfil().getId() != null) {
+                profilRepository.findById(annonceDetails.getProfil().getId())
+                    .ifPresent(existing::setProfil);
+            } else {
+                existing.setProfil(null);
+            }
+
+            if (annonceDetails.getTypeannonce() != null && annonceDetails.getTypeannonce().getId() != null) {
+                typeAnnonceRepository.findById(annonceDetails.getTypeannonce().getId())
+                    .ifPresent(existing::setTypeannonce);
+            } else {
+                existing.setTypeannonce(null);
+            }
+
+            Annonce updated = annonceRepository.save(existing);
+            return ResponseEntity.ok(updated);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAnnonce(@PathVariable Long id) {
+        if (!annonceRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        annonceRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

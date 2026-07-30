@@ -1,0 +1,261 @@
+/* ==========================================================================
+   CANDIDATS MANAGEMENT PAGE (ATS / KANBAN) - THEME DOLIBARR ERP
+   ========================================================================== */
+
+/* --- BOUTONS BASCULE DE VUE (KANBAN / LISTE) --- */
+.view-mode-toggle {
+  display: flex;
+  background: #eaeff5;
+  padding: 0.25rem;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+}
+
+.view-btn {
+  background: transparent;
+  border: none;
+  color: #475569;
+  padding: 0.45rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-btn:hover {
+  color: #365f91;
+}
+
+.view-btn.active {
+  background: #365f91;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* --- TABLEAU KANBAN ATS DOLIBARR --- */
+.kanban-board-container {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding-bottom: 1.5rem;
+  align-items: flex-start;
+}
+
+.kanban-column {
+  flex: 0 0 300px;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  transition: all 0.2s ease;
+}
+
+.kanban-column.drag-over {
+  background-color: #eff6ff;
+  border-color: #365f91;
+  box-shadow: 0 0 0 2px rgba(54, 95, 145, 0.3);
+}
+
+.kanban-column-header {
+  padding: 0.85rem 1rem;
+  background-color: #eaeff5;
+  border-bottom: 1px solid #cbd5e1;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-left: 4px solid #365f91;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kanban-column-header h4 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.kanban-count-badge {
+  background-color: #365f91;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 3px;
+}
+
+.kanban-cards-list {
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  overflow-y: auto;
+  min-height: 120px;
+}
+
+.kanban-card {
+  background-color: #ffffff;
+  border-radius: 4px;
+  padding: 1rem;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border-color: #365f91;
+}
+
+.kanban-card:active {
+  cursor: grabbing;
+}
+
+.kanban-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.candidate-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #365f91;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.candidate-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 0.2rem 0;
+}
+
+.candidate-job {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.kanban-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.cand-date {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.btn-icon-view-sm {
+  background-color: #eff6ff;
+  color: #365f91;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-icon-view-sm:hover {
+  background-color: #365f91;
+  color: #ffffff;
+  border-color: #365f91;
+}
+
+.kanban-empty-dropzone {
+  text-align: center;
+  padding: 2rem 1rem;
+  border: 2px dashed #cbd5e1;
+  border-radius: 4px;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+/* --- FICHE CANDIDAT ATS SPLIT VIEW DOLIBARR --- */
+.ats-split-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 950px) {
+  .ats-split-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ats-col-left, .ats-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ats-box {
+  background-color: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  padding: 1.25rem;
+}
+
+/* --- TIMELINE DE STATUTS --- */
+.timeline-list {
+  list-style: none;
+  padding: 0 0 0 1rem;
+  margin: 0;
+  border-left: 2px solid #365f91;
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 1rem;
+  padding-left: 1.25rem;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -1.75rem;
+  top: 0.2rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #365f91;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px #eff6ff;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.88rem;
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}

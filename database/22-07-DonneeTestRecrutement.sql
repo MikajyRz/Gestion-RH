@@ -133,3 +133,10 @@ INSERT INTO entretien (idcandidat, dateheure, idstatut, idresultat) VALUES
   (SELECT id FROM statutentretien WHERE nom = 'Terminé'),
   (SELECT id FROM resultat WHERE note = 17)
 );
+
+-- 6. UTILISATEURS BACKOFFICE RH
+INSERT INTO employe (nom, prenom, email) VALUES
+('Responsable', 'RH', 'admin@gestionrh.com');
+
+INSERT INTO utilisateurs (email, motdepasse, idemploye) VALUES
+('admin@gestionrh.com', 'admin123', (SELECT id FROM employe WHERE email = 'admin@gestionrh.com'));

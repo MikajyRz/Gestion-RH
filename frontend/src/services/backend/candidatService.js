@@ -40,3 +40,29 @@ export const getTousLesCandidats = async () => {
   const response = await backendClient.get('/candidats');
   return response.data;
 };
+
+export const getStatutsCandidat = async () => {
+  const response = await backendClient.get('/candidats/statuts');
+  return response.data;
+};
+
+export const getCandidatDetails = async (id) => {
+  const response = await backendClient.get(`/candidats/${id}/details`);
+  return response.data;
+};
+
+export const getCandidatDetailComplete = getCandidatDetails;
+
+export const updateCandidatStatut = async (idCandidat, idStatut) => {
+  const response = await backendClient.put(`/candidats/${idCandidat}/statut`, { idStatut });
+  return response.data;
+};
+
+export const updateStatutCandidat = updateCandidatStatut;
+
+export const getCvUrl = (cvPath) => {
+  if (!cvPath) return null;
+  if (cvPath.startsWith('http://') || cvPath.startsWith('https://')) return cvPath;
+  const fileName = cvPath.includes('/') ? cvPath.split('/').pop() : cvPath;
+  return `${API_BASE_URL}/candidats/cv/${encodeURIComponent(fileName)}`;
+};

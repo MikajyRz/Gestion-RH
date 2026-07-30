@@ -54,3 +54,23 @@ export const getDiplomesExigesByAnnonceId = async (id) => {
   const response = await backendClient.get(`/api/annonces/${id}/diplomes-exiges`);
   return response.data;
 };
+
+export const getAllAnnonces = async () => {
+  const response = await backendClient.get('/api/annonces');
+  return response.data;
+};
+
+export const createAnnonce = async (annonceData) => {
+  const response = await backendClient.post('/api/annonces', annonceData);
+  return response.data;
+};
+
+export const updateAnnonce = async (id, annonceData) => {
+  const response = await backendClient.put(`/api/annonces/${id}`, annonceData);
+  return response.data;
+};
+
+export const deleteAnnonce = async (id) => {
+  const response = await backendClient.delete(`/api/annonces/${id}`);
+  return response.data;
+};

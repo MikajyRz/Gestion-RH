@@ -1,0 +1,54 @@
+/* ==========================================================================
+   CRITERE MANAGER PAGE (FORMULAIRES DYNAMIQUES) - THEME DOLIBARR ERP
+   ========================================================================== */
+
+.btn-toggle-badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.btn-toggle-badge.is-mandatory {
+  background-color: var(--dolibarr-danger);
+  color: #ffffff;
+  border-color: #a00000;
+}
+
+.btn-toggle-badge.is-mandatory:hover {
+  background-color: #a00000;
+  box-shadow: 0 2px 4px rgba(160, 0, 0, 0.25);
+}
+
+.btn-toggle-badge.is-optional {
+  background-color: #64748b;
+  color: #ffffff;
+  border-color: #475569;
+}
+
+.btn-toggle-badge.is-optional:hover {
+  background-color: #475569;
+  box-shadow: 0 2px 4px rgba(71, 85, 105, 0.25);
+}
+
+.active-tag-sm {
+  font-size: 0.75rem;
+  color: var(--dolibarr-primary);
+  font-weight: 600;
+}
+
+.badge-type {
+  background-color: #eff6ff;
+  color: var(--dolibarr-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 3px;
+  border: 1px solid #bfdbfe;
+}

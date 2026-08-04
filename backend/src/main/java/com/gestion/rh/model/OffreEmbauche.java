@@ -14,17 +14,17 @@ public class OffreEmbauche {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "idcandidat", nullable = false)
+    @JoinColumn(name = "id_candidat", nullable = false)
     private Candidat candidat;
 
     @ManyToOne
-    @JoinColumn(name = "idtypecontrat")
+    @JoinColumn(name = "id_type_contrat")
     private TypesContrat typeContrat;
 
-    @Column(name = "datedebut")
+    @Column(name = "date_debut")
     private LocalDate dateDebut;
 
-    @Column(name = "nombremois")
+    @Column(name = "nombre_mois")
     private Integer nombreMois;
 
     @Column(name = "salaire", precision = 12, scale = 2)
@@ -36,7 +36,7 @@ public class OffreEmbauche {
     @Column(name = "statut", length = 50)
     private String statut; // "OFFRE_TRANSMISE", "ADMIS", "REFUSE"
 
-    @Column(name = "dateproposition")
+    @Column(name = "date_proposition")
     private LocalDateTime dateProposition = LocalDateTime.now();
 
     public OffreEmbauche() {}

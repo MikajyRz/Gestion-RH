@@ -12,14 +12,14 @@ public class HistoriqueEntretien {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "identretien", nullable = false)
+    @JoinColumn(name = "id_entretien", nullable = false)
     private Entretien entretien;
 
     @ManyToOne
-    @JoinColumn(name = "idstatut", nullable = false)
+    @JoinColumn(name = "id_statut", nullable = false)
     private StatutEntretien statut;
 
-    @Column(name = "datechangement")
+    @Column(name = "date_changement")
     private LocalDateTime datechangement = LocalDateTime.now();
 
     public HistoriqueEntretien() {}

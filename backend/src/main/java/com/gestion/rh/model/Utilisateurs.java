@@ -13,11 +13,11 @@ public class Utilisateurs {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(nullable = false, length = 200)
+    @Column(name = "mot_de_passe", nullable = false, length = 200)
     private String motdepasse;
 
     @ManyToOne
-    @JoinColumn(name = "idemploye")
+    @JoinColumn(name = "id_employe")
     private Employe employe;
 
     public Utilisateurs() {}

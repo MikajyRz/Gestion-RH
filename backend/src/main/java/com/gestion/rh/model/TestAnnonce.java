@@ -11,11 +11,11 @@ public class TestAnnonce {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "idtest", nullable = false)
+    @JoinColumn(name = "id_test", nullable = false)
     private QcmTest test;
 
     @ManyToOne
-    @JoinColumn(name = "idannonce", nullable = false)
+    @JoinColumn(name = "id_annonce", nullable = false)
     private Annonce annonce;
 
     public TestAnnonce() {}

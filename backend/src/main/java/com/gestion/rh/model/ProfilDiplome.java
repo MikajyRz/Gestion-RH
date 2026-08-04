@@ -11,11 +11,11 @@ public class ProfilDiplome {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "idprofil", nullable = false)
+    @JoinColumn(name = "id_profil", nullable = false)
     private Profil profil;
 
     @ManyToOne
-    @JoinColumn(name = "iddiplome", nullable = false)
+    @JoinColumn(name = "id_diplome", nullable = false)
     private Diplome diplome;
 
     public ProfilDiplome() {}

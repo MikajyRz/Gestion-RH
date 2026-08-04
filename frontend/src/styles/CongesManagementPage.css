@@ -1,0 +1,124 @@
+/* ==========================================================================
+   MODULE CONGÉS & ABSENCES - DESIGN DOLIBARR ERP
+   ========================================================================== */
+
+.conges-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.conges-metric-card {
+  background-color: #ffffff;
+  border: 1px solid var(--dolibarr-border-light, #e2e8f0);
+  border-left: 4px solid var(--dolibarr-primary, #365f91);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.conges-metric-card.warning {
+  border-left-color: #f39c12;
+}
+
+.conges-metric-card.success {
+  border-left-color: #27ae60;
+}
+
+.conges-metric-card.danger {
+  border-left-color: #c00000;
+}
+
+.conges-metric-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.35rem;
+}
+
+.conges-metric-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.badge-type-conge {
+  background-color: #eaeff5;
+  color: #365f91;
+  border: 1px solid #9ab4d6;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.days-counter-badge {
+  background-color: #e2e8f0;
+  color: #1e293b;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.status-pill-warning {
+  background-color: #fef5e7;
+  color: #d68910;
+  border: 1px solid #f39c12;
+}
+
+.status-pill-success {
+  background-color: #e8f8f0;
+  color: #1e7e34;
+  border: 1px solid #27ae60;
+}
+
+.status-pill-danger {
+  background-color: #fce8e6;
+  color: #c00000;
+  border: 1px solid #e74c3c;
+}
+
+.status-pill-gray {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-bar-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.empty-state-box {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background-color: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  color: #64748b;
+  font-size: 0.95rem;
+}

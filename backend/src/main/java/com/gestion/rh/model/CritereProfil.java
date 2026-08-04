@@ -12,23 +12,23 @@ public class CritereProfil {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "idprofil")
+    @JoinColumn(name = "id_profil")
     private Profil profil;
 
     @ManyToOne
-    @JoinColumn(name = "idcritere")
+    @JoinColumn(name = "id_critere")
     private Critere critere;
 
-    @Column(name = "valeurdouble", precision = 10, scale = 2)
+    @Column(name = "valeur_double", precision = 10, scale = 2)
     private BigDecimal valeurdouble;
 
-    @Column(name = "valeurvarchar", length = 200)
+    @Column(name = "valeur_varchar", length = 200)
     private String valeurvarchar;
 
-    @Column(name = "valeurbool")
+    @Column(name = "valeur_bool")
     private Boolean valeurbool;
 
-    @Column(name = "estobligatoire")
+    @Column(name = "est_obligatoire")
     private Boolean estobligatoire;
 
     public CritereProfil() {}

@@ -102,7 +102,20 @@ function BackofficeLayout() {
                 <line x1="8" y1="2" x2="8" y2="6"></line>
                 <line x1="3" y1="10" x2="21" y2="10"></line>
               </svg>
-              <span>Planning Entretiens</span>
+              <span>Planning Entretiens & Embauche</span>
+            </Link>
+
+            <div className="nav-section-title" style={{ marginTop: '1.25rem' }}>GESTION DU PERSONNEL & CONGÉS</div>
+
+            <Link
+              to="/backoffice/conges"
+              className={`nav-item-linkedin ${location.pathname.includes('/conges') ? 'active' : ''}`}
+            >
+              <svg className="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+              </svg>
+              <span>Congés & Absences</span>
             </Link>
 
             <div className="nav-section-title" style={{ marginTop: '1.25rem' }}>RÉFÉRENTIELS & CONFIGURATION</div>

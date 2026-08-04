@@ -11,7 +11,7 @@ public class QcmQuestion {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "idtest", nullable = false)
+    @JoinColumn(name = "id_test", nullable = false)
     private QcmTest test;
 
     @Column(nullable = false)

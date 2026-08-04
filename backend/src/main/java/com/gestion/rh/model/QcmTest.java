@@ -14,7 +14,7 @@ public class QcmTest {
     private String nom;
 
     @ManyToOne
-    @JoinColumn(name = "idprofil")
+    @JoinColumn(name = "id_profil")
     private Profil profil;
 
     public QcmTest() {}

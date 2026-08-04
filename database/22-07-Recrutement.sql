@@ -54,7 +54,7 @@ CREATE TABLE resultat (
 CREATE TABLE comptecandidat (
     id SERIAL PRIMARY KEY,
     email VARCHAR(100) NOT NULL UNIQUE,
-    motdepasse VARCHAR(255) NOT NULL
+    mot_de_passe VARCHAR(255) NOT NULL
 );
 
 -- Note : Ajout de la table employe si nécessaire pour clés étrangères
@@ -69,36 +69,36 @@ CREATE TABLE employe (
 CREATE TABLE annonce (
     id SERIAL PRIMARY KEY,
     description TEXT,
-    datedebut DATE,
-    datefin DATE,
-    nomposte VARCHAR(100) NOT NULL,
-    iddepartement INT REFERENCES departement(id) ON DELETE SET NULL,
-    idprofil INT REFERENCES profil(id) ON DELETE SET NULL,
-    idtypeannonce INT REFERENCES typeannonce(id) ON DELETE SET NULL,
-    datepublication DATE DEFAULT CURRENT_DATE
+    date_debut DATE,
+    date_fin DATE,
+    nom_poste VARCHAR(100) NOT NULL,
+    id_departement INT REFERENCES departement(id) ON DELETE SET NULL,
+    id_profil INT REFERENCES profil(id) ON DELETE SET NULL,
+    id_type_annonce INT REFERENCES typeannonce(id) ON DELETE SET NULL,
+    date_publication DATE DEFAULT CURRENT_DATE
 );
 
 CREATE TABLE critere (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
-    idtypechamp INT REFERENCES typechamp(id) ON DELETE CASCADE
+    id_type_champ INT REFERENCES typechamp(id) ON DELETE CASCADE
 );
 
 CREATE TABLE critereprofil (
     id SERIAL PRIMARY KEY,
-    idprofil INT REFERENCES profil(id) ON DELETE CASCADE,
-    idcritere INT REFERENCES critere(id) ON DELETE CASCADE,
-    valeurdouble NUMERIC(10,2),
-    valeurvarchar VARCHAR(200),
-    valeurbool BOOLEAN,
-    estobligatoire BOOLEAN DEFAULT TRUE
+    id_profil INT REFERENCES profil(id) ON DELETE CASCADE,
+    id_critere INT REFERENCES critere(id) ON DELETE CASCADE,
+    valeur_double NUMERIC(10,2),
+    valeur_varchar VARCHAR(200),
+    valeur_bool BOOLEAN,
+    est_obligatoire BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE profildiplome (
     id SERIAL PRIMARY KEY,
-    idprofil INT NOT NULL REFERENCES profil(id) ON DELETE CASCADE,
-    iddiplome INT NOT NULL REFERENCES diplome(id) ON DELETE CASCADE,
-    CONSTRAINT uk_profil_diplome UNIQUE (idprofil, iddiplome)
+    id_profil INT NOT NULL REFERENCES profil(id) ON DELETE CASCADE,
+    id_diplome INT NOT NULL REFERENCES diplome(id) ON DELETE CASCADE,
+    CONSTRAINT uk_profil_diplome UNIQUE (id_profil, id_diplome)
 );
 
 -- 3. CANDIDATS & CANDIDATURES
@@ -106,58 +106,58 @@ CREATE TABLE candidat (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     prenom VARCHAR(100) NOT NULL,
-    datenaissance DATE,
+    date_naissance DATE,
     adresse VARCHAR(200),
     cv TEXT, -- Chemin du fichier stocké (PDF)
-    idannonce INT REFERENCES annonce(id) ON DELETE SET NULL,
-    idstatut INT REFERENCES statutcandidat(id) ON DELETE SET NULL,
-    idcomptecandidat INT REFERENCES comptecandidat(id) ON DELETE CASCADE
+    id_annonce INT REFERENCES annonce(id) ON DELETE SET NULL,
+    id_statut INT REFERENCES statutcandidat(id) ON DELETE SET NULL,
+    id_compte_candidat INT REFERENCES comptecandidat(id) ON DELETE CASCADE
 );
 
 CREATE TABLE candidaturecritere (
     id SERIAL PRIMARY KEY,
-    idcandidat INT REFERENCES candidat(id) ON DELETE CASCADE,
-    idannonce INT REFERENCES annonce(id) ON DELETE CASCADE,
-    idcritere INT REFERENCES critere(id) ON DELETE CASCADE,
-    valeurdouble NUMERIC(10,2),
-    valeurvarchar VARCHAR(200),
-    valeurbool BOOLEAN,
-    iddiplome INT REFERENCES diplome(id) ON DELETE SET NULL
+    id_candidat INT REFERENCES candidat(id) ON DELETE CASCADE,
+    id_annonce INT REFERENCES annonce(id) ON DELETE CASCADE,
+    id_critere INT REFERENCES critere(id) ON DELETE CASCADE,
+    valeur_double NUMERIC(10,2),
+    valeur_varchar VARCHAR(200),
+    valeur_bool BOOLEAN,
+    id_diplome INT REFERENCES diplome(id) ON DELETE SET NULL
 );
 
 CREATE TABLE historiquecandidature (
     id SERIAL PRIMARY KEY,
-    idcandidat INT REFERENCES candidat(id) ON DELETE CASCADE,
-    idstatut INT REFERENCES statutcandidat(id) ON DELETE CASCADE,
-    datechangement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id_candidat INT REFERENCES candidat(id) ON DELETE CASCADE,
+    id_statut INT REFERENCES statutcandidat(id) ON DELETE CASCADE,
+    date_changement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 4. ENTRETIENS
 CREATE TABLE entretien (
     id SERIAL PRIMARY KEY,
-    idcandidat INT REFERENCES candidat(id) ON DELETE CASCADE,
-    dateheure TIMESTAMP NOT NULL,
-    idstatut INT REFERENCES statutentretien(id) ON DELETE SET NULL,
-    idresultat INT REFERENCES resultat(id) ON DELETE SET NULL
+    id_candidat INT REFERENCES candidat(id) ON DELETE CASCADE,
+    date_heure TIMESTAMP NOT NULL,
+    id_statut INT REFERENCES statutentretien(id) ON DELETE SET NULL,
+    id_resultat INT REFERENCES resultat(id) ON DELETE SET NULL
 );
 
 CREATE TABLE historiqueentretien (
     id SERIAL PRIMARY KEY,
-    identretien INT REFERENCES entretien(id) ON DELETE CASCADE,
-    idstatut INT REFERENCES statutentretien(id) ON DELETE CASCADE,
-    datechangement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id_entretien INT REFERENCES entretien(id) ON DELETE CASCADE,
+    id_statut INT REFERENCES statutentretien(id) ON DELETE CASCADE,
+    date_changement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 5. QCM ET TESTS TECHNIQUES
 CREATE TABLE qcmtest (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(150) NOT NULL,
-    idprofil INT REFERENCES profil(id) ON DELETE SET NULL
+    id_profil INT REFERENCES profil(id) ON DELETE SET NULL
 );
 
 CREATE TABLE qcmquestion (
     id SERIAL PRIMARY KEY,
-    idtest INT NOT NULL REFERENCES qcmtest(id) ON DELETE CASCADE,
+    id_test INT NOT NULL REFERENCES qcmtest(id) ON DELETE CASCADE,
     numero INT NOT NULL,
     question TEXT NOT NULL,
     points INT NOT NULL DEFAULT 1
@@ -165,25 +165,25 @@ CREATE TABLE qcmquestion (
 
 CREATE TABLE qcmchoix (
     id SERIAL PRIMARY KEY,
-    idquestion INT NOT NULL REFERENCES qcmquestion(id) ON DELETE CASCADE,
+    id_question INT NOT NULL REFERENCES qcmquestion(id) ON DELETE CASCADE,
     texte VARCHAR(500) NOT NULL,
-    estcorrect BOOLEAN DEFAULT FALSE
+    est_correct BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE qcmreponse (
     id SERIAL PRIMARY KEY,
-    idcandidat INT NOT NULL REFERENCES candidat(id) ON DELETE CASCADE,
-    idtest INT NOT NULL REFERENCES qcmtest(id) ON DELETE CASCADE,
-    idquestion INT NOT NULL REFERENCES qcmquestion(id) ON DELETE CASCADE,
-    idchoix INT REFERENCES qcmchoix(id) ON DELETE SET NULL,
-    pointsobtenus INT DEFAULT 0,
-    datereponse TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id_candidat INT NOT NULL REFERENCES candidat(id) ON DELETE CASCADE,
+    id_test INT NOT NULL REFERENCES qcmtest(id) ON DELETE CASCADE,
+    id_question INT NOT NULL REFERENCES qcmquestion(id) ON DELETE CASCADE,
+    id_choix INT REFERENCES qcmchoix(id) ON DELETE SET NULL,
+    points_obtenus INT DEFAULT 0,
+    date_reponse TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE testannonce (
     id SERIAL PRIMARY KEY,
-    idtest INT NOT NULL REFERENCES qcmtest(id) ON DELETE CASCADE,
-    idannonce INT NOT NULL REFERENCES annonce(id) ON DELETE CASCADE
+    id_test INT NOT NULL REFERENCES qcmtest(id) ON DELETE CASCADE,
+    id_annonce INT NOT NULL REFERENCES annonce(id) ON DELETE CASCADE
 );
 
 -- 6. UTILISATEURS RH ET CONTRATS
@@ -195,33 +195,33 @@ CREATE TABLE types_contrat (
 
 CREATE TABLE contrat (
     id SERIAL PRIMARY KEY,
-    idemploye INT REFERENCES employe(id) ON DELETE CASCADE,
-    datedebut DATE NOT NULL,
-    nombremois INT,
-    typecontrat INT REFERENCES types_contrat(id) ON DELETE SET NULL
+    id_employe INT REFERENCES employe(id) ON DELETE CASCADE,
+    date_debut DATE NOT NULL,
+    nombre_mois INT,
+    id_type_contrat INT REFERENCES types_contrat(id) ON DELETE SET NULL
 );
 
 CREATE TABLE offre_embauche (
     id SERIAL PRIMARY KEY,
-    idcandidat INT NOT NULL REFERENCES candidat(id) ON DELETE CASCADE,
-    idtypecontrat INT REFERENCES types_contrat(id) ON DELETE SET NULL,
-    datedebut DATE,
-    nombremois INT,
+    id_candidat INT NOT NULL REFERENCES candidat(id) ON DELETE CASCADE,
+    id_type_contrat INT REFERENCES types_contrat(id) ON DELETE SET NULL,
+    date_debut DATE,
+    nombre_mois INT,
     salaire NUMERIC(12,2),
     remarques TEXT,
     statut VARCHAR(50) DEFAULT 'OFFRE_TRANSMISE',
-    dateproposition TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    date_proposition TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE utilisateurs (
     id SERIAL PRIMARY KEY,
     email VARCHAR(150) NOT NULL UNIQUE,
-    motdepasse VARCHAR(200) NOT NULL,
-    idemploye INT REFERENCES employe(id) ON DELETE CASCADE
+    mot_de_passe VARCHAR(200) NOT NULL,
+    id_employe INT REFERENCES employe(id) ON DELETE CASCADE
 );
 
 -- 7. INDEXATION PERFORMANCES (POUR APIS REACT)
-CREATE INDEX idx_candidat_annonce ON candidat(idannonce);
-CREATE INDEX idx_candidat_statut ON candidat(idstatut);
-CREATE INDEX idx_entretien_candidat ON entretien(idcandidat);
-CREATE INDEX idx_qcmreponse_candidat ON qcmreponse(idcandidat, idtest);
+CREATE INDEX idx_candidat_annonce ON candidat(id_annonce);
+CREATE INDEX idx_candidat_statut ON candidat(id_statut);
+CREATE INDEX idx_entretien_candidat ON entretien(id_candidat);
+CREATE INDEX idx_qcmreponse_candidat ON qcmreponse(id_candidat, id_test);

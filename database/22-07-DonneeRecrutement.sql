@@ -68,7 +68,7 @@ INSERT INTO types_contrat (code, libelle) VALUES
 ('FREELANCE', 'Prestation Indépendante');
 
 -- 9. Critères de Base (Généraux + Spécifiques)
-INSERT INTO critere (nom, idtypechamp) VALUES 
+INSERT INTO critere (nom, id_type_champ) VALUES 
 ('Années d''expérience globale', (SELECT id FROM typechamp WHERE libelle = 'Nombre')),
 ('Diplôme le plus élevé', (SELECT id FROM typechamp WHERE libelle = 'Diplome')),
 ('Taille minimale (cm)', (SELECT id FROM typechamp WHERE libelle = 'Nombre')),
@@ -81,61 +81,61 @@ INSERT INTO critere (nom, idtypechamp) VALUES
 -- ============================================================================
 
 -- Profil 1 : Développeur Fullstack Java / React
-INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, estobligatoire) 
+INSERT INTO critereprofil (id_profil, id_critere, valeur_double, est_obligatoire) 
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Développeur Fullstack Java / React'),
  (SELECT id FROM critere WHERE nom = 'Années d''expérience globale'),
  3.00, TRUE);
 
-INSERT INTO profildiplome (idprofil, iddiplome)
+INSERT INTO profildiplome (id_profil, id_diplome)
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Développeur Fullstack Java / React'),
  (SELECT id FROM diplome WHERE nom = 'Licence / Bac+3'));
 
 -- Profil 2 : Développeur Frontend Vue.js
-INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, estobligatoire) 
+INSERT INTO critereprofil (id_profil, id_critere, valeur_double, est_obligatoire) 
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Développeur Frontend Vue.js'),
  (SELECT id FROM critere WHERE nom = 'Années d''expérience globale'),
  2.00, TRUE);
 
-INSERT INTO profildiplome (idprofil, iddiplome)
+INSERT INTO profildiplome (id_profil, id_diplome)
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Développeur Frontend Vue.js'),
  (SELECT id FROM diplome WHERE nom = 'Licence / Bac+3'));
 
 -- Profil 3 : Administrateur Systèmes & DevOps
-INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, estobligatoire) 
+INSERT INTO critereprofil (id_profil, id_critere, valeur_double, est_obligatoire) 
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Administrateur Systèmes & DevOps'),
  (SELECT id FROM critere WHERE nom = 'Années d''expérience globale'),
  4.00, TRUE);
 
-INSERT INTO profildiplome (idprofil, iddiplome)
+INSERT INTO profildiplome (id_profil, id_diplome)
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Administrateur Systèmes & DevOps'),
  (SELECT id FROM diplome WHERE nom = 'Master / Bac+5'));
 
 -- Profil 4 : Chef de Projet RH
-INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, estobligatoire) 
+INSERT INTO critereprofil (id_profil, id_critere, valeur_double, est_obligatoire) 
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Chef de Projet RH'),
  (SELECT id FROM critere WHERE nom = 'Années d''expérience globale'),
  3.00, TRUE);
 
-INSERT INTO profildiplome (idprofil, iddiplome)
+INSERT INTO profildiplome (id_profil, id_diplome)
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Chef de Projet RH'),
  (SELECT id FROM diplome WHERE nom = 'Master / Bac+5'));
 
 -- Profil 5 : Comptable Senior
-INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, estobligatoire) 
+INSERT INTO critereprofil (id_profil, id_critere, valeur_double, est_obligatoire) 
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Comptable Senior'),
  (SELECT id FROM critere WHERE nom = 'Années d''expérience globale'),
  5.00, TRUE);
 
-INSERT INTO profildiplome (idprofil, iddiplome)
+INSERT INTO profildiplome (id_profil, id_diplome)
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Comptable Senior'),
  (SELECT id FROM diplome WHERE nom = 'Licence / Bac+3')),
@@ -143,7 +143,7 @@ VALUES
  (SELECT id FROM diplome WHERE nom = 'Master / Bac+5'));
 
 -- Profil 6 : Gardien / Agent de Sécurité
-INSERT INTO critereprofil (idprofil, idcritere, valeurdouble, valeurbool, estobligatoire) 
+INSERT INTO critereprofil (id_profil, id_critere, valeur_double, valeur_bool, est_obligatoire) 
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Gardien / Agent de Sécurité'), 
  (SELECT id FROM critere WHERE nom = 'Taille minimale (cm)'), 
@@ -155,7 +155,7 @@ VALUES
  (SELECT id FROM critere WHERE nom = 'Travail de nuit accepté'), 
  NULL, TRUE, TRUE);
 
-INSERT INTO profildiplome (idprofil, iddiplome)
+INSERT INTO profildiplome (id_profil, id_diplome)
 VALUES 
 ((SELECT id FROM profil WHERE nom = 'Gardien / Agent de Sécurité'),
  (SELECT id FROM diplome WHERE nom = 'Aucun / Certificat de Sécurité'));

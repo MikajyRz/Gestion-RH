@@ -17,7 +17,7 @@ public class Candidat {
     @Column(nullable = false, length = 100)
     private String prenom;
 
-    @Column(name = "datenaissance")
+    @Column(name = "date_naissance")
     private LocalDate datenaissance;
 
     @Column(length = 200)
@@ -27,15 +27,15 @@ public class Candidat {
     private String cv;
 
     @ManyToOne
-    @JoinColumn(name = "idannonce")
+    @JoinColumn(name = "id_annonce")
     private Annonce annonce;
 
     @ManyToOne
-    @JoinColumn(name = "idstatut")
+    @JoinColumn(name = "id_statut")
     private StatutCandidat statut;
 
     @ManyToOne
-    @JoinColumn(name = "idcomptecandidat")
+    @JoinColumn(name = "id_compte_candidat")
     private CompteCandidat compteCandidat;
 
     public Candidat() {}

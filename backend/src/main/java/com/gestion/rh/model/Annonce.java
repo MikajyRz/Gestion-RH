@@ -11,31 +11,31 @@ public class Annonce {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nomposte", nullable = false, length = 100)
+    @Column(name = "nom_poste", nullable = false, length = 100)
     private String nomposte;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "datedebut")
+    @Column(name = "date_debut")
     private LocalDate datedebut;
 
-    @Column(name = "datefin")
+    @Column(name = "date_fin")
     private LocalDate datefin;
 
-    @Column(name = "datepublication")
+    @Column(name = "date_publication")
     private LocalDate datepublication;
 
     @ManyToOne
-    @JoinColumn(name = "iddepartement")
+    @JoinColumn(name = "id_departement")
     private Departement departement;
 
     @ManyToOne
-    @JoinColumn(name = "idprofil")
+    @JoinColumn(name = "id_profil")
     private Profil profil;
 
     @ManyToOne
-    @JoinColumn(name = "idtypeannonce")
+    @JoinColumn(name = "id_type_annonce")
     private TypeAnnonce typeannonce;
 
     public Annonce() {}

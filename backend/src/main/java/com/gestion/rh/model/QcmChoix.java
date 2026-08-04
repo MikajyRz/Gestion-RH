@@ -11,13 +11,13 @@ public class QcmChoix {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "idquestion", nullable = false)
+    @JoinColumn(name = "id_question", nullable = false)
     private QcmQuestion question;
 
     @Column(nullable = false, length = 500)
     private String texte;
 
-    @Column(name = "estcorrect")
+    @Column(name = "est_correct")
     private Boolean estcorrect = false;
 
     public QcmChoix() {}

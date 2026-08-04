@@ -12,17 +12,17 @@ public class Contrat {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "idemploye", nullable = false)
+    @JoinColumn(name = "id_employe", nullable = false)
     private Employe employe;
 
-    @Column(name = "datedebut", nullable = false)
+    @Column(name = "date_debut", nullable = false)
     private LocalDate dateDebut;
 
-    @Column(name = "nombremois")
+    @Column(name = "nombre_mois")
     private Integer nombreMois;
 
     @ManyToOne
-    @JoinColumn(name = "typecontrat")
+    @JoinColumn(name = "id_type_contrat")
     private TypesContrat typeContrat;
 
     public Contrat() {}

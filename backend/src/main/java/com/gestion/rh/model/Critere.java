@@ -14,7 +14,7 @@ public class Critere {
     private String nom;
 
     @ManyToOne
-    @JoinColumn(name = "idtypechamp")
+    @JoinColumn(name = "id_type_champ")
     private TypeChamp typechamp;
 
     public Critere() {}

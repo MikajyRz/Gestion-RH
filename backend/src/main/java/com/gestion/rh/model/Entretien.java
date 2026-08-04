@@ -12,18 +12,18 @@ public class Entretien {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "idcandidat", nullable = false)
+    @JoinColumn(name = "id_candidat", nullable = false)
     private Candidat candidat;
 
-    @Column(name = "dateheure", nullable = false)
+    @Column(name = "date_heure", nullable = false)
     private LocalDateTime dateheure;
 
     @ManyToOne
-    @JoinColumn(name = "idstatut")
+    @JoinColumn(name = "id_statut")
     private StatutEntretien statut;
 
     @ManyToOne
-    @JoinColumn(name = "idresultat")
+    @JoinColumn(name = "id_resultat")
     private Resultat resultat;
 
     public Entretien() {}

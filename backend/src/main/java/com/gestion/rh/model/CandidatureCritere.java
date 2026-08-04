@@ -12,28 +12,28 @@ public class CandidatureCritere {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "idcandidat")
+    @JoinColumn(name = "id_candidat")
     private Candidat candidat;
 
     @ManyToOne
-    @JoinColumn(name = "idannonce")
+    @JoinColumn(name = "id_annonce")
     private Annonce annonce;
 
     @ManyToOne
-    @JoinColumn(name = "idcritere")
+    @JoinColumn(name = "id_critere")
     private Critere critere;
 
-    @Column(name = "valeurdouble", precision = 10, scale = 2)
+    @Column(name = "valeur_double", precision = 10, scale = 2)
     private BigDecimal valeurdouble;
 
-    @Column(name = "valeurvarchar", length = 200)
+    @Column(name = "valeur_varchar", length = 200)
     private String valeurvarchar;
 
-    @Column(name = "valeurbool")
+    @Column(name = "valeur_bool")
     private Boolean valeurbool;
 
     @ManyToOne
-    @JoinColumn(name = "iddiplome")
+    @JoinColumn(name = "id_diplome")
     private Diplome diplome;
 
     public CandidatureCritere() {}

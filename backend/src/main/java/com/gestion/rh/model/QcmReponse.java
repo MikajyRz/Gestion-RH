@@ -12,25 +12,25 @@ public class QcmReponse {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "idcandidat", nullable = false)
+    @JoinColumn(name = "id_candidat", nullable = false)
     private Candidat candidat;
 
     @ManyToOne
-    @JoinColumn(name = "idtest", nullable = false)
+    @JoinColumn(name = "id_test", nullable = false)
     private QcmTest test;
 
     @ManyToOne
-    @JoinColumn(name = "idquestion", nullable = false)
+    @JoinColumn(name = "id_question", nullable = false)
     private QcmQuestion question;
 
     @ManyToOne
-    @JoinColumn(name = "idchoix")
+    @JoinColumn(name = "id_choix")
     private QcmChoix choix;
 
-    @Column(name = "pointsobtenus")
+    @Column(name = "points_obtenus")
     private Integer pointsobtenus = 0;
 
-    @Column(name = "datereponse")
+    @Column(name = "date_reponse")
     private LocalDateTime datereponse = LocalDateTime.now();
 
     public QcmReponse() {}

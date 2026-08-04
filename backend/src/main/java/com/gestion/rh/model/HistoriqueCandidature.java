@@ -12,14 +12,14 @@ public class HistoriqueCandidature {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "idcandidat")
+    @JoinColumn(name = "id_candidat")
     private Candidat candidat;
 
     @ManyToOne
-    @JoinColumn(name = "idstatut")
+    @JoinColumn(name = "id_statut")
     private StatutCandidat statut;
 
-    @Column(name = "datechangement")
+    @Column(name = "date_changement")
     private LocalDateTime datechangement;
 
     public HistoriqueCandidature() {

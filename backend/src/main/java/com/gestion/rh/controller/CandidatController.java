@@ -37,6 +37,11 @@ public class CandidatController {
     private final HistoriqueCandidatureRepository historiqueCandidatureRepository;
     private final CritereProfilRepository critereProfilRepository;
     private final ProfilDiplomeRepository profilDiplomeRepository;
+    private final TypesContratRepository typesContratRepository;
+    private final OffreEmbaucheRepository offreEmbaucheRepository;
+    private final EmployeRepository employeRepository;
+    private final ContratRepository contratRepository;
+    private final com.gestion.rh.service.ContratPdfService contratPdfService;
 
     public CandidatController(CandidatRepository candidatRepository,
                               AnnonceRepository annonceRepository,
@@ -47,7 +52,12 @@ public class CandidatController {
                               CompteCandidatRepository compteCandidatRepository,
                               HistoriqueCandidatureRepository historiqueCandidatureRepository,
                               CritereProfilRepository critereProfilRepository,
-                              ProfilDiplomeRepository profilDiplomeRepository) {
+                              ProfilDiplomeRepository profilDiplomeRepository,
+                              TypesContratRepository typesContratRepository,
+                              OffreEmbaucheRepository offreEmbaucheRepository,
+                              EmployeRepository employeRepository,
+                              ContratRepository contratRepository,
+                              com.gestion.rh.service.ContratPdfService contratPdfService) {
         this.candidatRepository = candidatRepository;
         this.annonceRepository = annonceRepository;
         this.statutCandidatRepository = statutCandidatRepository;
@@ -58,6 +68,11 @@ public class CandidatController {
         this.historiqueCandidatureRepository = historiqueCandidatureRepository;
         this.critereProfilRepository = critereProfilRepository;
         this.profilDiplomeRepository = profilDiplomeRepository;
+        this.typesContratRepository = typesContratRepository;
+        this.offreEmbaucheRepository = offreEmbaucheRepository;
+        this.employeRepository = employeRepository;
+        this.contratRepository = contratRepository;
+        this.contratPdfService = contratPdfService;
     }
 
     @GetMapping
@@ -294,5 +309,185 @@ public class CandidatController {
 
         // Retourner le chemin relatif pour stockage en BDD
         return uploadDir + "/" + uniqueName;
+    }
+
+    // --- MODULE D'EMBAUCHE DÉFINITIVE ET PROPOSITION DE CONTRAT ---
+
+    @GetMapping("/types-contrat")
+    public ResponseEntity<List<TypesContrat>> getTypesContrat() {
+        List<TypesContrat> liste = typesContratRepository.findAll();
+        if (liste.isEmpty()) {
+            // Auto-population des types de contrat par défaut si la table est vide
+            typesContratRepository.save(new TypesContrat("CDI", "Contrat à Durée Indéterminée"));
+            typesContratRepository.save(new TypesContrat("CDD", "Contrat à Durée Déterminée"));
+            typesContratRepository.save(new TypesContrat("STAGE", "Stage Académique / Professionnel"));
+            typesContratRepository.save(new TypesContrat("ALTERNANCE", "Contrat d'Alternance"));
+            typesContratRepository.save(new TypesContrat("FREELANCE", "Prestation Indépendante"));
+            liste = typesContratRepository.findAll();
+        }
+        return ResponseEntity.ok(liste);
+    }
+
+    @GetMapping("/{id}/offre")
+    public ResponseEntity<?> getOffreCandidat(@PathVariable Long id) {
+        Optional<OffreEmbauche> offreOpt = offreEmbaucheRepository.findTopByCandidatIdOrderByIdDesc(id);
+        if (offreOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(offreOpt.get());
+    }
+
+    @PostMapping("/{id}/transmettre-offre")
+    public ResponseEntity<?> transmettreOffreEmbauche(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        Optional<Candidat> candOpt = candidatRepository.findById(id);
+        if (candOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Candidat candidat = candOpt.get();
+
+        Integer idTypeContrat = body.get("idTypeContrat") != null ? Integer.valueOf(body.get("idTypeContrat").toString()) : null;
+        TypesContrat typeContrat = null;
+        if (idTypeContrat != null) {
+            typeContrat = typesContratRepository.findById(idTypeContrat).orElse(null);
+        }
+
+        LocalDate dateDebut = null;
+        if (body.get("dateDebut") != null && !body.get("dateDebut").toString().isBlank()) {
+            dateDebut = LocalDate.parse(body.get("dateDebut").toString());
+        }
+
+        Integer nombreMois = body.get("nombreMois") != null && !body.get("nombreMois").toString().isBlank()
+                ? Integer.valueOf(body.get("nombreMois").toString()) : null;
+
+        BigDecimal salaire = null;
+        if (body.get("salaire") != null && !body.get("salaire").toString().isBlank()) {
+            salaire = new BigDecimal(body.get("salaire").toString());
+        }
+
+        String remarques = (String) body.get("remarques");
+
+        OffreEmbauche offre = new OffreEmbauche();
+        offre.setCandidat(candidat);
+        offre.setTypeContrat(typeContrat);
+        offre.setDateDebut(dateDebut);
+        offre.setNombreMois(nombreMois);
+        offre.setSalaire(salaire);
+        offre.setRemarques(remarques);
+        offre.setStatut("OFFRE_TRANSMISE");
+
+        OffreEmbauche savedOffre = offreEmbaucheRepository.save(offre);
+
+        // Passer le statut du candidat à "Offre Transmise" (ID 6)
+        StatutCandidat stOffreTransmise = statutCandidatRepository.findById(6)
+                .orElseGet(() -> statutCandidatRepository.findByNom("Offre Transmise").orElse(null));
+
+        if (stOffreTransmise != null) {
+            candidat.setStatut(stOffreTransmise);
+            candidatRepository.save(candidat);
+            historiqueCandidatureRepository.save(new HistoriqueCandidature(candidat, stOffreTransmise));
+        }
+
+        return ResponseEntity.ok(savedOffre);
+    }
+
+    @PostMapping("/{id}/valider-embauche")
+    public ResponseEntity<?> validerEmbaucheDefinitive(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        Optional<Candidat> candOpt = candidatRepository.findById(id);
+        if (candOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Candidat candidat = candOpt.get();
+        String action = body.get("action") != null ? body.get("action").toString().toUpperCase() : "ADMIS";
+
+        Optional<OffreEmbauche> offreOpt = offreEmbaucheRepository.findTopByCandidatIdOrderByIdDesc(id);
+
+        if ("ADMIS".equals(action) || "EMBAUCHER".equals(action)) {
+            StatutCandidat stAdmis = statutCandidatRepository.findById(7)
+                    .orElseGet(() -> statutCandidatRepository.findByNom("Admis / Embauché").orElse(null));
+            if (stAdmis != null) {
+                candidat.setStatut(stAdmis);
+                candidatRepository.save(candidat);
+                historiqueCandidatureRepository.save(new HistoriqueCandidature(candidat, stAdmis));
+            }
+            
+            OffreEmbauche offre = offreOpt.orElse(null);
+            if (offre != null) {
+                offre.setStatut("ACCEPTEE");
+                offreEmbaucheRepository.save(offre);
+            }
+
+            // CRÉATION AUTOMATIQUE EN BDD : CANDIDAT -> EMPLOYÉ & ENREGISTREMENT DU CONTRAT
+            String emailEmploye = candidat.getCompteCandidat() != null ? candidat.getCompteCandidat().getEmail()
+                    : ((candidat.getPrenom() != null ? candidat.getPrenom().toLowerCase().replaceAll("\\s+", "") : "candidat")
+                       + "." + (candidat.getNom() != null ? candidat.getNom().toLowerCase().replaceAll("\\s+", "") : "rh")
+                       + "@entreprise.com");
+
+            Employe employe = employeRepository.findByEmail(emailEmploye)
+                    .orElseGet(() -> employeRepository.save(new Employe(candidat.getNom(), candidat.getPrenom(), emailEmploye)));
+
+            // Création du contrat de travail associé
+            LocalDate dateDebut = (offre != null && offre.getDateDebut() != null) ? offre.getDateDebut() : LocalDate.now();
+            Integer nombreMois = (offre != null) ? offre.getNombreMois() : null;
+            TypesContrat typeContrat = (offre != null) ? offre.getTypeContrat() : null;
+
+            Contrat nouveauContrat = new Contrat(employe, dateDebut, nombreMois, typeContrat);
+            Contrat savedContrat = contratRepository.save(nouveauContrat);
+
+            // CRÉATION AUTOMATIQUE DU PDF DANS UPLOADS/CONTRAT/CONTRAT(NOMEMPLOYE).PDF
+            String pdfPath = null;
+            try {
+                java.io.File pdfFile = contratPdfService.genererEtSauvegarderContratPdf(candidat, offre);
+                pdfPath = "uploads/contrat/" + pdfFile.getName();
+            } catch (Exception e) {
+                System.err.println("Erreur création PDF contrat : " + e.getMessage());
+            }
+
+            return ResponseEntity.ok(Map.of(
+                "message", "Candidat admis et inséré dans la table des employés avec son contrat de travail PDF.",
+                "candidat", candidat,
+                "employe", employe,
+                "contrat", savedContrat,
+                "pdfUrl", pdfPath != null ? pdfPath : ""
+            ));
+        } else {
+            StatutCandidat stRefuse = statutCandidatRepository.findById(8)
+                    .orElseGet(() -> statutCandidatRepository.findByNom("Refusé").orElse(null));
+            if (stRefuse != null) {
+                candidat.setStatut(stRefuse);
+                candidatRepository.save(candidat);
+                historiqueCandidatureRepository.save(new HistoriqueCandidature(candidat, stRefuse));
+            }
+            offreOpt.ifPresent(o -> {
+                o.setStatut("DECLINEE");
+                offreEmbaucheRepository.save(o);
+            });
+            return ResponseEntity.ok(Map.of("message", "Offre d'embauche marquée comme déclinée / refusée.", "candidat", candidat));
+        }
+    }
+
+    @GetMapping("/{id}/exporter-contrat-pdf")
+    public ResponseEntity<?> exporterContratPdf(@PathVariable Long id) {
+        Optional<Candidat> candOpt = candidatRepository.findById(id);
+        if (candOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Candidat candidat = candOpt.get();
+        OffreEmbauche offre = offreEmbaucheRepository.findTopByCandidatIdOrderByIdDesc(id).orElse(null);
+
+        try {
+            java.io.File pdfFile = contratPdfService.genererEtSauvegarderContratPdf(candidat, offre);
+            byte[] bytes = java.nio.file.Files.readAllBytes(pdfFile.toPath());
+
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/pdf")
+                    .header("Content-Disposition", "attachment; filename=\"" + pdfFile.getName() + "\"")
+                    .body(bytes);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la génération du contrat PDF : " + e.getMessage());
+        }
     }
 }

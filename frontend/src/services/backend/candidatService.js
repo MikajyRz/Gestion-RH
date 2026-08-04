@@ -66,3 +66,27 @@ export const getCvUrl = (cvPath) => {
   const fileName = cvPath.includes('/') ? cvPath.split('/').pop() : cvPath;
   return `${API_BASE_URL}/candidats/cv/${encodeURIComponent(fileName)}`;
 };
+
+export const getTypesContrat = async () => {
+  const response = await backendClient.get('/candidats/types-contrat');
+  return response.data;
+};
+
+export const getOffreCandidat = async (idCandidat) => {
+  const response = await backendClient.get(`/candidats/${idCandidat}/offre`);
+  return response.data;
+};
+
+export const transmettreOffreEmbauche = async (idCandidat, offerPayload) => {
+  const response = await backendClient.post(`/candidats/${idCandidat}/transmettre-offre`, offerPayload);
+  return response.data;
+};
+
+export const validerEmbaucheDefinitive = async (idCandidat, action = 'ADMIS') => {
+  const response = await backendClient.post(`/candidats/${idCandidat}/valider-embauche`, { action });
+  return response.data;
+};
+
+export const getContratPdfUrl = (idCandidat) => {
+  return `${API_BASE_URL}/candidats/${idCandidat}/exporter-contrat-pdf`;
+};

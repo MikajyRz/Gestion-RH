@@ -262,3 +262,81 @@
   border: 1px solid #f5c6cb;
   font-weight: 500;
 }
+
+/* --- DOCUMENT CONTRAT DE TRAVAIL IMPRIMABLE / EXPORT PDF --- */
+.contract-document-box {
+  background-color: #ffffff;
+  padding: 2.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  color: #0f172a;
+  line-height: 1.6;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.contract-document-header {
+  text-align: center;
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.contract-document-header h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: 0.5px;
+}
+
+.contract-document-header p {
+  font-size: 0.9rem;
+  color: #475569;
+  margin: 0;
+}
+
+.contract-section {
+  margin-bottom: 1.25rem;
+}
+
+.contract-section h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.25rem;
+  margin: 0 0 0.5rem 0;
+  color: #1e293b;
+}
+
+.contract-signatures-grid {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3rem;
+  padding-top: 1rem;
+}
+
+.signature-block {
+  width: 45%;
+  border-top: 1px dashed #94a3b8;
+  padding-top: 0.5rem;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-contract-document, #printable-contract-document * {
+    visibility: visible;
+  }
+  #printable-contract-document {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+}

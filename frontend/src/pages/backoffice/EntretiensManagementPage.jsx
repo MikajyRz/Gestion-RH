@@ -10,7 +10,14 @@ import {
 } from '../../services/backend/entretienService';
 import { getAllAnnonces } from '../../services/backend/annonceService';
 import { getResultatsCandidats } from '../../services/backend/qcmService';
-import { updateCandidatStatut } from '../../services/backend/candidatService';
+import {
+  updateCandidatStatut,
+  getTypesContrat,
+  transmettreOffreEmbauche,
+  validerEmbaucheDefinitive,
+  getOffreCandidat,
+  getContratPdfUrl
+} from '../../services/backend/candidatService';
 import '../../styles/Backoffice.css';
 import '../../styles/EntretiensManagementPage.css';
 
@@ -23,6 +30,7 @@ function EntretiensManagementPage() {
   const [candidatsQcmTermine, setCandidatsQcmTermine] = useState([]);
   const [annonces, setAnnonces] = useState([]);
   const [qcmResultats, setQcmResultats] = useState([]);
+  const [typesContrat, setTypesContrat] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
@@ -51,20 +59,47 @@ function EntretiensManagementPage() {
   const [evalAppreciation, setEvalAppreciation] = useState('');
   const [submittingEval, setSubmittingEval] = useState(false);
 
+  // Modale Proposition d'Offre de Contrat
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [selectedCandidatForOffer, setSelectedCandidatForOffer] = useState(null);
+  const [offerForm, setOfferForm] = useState({
+    idTypeContrat: '',
+    dateDebut: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+    nombreMois: '12',
+    salaire: '2500000',
+    remarques: ''
+  });
+  const [submittingOffer, setSubmittingOffer] = useState(false);
+
+  // Modale Validation Finale d'Embauche (Confirm / Refuse Hire)
+  const [showConfirmHireModal, setShowConfirmHireModal] = useState(false);
+  const [selectedCandidatForConfirmHire, setSelectedCandidatForConfirmHire] = useState(null);
+  const [existingOfferData, setExistingOfferData] = useState(null);
+  const [loadingExistingOffer, setLoadingExistingOffer] = useState(false);
+  const [submittingConfirmHire, setSubmittingConfirmHire] = useState(false);
+
+  // Modale Document & Export PDF de Contrat
+  const [showContractPdfModal, setShowContractPdfModal] = useState(false);
+  const [selectedCandidatForPdf, setSelectedCandidatForPdf] = useState(null);
+  const [contractPdfData, setContractPdfData] = useState(null);
+  const [loadingContractPdf, setLoadingContractPdf] = useState(false);
+
   const loadData = async () => {
     try {
       setLoading(true);
-      const [entretiensData, statutsData, candidatsEligibles, annoncesData, qcmResultatsData] = await Promise.all([
+      const [entretiensData, statutsData, candidatsEligibles, annoncesData, qcmResultatsData, typesContratData] = await Promise.all([
         getAllEntretiens(),
         getStatutsEntretien(),
         getCandidatsEligiblesEntretien(),
         getAllAnnonces(),
-        getResultatsCandidats()
+        getResultatsCandidats(),
+        getTypesContrat().catch(() => [])
       ]);
       setEntretiens(entretiensData || []);
       setStatuts(statutsData || []);
       setAnnonces(annoncesData || []);
       setQcmResultats(qcmResultatsData || []);
+      setTypesContrat(typesContratData || []);
 
       const listEligibles = candidatsEligibles || [];
       setCandidatsQcmTermine(listEligibles);
@@ -300,7 +335,7 @@ function EntretiensManagementPage() {
     }
   };
 
-  // Mise à jour directe du statut candidat (ex: Embaucher, Offre transmise, Refuser)
+  // Mise à jour directe du statut candidat (ex: Refuser)
   const handleUpdateCandidatStatutDirect = async (candidatId, newStatutId, statutLibelle) => {
     try {
       await updateCandidatStatut(candidatId, newStatutId);
@@ -309,6 +344,100 @@ function EntretiensManagementPage() {
     } catch (err) {
       notify('Erreur lors de la mise à jour du statut candidat.', true);
     }
+  };
+
+  // Ouverture modale TRANSMISSION D'OFFRE DE CONTRAT D'EMBAUCHE
+  const handleOpenOfferModal = (candidat) => {
+    setSelectedCandidatForOffer(candidat);
+    const defaultTypeId = typesContrat.length > 0 ? typesContrat[0].id.toString() : '1';
+    setOfferForm({
+      idTypeContrat: defaultTypeId,
+      dateDebut: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+      nombreMois: '12',
+      salaire: '2500000',
+      remarques: 'Proposition d\'embauche transmise à l\'issue des tests QCM et de l\'entretien RH.'
+    });
+    setShowOfferModal(true);
+  };
+
+  const handleSubmitOffer = async (e) => {
+    e.preventDefault();
+    if (!selectedCandidatForOffer || !offerForm.idTypeContrat) return;
+
+    try {
+      setSubmittingOffer(true);
+      const payload = {
+        idTypeContrat: parseInt(offerForm.idTypeContrat, 10),
+        dateDebut: offerForm.dateDebut,
+        nombreMois: offerForm.nombreMois ? parseInt(offerForm.nombreMois, 10) : null,
+        salaire: offerForm.salaire ? parseFloat(offerForm.salaire) : null,
+        remarques: offerForm.remarques
+      };
+
+      await transmettreOffreEmbauche(selectedCandidatForOffer.id, payload);
+      notify(`Proposition d'offre transmise à ${selectedCandidatForOffer.prenom} ${selectedCandidatForOffer.nom}. Statut mis à jour vers "Offre Transmise".`);
+      setShowOfferModal(false);
+      loadData();
+    } catch (err) {
+      console.error('Erreur transmission offre :', err);
+      notify('Erreur lors de la transmission de l\'offre.', true);
+    } finally {
+      setSubmittingOffer(false);
+    }
+  };
+
+  // Ouverture modale VALIDATION FINALE D'EMBAUCHE / CONFIRMATION
+  const handleOpenConfirmHireModal = async (candidat) => {
+    setSelectedCandidatForConfirmHire(candidat);
+    setShowConfirmHireModal(true);
+    setLoadingExistingOffer(true);
+    try {
+      const offre = await getOffreCandidat(candidat.id);
+      setExistingOfferData(offre);
+    } catch (err) {
+      setExistingOfferData(null);
+    } finally {
+      setLoadingExistingOffer(false);
+    }
+  };
+
+  const handleFinalizeHire = async (action) => {
+    if (!selectedCandidatForConfirmHire) return;
+
+    try {
+      setSubmittingConfirmHire(true);
+      await validerEmbaucheDefinitive(selectedCandidatForConfirmHire.id, action);
+      if (action === 'ADMIS') {
+        notify(`Félicitations ! ${selectedCandidatForConfirmHire.prenom} ${selectedCandidatForConfirmHire.nom} est définitivement embauché(e) (Statut "Admis / Embauché").`);
+      } else {
+        notify(`Offre marquée comme déclinée/refusée pour ${selectedCandidatForConfirmHire.prenom} ${selectedCandidatForConfirmHire.nom}.`);
+      }
+      setShowConfirmHireModal(false);
+      loadData();
+    } catch (err) {
+      notify('Erreur lors de la validation d\'embauche.', true);
+    } finally {
+      setSubmittingConfirmHire(false);
+    }
+  };
+
+  // Ouverture modale DOCUMENT DE CONTRAT ET EXPORT PDF
+  const handleOpenContractPdfModal = async (candidat) => {
+    setSelectedCandidatForPdf(candidat);
+    setShowContractPdfModal(true);
+    setLoadingContractPdf(true);
+    try {
+      const offre = await getOffreCandidat(candidat.id);
+      setContractPdfData(offre);
+    } catch (err) {
+      setContractPdfData(null);
+    } finally {
+      setLoadingContractPdf(false);
+    }
+  };
+
+  const handlePrintContract = () => {
+    window.print();
   };
 
   // Évaluation d'un entretien
@@ -824,10 +953,14 @@ function EntretiensManagementPage() {
                           const candStatutNom = item.candidat.statut?.nom || 'En cours';
                           const candStatutId = item.candidat.statut?.id;
 
+                          const isAdmis = candStatutId === 7 || candStatutNom.toLowerCase().includes('embauch') || candStatutNom.toLowerCase().includes('admis');
+                          const isRefuse = candStatutId === 8 || candStatutNom.toLowerCase().includes('refus');
+                          const isOffreTransmise = candStatutId === 6 || candStatutNom.toLowerCase().includes('offre');
+
                           let candBadgeClass = 'badge-status-neutral';
-                          if (candStatutId === 8 || candStatutNom.toLowerCase().includes('refus')) candBadgeClass = 'badge-status-expired';
-                          else if (candStatutId === 7 || candStatutNom.toLowerCase().includes('embauch') || candStatutNom.toLowerCase().includes('admis')) candBadgeClass = 'badge-status-active';
-                          else if (candStatutId === 6 || candStatutNom.toLowerCase().includes('offre')) candBadgeClass = 'badge-status-info';
+                          if (isRefuse) candBadgeClass = 'badge-status-expired';
+                          else if (isAdmis) candBadgeClass = 'badge-status-active';
+                          else if (isOffreTransmise) candBadgeClass = 'badge-status-info';
                           else if (candStatutId === 5 || candStatutNom.toLowerCase().includes('entretien')) candBadgeClass = 'badge-status-upcoming';
 
                           let scoreBadgeClass = 'badge-status-active';
@@ -835,7 +968,7 @@ function EntretiensManagementPage() {
                           else if (item.scoreGlobal < 14) scoreBadgeClass = 'badge-status-upcoming';
 
                           return (
-                            <tr key={item.candidat.id} style={{ backgroundColor: isBest ? '#f0fdf4' : 'transparent' }}>
+                            <tr key={`ranking-${item.candidat.id}-${item.entretienId}-${index}`} style={{ backgroundColor: isBest ? '#f0fdf4' : 'transparent' }}>
                               <td>
                                 <span style={{
                                   fontWeight: 800,
@@ -880,28 +1013,57 @@ function EntretiensManagementPage() {
                               </td>
                               <td>
                                 <div className="action-buttons-group" style={{ justifyContent: 'flex-end', gap: '0.35rem' }}>
-                                  <button
-                                    className="btn-icon btn-icon-view"
-                                    title="Proposer une offre au candidat"
-                                    onClick={() => handleUpdateCandidatStatutDirect(item.candidat.id, 6, 'Offre Transmise')}
-                                  >
-                                    <span>Offre</span>
-                                  </button>
-                                  <button
-                                    className="btn-icon btn-icon-edit"
-                                    style={{ backgroundColor: '#365f91', borderColor: '#2a4b73', color: '#ffffff' }}
-                                    title="Embaucher directement ce candidat"
-                                    onClick={() => handleUpdateCandidatStatutDirect(item.candidat.id, 7, 'Admis / Embauché')}
-                                  >
-                                    <span>Embaucher</span>
-                                  </button>
-                                  <button
-                                    className="btn-icon btn-icon-delete"
-                                    title="Refuser ce candidat"
-                                    onClick={() => handleUpdateCandidatStatutDirect(item.candidat.id, 8, 'Refusé')}
-                                  >
-                                    <span>Refuser</span>
-                                  </button>
+                                  {isAdmis ? (
+                                    <a
+                                      href={getContratPdfUrl(item.candidat.id)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="btn-linkedin-action-header"
+                                      style={{ backgroundColor: '#057642', padding: '0.4rem 0.85rem', fontSize: '0.82rem', textDecoration: 'none', display: 'inline-block' }}
+                                      title="Télécharger le fichier PDF du contrat enregistré dans uploads/contrat"
+                                    >
+                                      Exporter Contrat (PDF)
+                                    </a>
+                                  ) : isRefuse ? (
+                                    <span className="status-pill badge-status-expired" style={{ backgroundColor: '#fee2e2', color: '#dc2626', fontWeight: 600 }}>
+                                      Candidature Refusée
+                                    </span>
+                                  ) : isOffreTransmise ? (
+                                    <>
+                                      <button
+                                        className="btn-linkedin-primary-sm"
+                                        style={{ backgroundColor: '#057642', borderColor: '#057642' }}
+                                        title="Valider l'embauche définitive du candidat"
+                                        onClick={() => handleOpenConfirmHireModal(item.candidat)}
+                                      >
+                                        <span>Valider Embauche</span>
+                                      </button>
+                                      <button
+                                        className="btn-icon btn-icon-delete"
+                                        title="Refuser ce candidat"
+                                        onClick={() => handleUpdateCandidatStatutDirect(item.candidat.id, 8, 'Refusé')}
+                                      >
+                                        <span>Refuser</span>
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <button
+                                        className="btn-linkedin-secondary-sm"
+                                        title="Proposer et transmettre une offre de contrat"
+                                        onClick={() => handleOpenOfferModal(item.candidat)}
+                                      >
+                                        <span>Transmettre Offre</span>
+                                      </button>
+                                      <button
+                                        className="btn-icon btn-icon-delete"
+                                        title="Refuser ce candidat"
+                                        onClick={() => handleUpdateCandidatStatutDirect(item.candidat.id, 8, 'Refusé')}
+                                      >
+                                        <span>Refuser</span>
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               </td>
                             </tr>
@@ -1047,6 +1209,287 @@ function EntretiensManagementPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODALE 1: TRANSMISSION DE LA PROPOSITION D'OFFRE DE CONTRAT */}
+      {showOfferModal && selectedCandidatForOffer && (
+        <div className="modal-backdrop">
+          <div className="modal-content modal-md">
+            <div className="modal-header">
+              <h2>Proposition d'Offre de Contrat d'Embauche</h2>
+              <button className="modal-close-btn" onClick={() => setShowOfferModal(false)}>✕</button>
+            </div>
+
+            <form onSubmit={handleSubmitOffer} className="modal-body form-grid-1">
+              <div className="details-dates-box" style={{ marginBottom: '1rem' }}>
+                <p><strong>Candidat :</strong> {selectedCandidatForOffer.prenom} {selectedCandidatForOffer.nom}</p>
+                <p><strong>Poste visé :</strong> {selectedCandidatForOffer.annonce?.nomposte || 'Offre d\'emploi'}</p>
+              </div>
+
+              <div className="form-group-linkedin">
+                <label>Type de Contrat proposé *</label>
+                <select
+                  required
+                  value={offerForm.idTypeContrat}
+                  onChange={(e) => setOfferForm({ ...offerForm, idTypeContrat: e.target.value })}
+                >
+                  {typesContrat.map((tc, index) => (
+                    <option key={`tc-${tc.id}-${index}`} value={tc.id}>{tc.libelle} ({tc.code})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid-2-cols" style={{ gap: '1rem' }}>
+                <div className="form-group-linkedin">
+                  <label>Date de prise de poste prévue *</label>
+                  <input
+                    type="date"
+                    required
+                    value={offerForm.dateDebut}
+                    onChange={(e) => setOfferForm({ ...offerForm, dateDebut: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group-linkedin">
+                  <label>Durée du contrat (en mois)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="Ex: 12 (pour CDD / Stage)"
+                    value={offerForm.nombreMois}
+                    onChange={(e) => setOfferForm({ ...offerForm, nombreMois: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group-linkedin">
+                <label>Rémunération mensuelle brute proposée *</label>
+                <input
+                  type="number"
+                  step="100"
+                  required
+                  placeholder="Ex: 2500000"
+                  value={offerForm.salaire}
+                  onChange={(e) => setOfferForm({ ...offerForm, salaire: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group-linkedin">
+                <label>Remarques / Avantages complémentaires</label>
+                <textarea
+                  rows={3}
+                  placeholder="Primes, télétravail, mutuelle d'entreprise, indemnités..."
+                  value={offerForm.remarques}
+                  onChange={(e) => setOfferForm({ ...offerForm, remarques: e.target.value })}
+                />
+              </div>
+
+              <div className="modal-footer" style={{ padding: '1rem 0 0 0', border: 'none', backgroundColor: 'transparent' }}>
+                <button
+                  type="button"
+                  className="btn-linkedin-secondary"
+                  onClick={() => setShowOfferModal(false)}
+                  disabled={submittingOffer}
+                >
+                  Annuler
+                </button>
+                <button type="submit" className="btn-linkedin-primary" style={{ width: 'auto' }} disabled={submittingOffer}>
+                  {submittingOffer ? 'Envoi de l\'offre...' : 'Transmettre la proposition d\'offre'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODALE 2: VALIDATION DÉFINITIVE DE L'EMBAUCHE (ADMIS OU REFUSÉ) */}
+      {showConfirmHireModal && selectedCandidatForConfirmHire && (
+        <div className="modal-backdrop">
+          <div className="modal-content modal-md">
+            <div className="modal-header">
+              <h2>Validation Définitive de l'Embauche</h2>
+              <button className="modal-close-btn" onClick={() => setShowConfirmHireModal(false)}>✕</button>
+            </div>
+
+            <div className="modal-body form-grid-1">
+              <div className="details-dates-box" style={{ marginBottom: '1rem' }}>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: '#0f172a' }}>
+                  {selectedCandidatForConfirmHire.prenom} {selectedCandidatForConfirmHire.nom}
+                </h3>
+                <p style={{ margin: 0, color: '#475569' }}>
+                  Poste : <strong>{selectedCandidatForConfirmHire.annonce?.nomposte || '—'}</strong> | Email :{' '}
+                  <strong>{selectedCandidatForConfirmHire.compteCandidat?.email || '—'}</strong>
+                </p>
+              </div>
+
+              {loadingExistingOffer ? (
+                <div className="loading-spinner-container">
+                  <div className="spinner-sm"></div>
+                  <p>Chargement des termes de l'offre proposée...</p>
+                </div>
+              ) : existingOfferData ? (
+                <div style={{ backgroundColor: '#f8fafc', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <h4 style={{ margin: '0 0 0.75rem 0', color: '#0a66c2' }}>Termes de la Proposition d'Offre :</h4>
+                  <p style={{ margin: '0.35rem 0' }}>
+                    <strong>Type de Contrat :</strong> {existingOfferData.typeContrat?.libelle || 'Non spécifié'}
+                  </p>
+                  <p style={{ margin: '0.35rem 0' }}>
+                    <strong>Date de prise de poste :</strong> {existingOfferData.dateDebut || 'Non définie'}
+                  </p>
+                  {existingOfferData.nombreMois && (
+                    <p style={{ margin: '0.35rem 0' }}>
+                      <strong>Durée :</strong> {existingOfferData.nombreMois} mois
+                    </p>
+                  )}
+                  <p style={{ margin: '0.35rem 0' }}>
+                    <strong>Rémunération Brute :</strong> {existingOfferData.salaire ? `${existingOfferData.salaire} MGA / mois` : 'Non précisé'}
+                  </p>
+                  {existingOfferData.remarques && (
+                    <p style={{ margin: '0.35rem 0' }}>
+                      <strong>Remarques :</strong> <em>"{existingOfferData.remarques}"</em>
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="alert-linkedin-info" style={{ margin: 0 }}>
+                  Aucune proposition de contrat spécifique enregistrée. Vous pouvez valider l'embauche définitive directement.
+                </div>
+              )}
+
+              <div className="modal-footer" style={{ padding: '1.5rem 0 0 0', border: 'none', backgroundColor: 'transparent', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn-linkedin-secondary"
+                  onClick={() => setShowConfirmHireModal(false)}
+                  disabled={submittingConfirmHire}
+                >
+                  Annuler
+                </button>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button
+                    type="button"
+                    className="btn-linkedin-danger-sm"
+                    style={{ backgroundColor: '#dc2626', color: '#fff', border: 'none', padding: '0.75rem 1.25rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                    onClick={() => handleFinalizeHire('REFUSE')}
+                    disabled={submittingConfirmHire}
+                  >
+                    Offre Déclinée / Refusé
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-linkedin-primary"
+                    style={{ width: 'auto', padding: '0.75rem 1.5rem', backgroundColor: '#057642' }}
+                    onClick={() => handleFinalizeHire('ADMIS')}
+                    disabled={submittingConfirmHire}
+                  >
+                    {submittingConfirmHire ? 'Validation...' : 'Valider Embauche Définitive (Admis)'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODALE 3: CONTRAT DE TRAVAIL OFFICIEL & EXPORT PDF IMPRIMABLE */}
+      {showContractPdfModal && selectedCandidatForPdf && (
+        <div className="modal-backdrop">
+          <div className="modal-content modal-lg">
+            <div className="modal-header">
+              <h2>Contrat de Travail Officiel (Export PDF)</h2>
+              <button className="modal-close-btn" onClick={() => setShowContractPdfModal(false)}>✕</button>
+            </div>
+
+            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+              {loadingContractPdf ? (
+                <div className="loading-spinner-container">
+                  <div className="spinner-sm"></div>
+                  <p>Génération du contrat de travail en cours...</p>
+                </div>
+              ) : (
+                <div id="printable-contract-document" className="contract-document-box">
+                  <div className="contract-document-header">
+                    <h2>CONTRAT DE TRAVAIL</h2>
+                    <p>Référence Dossier RH : RH-EMB-{selectedCandidatForPdf.id.toString().padStart(4, '0')}</p>
+                  </div>
+
+                  <div className="contract-section">
+                    <h4>ENTRE LES SOUSSIGNÉS :</h4>
+                    <p>
+                      <strong>L'Employeur :</strong> La Société <strong>Gestion RH S.A.R.L</strong>, représentée par la Direction des Ressources Humaines, d'une part,
+                    </p>
+                    <p>
+                      <strong>Et l’Employé(e) :</strong> M./Mme <strong>{selectedCandidatForPdf.prenom} {selectedCandidatForPdf.nom}</strong>, 
+                      demeurant à : {selectedCandidatForPdf.adresse || 'Adresse non renseignée'}, Email : {selectedCandidatForPdf.compteCandidat?.email || '—'}, d'autre part.
+                    </p>
+                  </div>
+
+                  <div className="contract-section">
+                    <h4>ARTICLE 1 : ENGAGEMENT ET FONCTION</h4>
+                    <p>
+                      L’Employeur engage M./Mme <strong>{selectedCandidatForPdf.prenom} {selectedCandidatForPdf.nom}</strong> en qualité de{' '}
+                      <strong>{selectedCandidatForPdf.annonce?.nomposte || 'Collaborateur RH'}</strong> au sein du Département{' '}
+                      <strong>{selectedCandidatForPdf.annonce?.departement?.nom || 'Général'}</strong>.
+                    </p>
+                  </div>
+
+                  <div className="contract-section">
+                    <h4>ARTICLE 2 : DATE D'EFFET ET TYPE DE CONTRAT</h4>
+                    <p>
+                      Le présent contrat prend effet à compter du <strong>{contractPdfData?.dateDebut || new Date().toISOString().split('T')[0]}</strong> sous le régime d'un{' '}
+                      <strong>{contractPdfData?.typeContrat?.libelle || 'Contrat de Travail'} ({contractPdfData?.typeContrat?.code || 'CDI'})</strong>.
+                      {contractPdfData?.nombreMois && (
+                        <span> Pour une durée déterminée de <strong>{contractPdfData.nombreMois} mois</strong>.</span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="contract-section">
+                    <h4>ARTICLE 3 : RÉMUNÉRATION</h4>
+                    <p>
+                      En contrepartie de l'accomplissement de ses fonctions, l’Employé(e) percevra une rémunération mensuelle brute de{' '}
+                      <strong>{contractPdfData?.salaire ? `${contractPdfData.salaire} MGA` : '2 500 000 MGA'}</strong>.
+                    </p>
+                  </div>
+
+                  {contractPdfData?.remarques && (
+                    <div className="contract-section">
+                      <h4>ARTICLE 4 : DISPOSITIONS PARTICULIÈRES & AVANTAGES</h4>
+                      <p><em>"{contractPdfData.remarques}"</em></p>
+                    </div>
+                  )}
+
+                  <div className="contract-signatures-grid">
+                    <div className="signature-block">
+                      <p><strong>Pour l'Entreprise :</strong></p>
+                      <p style={{ marginTop: '2.5rem', fontSize: '0.85rem', color: '#64748b' }}>(Signature & Cachet)</p>
+                    </div>
+                    <div className="signature-block">
+                      <p><strong>L'Employé(e) :</strong></p>
+                      <p style={{ fontSize: '0.8rem', color: '#64748b' }}>"Lu et approuvé"</p>
+                      <p style={{ marginTop: '1.5rem', fontSize: '0.85rem', color: '#64748b' }}>(Signature)</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer" style={{ padding: '1rem 1.5rem', justifyContent: 'space-between' }}>
+              <button className="btn-linkedin-secondary" onClick={() => setShowContractPdfModal(false)}>
+                Fermer
+              </button>
+              <a
+                href={getContratPdfUrl(selectedCandidatForPdf.id)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-linkedin-primary"
+                style={{ width: 'auto', backgroundColor: '#057642', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+              >
+                Exporter / Télécharger en PDF
+              </a>
+            </div>
           </div>
         </div>
       )}

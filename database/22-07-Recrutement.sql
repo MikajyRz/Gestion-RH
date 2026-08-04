@@ -4,7 +4,7 @@
 
 DROP TABLE IF EXISTS historiqueentretien, entretien, resultat, statutentretien, 
                      historiquecandidature, candidaturecritere, qcmreponse, qcmchoix, 
-                     qcmquestion, testannonce, qcmqtest, qcmtest, candidat, 
+                     qcmquestion, testannonce, qcmqtest, qcmtest, offre_embauche, candidat, 
                      comptecandidat, statutcandidat, profildiplome, critereprofil, 
                      critere, typechamp, annonce, typeannonce, diplome, 
                      utilisateurs, contrat, types_contrat, employe, profil, departement CASCADE;
@@ -199,6 +199,18 @@ CREATE TABLE contrat (
     datedebut DATE NOT NULL,
     nombremois INT,
     typecontrat INT REFERENCES types_contrat(id) ON DELETE SET NULL
+);
+
+CREATE TABLE offre_embauche (
+    id SERIAL PRIMARY KEY,
+    idcandidat INT NOT NULL REFERENCES candidat(id) ON DELETE CASCADE,
+    idtypecontrat INT REFERENCES types_contrat(id) ON DELETE SET NULL,
+    datedebut DATE,
+    nombremois INT,
+    salaire NUMERIC(12,2),
+    remarques TEXT,
+    statut VARCHAR(50) DEFAULT 'OFFRE_TRANSMISE',
+    dateproposition TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE utilisateurs (

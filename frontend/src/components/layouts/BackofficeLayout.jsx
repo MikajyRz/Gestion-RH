@@ -117,6 +117,16 @@ function BackofficeLayout() {
               </svg>
               <span>Congés & Absences</span>
             </Link>
+            <Link
+              to="/backoffice/paie"
+              className={`nav-item-linkedin ${location.pathname.includes('/paie') ? 'active' : ''}`}
+            >
+              <svg className="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
+              </svg>
+              <span>Gestion de la Paie</span>
+            </Link>
 
             <div className="nav-section-title" style={{ marginTop: '1.25rem' }}>RÉFÉRENTIELS & CONFIGURATION</div>
 

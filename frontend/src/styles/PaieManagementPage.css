@@ -1,0 +1,42 @@
+/* ==========================================================================
+   MODULE PAIE & RÉMUNÉRATION - DESIGN DOLIBARR ERP (SANS ICÔNES)
+   ========================================================================== */
+
+.paie-filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.paie-money-highlight {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.paie-net-badge {
+  background-color: #e8f8f0;
+  color: #1e7e34;
+  border: 1px solid #27ae60;
+  padding: 0.3rem 0.65rem;
+  border-radius: 4px;
+  font-weight: 800;
+}
+
+.paie-brut-badge {
+  background-color: #eaeff5;
+  color: #365f91;
+  border: 1px solid #9ab4d6;
+  padding: 0.3rem 0.65rem;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.paie-deduction-badge {
+  background-color: #fce8e6;
+  color: #c00000;
+  border: 1px solid #e74c3c;
+  padding: 0.3rem 0.65rem;
+  border-radius: 4px;
+  font-weight: 700;
+}

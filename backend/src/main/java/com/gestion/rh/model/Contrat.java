@@ -25,6 +25,9 @@ public class Contrat {
     @JoinColumn(name = "id_type_contrat")
     private TypesContrat typeContrat;
 
+    @Column(name = "salaire", precision = 12, scale = 2)
+    private java.math.BigDecimal salaire;
+
     public Contrat() {}
 
     public Contrat(Employe employe, LocalDate dateDebut, Integer nombreMois, TypesContrat typeContrat) {
@@ -72,5 +75,13 @@ public class Contrat {
 
     public void setTypeContrat(TypesContrat typeContrat) {
         this.typeContrat = typeContrat;
+    }
+
+    public java.math.BigDecimal getSalaire() {
+        return salaire;
+    }
+
+    public void setSalaire(java.math.BigDecimal salaire) {
+        this.salaire = salaire;
     }
 }

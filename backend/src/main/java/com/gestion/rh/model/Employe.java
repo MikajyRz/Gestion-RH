@@ -1,6 +1,7 @@
 package com.gestion.rh.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "employe")
@@ -18,6 +19,19 @@ public class Employe {
 
     @Column(nullable = false, unique = true, length = 150)
     private String email;
+
+    @Column(name = "matricule", length = 50)
+    private String matricule;
+
+    @Column(name = "numero_cnaps", length = 50)
+    private String numeroCnaps;
+
+    @Column(name = "date_dembauche")
+    private LocalDate dateDembauche;
+
+    @ManyToOne
+    @JoinColumn(name = "id_departement")
+    private Departement departement;
 
     public Employe() {}
 
@@ -57,5 +71,37 @@ public class Employe {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getMatricule() {
+        return matricule;
+    }
+
+    public void setMatricule(String matricule) {
+        this.matricule = matricule;
+    }
+
+    public String getNumeroCnaps() {
+        return numeroCnaps;
+    }
+
+    public void setNumeroCnaps(String numeroCnaps) {
+        this.numeroCnaps = numeroCnaps;
+    }
+
+    public LocalDate getDateDembauche() {
+        return dateDembauche;
+    }
+
+    public void setDateDembauche(LocalDate dateDembauche) {
+        this.dateDembauche = dateDembauche;
+    }
+
+    public Departement getDepartement() {
+        return departement;
+    }
+
+    public void setDepartement(Departement departement) {
+        this.departement = departement;
     }
 }

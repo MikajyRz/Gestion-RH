@@ -433,6 +433,9 @@ public class CandidatController {
             TypesContrat typeContrat = (offre != null) ? offre.getTypeContrat() : null;
 
             Contrat nouveauContrat = new Contrat(employe, dateDebut, nombreMois, typeContrat);
+            if (offre != null && offre.getSalaire() != null) {
+                nouveauContrat.setSalaire(offre.getSalaire());
+            }
             Contrat savedContrat = contratRepository.save(nouveauContrat);
 
             // CRÉATION AUTOMATIQUE DU PDF DANS UPLOADS/CONTRAT/CONTRAT(NOMEMPLOYE).PDF

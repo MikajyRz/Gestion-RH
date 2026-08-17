@@ -11,6 +11,7 @@ import CandidatsManagementPage from '../pages/backoffice/CandidatsManagementPage
 import QcmManagementPage from '../pages/backoffice/QcmManagementPage';
 import EntretiensManagementPage from '../pages/backoffice/EntretiensManagementPage';
 import CongesManagementPage from '../pages/backoffice/CongesManagementPage';
+import PaieManagementPage from '../pages/backoffice/PaieManagementPage';
 
 import HomePage from '../pages/frontoffice/HomePage';
 import AnnoncesPage from '../pages/frontoffice/AnnoncesPage';
@@ -46,6 +47,7 @@ export const AppRouter = () => {
         <Route path="qcm" element={<QcmManagementPage />} />
         <Route path="entretiens" element={<EntretiensManagementPage />} />
         <Route path="conges" element={<CongesManagementPage />} />
+        <Route path="paie" element={<PaieManagementPage />} />
         <Route path="referentiels" element={<ReferentielsPage />} />
         <Route path="criteres" element={<CritereManagerPage />} />
       </Route>

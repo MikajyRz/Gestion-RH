@@ -193,9 +193,4 @@ Gestion-RH/
 Les contributions sont les bienvenues ! Pour toute modification majeure, merci d'ouvrir une issue au préalable pour discuter de ce que vous souhaitez modifier.
 
 Distribué sous la licence **MIT**.
-
----
-
-<p align="center">
-  Fait avec ❤️ par <b>Mikajy</b> — Développeur Fullstack
-</p>
+

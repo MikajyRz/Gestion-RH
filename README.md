@@ -210,4 +210,6 @@ Gestion-RH/
 Les contributions sont les bienvenues ! Pour toute amélioration, veuillez ouvrir une issue ou une Pull Request.
 
 Distribué sous la licence **MIT**. Voir [LICENSE](LICENSE) pour plus d'informations.
-
+
+---
+
